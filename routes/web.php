@@ -388,7 +388,7 @@ Route::get("/get/TurIlt", function () {
     return $turIlt->getTurIlt();
 });
 
-Route::get("/get/get/DansburtgelTurIlt/{humrugID}", function ($humrugID) {
+Route::get("/get/DansburtgelTurIlt/{humrugID}", function ($humrugID) {
     $turIlt = new TurIlt();
     return $turIlt->getDansburtgelTurByHumrug($humrugID);
 });

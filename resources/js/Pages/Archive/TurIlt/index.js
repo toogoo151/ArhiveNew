@@ -7,9 +7,9 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 // import BaingaHadgalahHugatsaa from "./BaingaHadgalahHugatsaa";
 import TurHadgalahHugatsaa from "./TurHadgalahHugatsaa";
-import TurIltsChild from "./TurIltsChild";
-import TurIltNew from "./TurIltNew";
 import TurIltEdit from "./TurIltEdit";
+import TurIltNew from "./TurIltNew";
+import TurIltsChild from "./TurIltsChild";
 // import BaingaIltsEdit from "./BaingaIltsEdit";
 import TurIltShiljuuleh from "./TurIltShiljuuleh";
 // import BaingaIltsNew from "./BaingaIltsNew";
