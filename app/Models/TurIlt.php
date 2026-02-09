@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\DB;
 class TurIlt extends Model
 {
     use HasFactory;
-    protected $table = 'db_hnilt';
+    protected $table = 'db_arhivbaingahad';
     public $timestamps = false;
 
     public function getTurIlt()
     {
         try {
-            $turIlt = DB::table("db_hnilt")
-                ->join("db_humrug", "db_humrug.id", "=", "db_hnilt.humrug_id")
-                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_hnilt.dans_id")
+            $turIlt = DB::table("db_arhivbaingahad")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
-                    "db_hnilt.*",
+                    "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.dans_baidal",
@@ -30,7 +30,7 @@ class TurIlt extends Model
                     $query->whereNull("ustgasan_temdeglel")
                         ->orWhere("ustgasan_temdeglel", "");
                 })
-                ->orderByDesc("db_hnilt.id")
+                ->orderByDesc("db_arhivbaingahad.id")
 
                 ->get();
 
@@ -49,28 +49,28 @@ class TurIlt extends Model
     public function getArchiveTurIlt()
     {
         try {
-            $ArchiveturIlt = DB::table("db_hnilt")
+            $ArchiveturIlt = DB::table("db_arhivbaingahad")
                 ->join(
                     "db_humrug",
                     "db_humrug.id",
                     "=",
-                    "db_hnilt.humrug_id"
+                    "db_arhivbaingahad.humrug_id"
                 )
                 ->leftJoin(
                     "db_arhivdans",
                     "db_arhivdans.id",
                     "=",
-                    "db_hnilt.dans_id"
+                    "db_arhivbaingahad.dans_id"
                 )
                 ->select(
-                    "db_hnilt.*",
+                    "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.dans_baidal",
                     "db_arhivdans.hadgalah_hugatsaa"
                 )
-                ->whereNotNull("db_hnilt.ustgasan_temdeglel")
-                ->where("db_hnilt.ustgasan_temdeglel", "!=", "")
+                ->whereNotNull("db_arhivbaingahad.ustgasan_temdeglel")
+                ->where("db_arhivbaingahad.ustgasan_temdeglel", "!=", "")
                 ->get();
 
             return $ArchiveturIlt;

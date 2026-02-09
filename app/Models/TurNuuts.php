@@ -10,16 +10,16 @@ use Illuminate\Support\Facades\DB;
 class TurNuuts extends Model
 {
     use HasFactory;
-    protected $table = 'db_hnnuuts';
+    protected $table = 'db_arhivhnnuuts';
     public $timestamps = false;
 
     // public function getBaingaNuuts()
     // {
     //     try {
-    //         $baingaNuuts = DB::table("db_hnnuuts")
-    //             ->join("db_humrug", "db_humrug.humrug_dugaar", "=", "db_hnnuuts.humrug_id")
-    //             ->leftjoin("db_arhivdans", "db_arhivdans.dans_dugaar", "=", "db_hnnuuts.dans_id")
-    //             ->select("db_hnnuuts.*", "db_humrug.humrug_ner", "db_arhivdans.dans_ner")
+    //         $baingaNuuts = DB::table("db_arhivhnnuuts")
+    //             ->join("db_humrug", "db_humrug.humrug_dugaar", "=", "db_arhivhnnuuts.humrug_id")
+    //             ->leftjoin("db_arhivdans", "db_arhivdans.dans_dugaar", "=", "db_arhivhnnuuts.dans_id")
+    //             ->select("db_arhivhnnuuts.*", "db_humrug.humrug_ner", "db_arhivdans.dans_ner")
     //             ->get();
     //         return $baingaNuuts;
     //     } catch (\Throwable $th) {
@@ -37,20 +37,20 @@ class TurNuuts extends Model
     {
         try {
 
-            $ArchiveturNuuts = DB::table("db_hnnuuts")
+            $ArchiveturNuuts = DB::table("db_arhivhnnuuts")
                 ->select(
-                    "db_hnnuuts.*",
+                    "db_arhivhnnuuts.*",
 
                     // humrug нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT humrug_ner
               FROM db_humrug
-              WHERE db_humrug.ud = db_hnnuuts.humrug_id
+              WHERE db_humrug.ud = db_arhivhnnuuts.humrug_id
               LIMIT 1) as humrug_ner"),
 
                     // dans нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT dans_ner
               FROM db_arhivdans
-              WHERE db_arhivdans.id = db_hnnuuts.dans_id
+              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
               LIMIT 1) as dans_ner"),
 
                     // db_arhivdans доторх dans_baidal утгыг нэмэх
@@ -59,39 +59,39 @@ class TurNuuts extends Model
                     // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
                     "db_arhivdans.hadgalah_hugatsaa"
                 )
-                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_hnnuuts.dans_id")
-                ->whereNotNull("db_hnnuuts.ustgasan_temdeglel")
-                ->where("db_hnnuuts.ustgasan_temdeglel", "!=", "")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
+                ->whereNotNull("db_arhivhnnuuts.ustgasan_temdeglel")
+                ->where("db_arhivhnnuuts.ustgasan_temdeglel", "!=", "")
 
-                ->orderByDesc("db_hnnuuts.id")
+                ->orderByDesc("db_arhivhnnuuts.id")
                 ->get();
 
             return $ArchiveturNuuts;
 
 
 
-            // $ArchiveturNuuts = DB::table("db_hnnuuts")
+            // $ArchiveturNuuts = DB::table("db_arhivhnnuuts")
             //     ->join(
             //         "db_humrug",
             //         "db_humrug.humrug_dugaar",
             //         "=",
-            //         "db_hnnuuts.humrug_id"
+            //         "db_arhivhnnuuts.humrug_id"
             //     )
             //     ->leftJoin(
             //         "db_arhivdans",
             //         "db_arhivdans.dans_dugaar",
             //         "=",
-            //         "db_hnnuuts.dans_id"
+            //         "db_arhivhnnuuts.dans_id"
             //     )
             //     ->select(
-            //         "db_hnnuuts.*",
+            //         "db_arhivhnnuuts.*",
             //         "db_humrug.humrug_ner",
             //         "db_arhivdans.dans_ner",
             //         "db_arhivdans.dans_baidal",
             //         "db_arhivdans.hadgalah_hugatsaa"
             //     )
-            //     ->whereNotNull("db_hnnuuts.ustgasan_temdeglel")
-            //     ->where("db_hnnuuts.ustgasan_temdeglel", "!=", "")
+            //     ->whereNotNull("db_arhivhnnuuts.ustgasan_temdeglel")
+            //     ->where("db_arhivhnnuuts.ustgasan_temdeglel", "!=", "")
             //     ->get();
 
             // return $ArchiveturNuuts;
@@ -107,7 +107,7 @@ class TurNuuts extends Model
     {
         try {
 
-            //   $baingaIlt = DB::table("db_hnnuuts")
+            //   $baingaIlt = DB::table("db_arhivhnnuuts")
             //         ->join("db_humrug", "db_humrug.humrug_dugaar", "=", "db_arhivbaingahad.humrug_id")
             //         ->leftJoin("db_arhivdans", "db_arhivdans.dans_dugaar", "=", "db_arhivbaingahad.dans_id")
             //         ->select(
@@ -126,20 +126,20 @@ class TurNuuts extends Model
             //         ->get();
 
             //     return $baingaIlt;
-            $turNuuts = DB::table("db_hnnuuts")
+            $turNuuts = DB::table("db_arhivhnnuuts")
                 ->select(
-                    "db_hnnuuts.*",
+                    "db_arhivhnnuuts.*",
 
                     // humrug нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT humrug_ner
               FROM db_humrug
-              WHERE db_humrug.id = db_hnnuuts.humrug_id
+              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
               LIMIT 1) as humrug_ner"),
 
                     // dans нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT dans_ner
               FROM db_arhivdans
-              WHERE db_arhivdans.id = db_hnnuuts.dans_id
+              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
               LIMIT 1) as dans_ner"),
 
                     // db_arhivdans доторх dans_baidal утгыг нэмэх
@@ -148,12 +148,12 @@ class TurNuuts extends Model
                     // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
                     "db_arhivdans.hadgalah_hugatsaa"
                 )
-                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_hnnuuts.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
                 ->where(function ($query) {
                     $query->whereNull("ustgasan_temdeglel")
                         ->orWhere("ustgasan_temdeglel", "");
                 })
-                ->orderByDesc("db_hnnuuts.id")
+                ->orderByDesc("db_arhivhnnuuts.id")
                 ->get();
 
             return $turNuuts;
