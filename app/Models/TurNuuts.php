@@ -1,0 +1,217 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class TurNuuts extends Model
+{
+    use HasFactory;
+    protected $table = 'db_hnnuuts';
+    public $timestamps = false;
+
+    // public function getBaingaNuuts()
+    // {
+    //     try {
+    //         $baingaNuuts = DB::table("db_hnnuuts")
+    //             ->join("db_humrug", "db_humrug.humrug_dugaar", "=", "db_hnnuuts.humrug_id")
+    //             ->leftjoin("db_arhivdans", "db_arhivdans.dans_dugaar", "=", "db_hnnuuts.dans_id")
+    //             ->select("db_hnnuuts.*", "db_humrug.humrug_ner", "db_arhivdans.dans_ner")
+    //             ->get();
+    //         return $baingaNuuts;
+    //     } catch (\Throwable $th) {
+    //         return response(
+    //             array(
+    //                 "status" => "error",
+    //                 "msg" => "татаж чадсангүй."
+    //             ),
+    //             500
+    //         );
+    //     }
+    // }
+
+    public function getArchiveTurNuuts()
+    {
+        try {
+
+            $ArchiveturNuuts = DB::table("db_hnnuuts")
+                ->select(
+                    "db_hnnuuts.*",
+
+                    // humrug нэрийг 1 ширхэгээр авах
+                    DB::raw("(SELECT humrug_ner
+              FROM db_humrug
+              WHERE db_humrug.ud = db_hnnuuts.humrug_id
+              LIMIT 1) as humrug_ner"),
+
+                    // dans нэрийг 1 ширхэгээр авах
+                    DB::raw("(SELECT dans_ner
+              FROM db_arhivdans
+              WHERE db_arhivdans.id = db_hnnuuts.dans_id
+              LIMIT 1) as dans_ner"),
+
+                    // db_arhivdans доторх dans_baidal утгыг нэмэх
+                    "db_arhivdans.dans_baidal",
+
+                    // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
+                    "db_arhivdans.hadgalah_hugatsaa"
+                )
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_hnnuuts.dans_id")
+                ->whereNotNull("db_hnnuuts.ustgasan_temdeglel")
+                ->where("db_hnnuuts.ustgasan_temdeglel", "!=", "")
+
+                ->orderByDesc("db_hnnuuts.id")
+                ->get();
+
+            return $ArchiveturNuuts;
+
+
+
+            // $ArchiveturNuuts = DB::table("db_hnnuuts")
+            //     ->join(
+            //         "db_humrug",
+            //         "db_humrug.humrug_dugaar",
+            //         "=",
+            //         "db_hnnuuts.humrug_id"
+            //     )
+            //     ->leftJoin(
+            //         "db_arhivdans",
+            //         "db_arhivdans.dans_dugaar",
+            //         "=",
+            //         "db_hnnuuts.dans_id"
+            //     )
+            //     ->select(
+            //         "db_hnnuuts.*",
+            //         "db_humrug.humrug_ner",
+            //         "db_arhivdans.dans_ner",
+            //         "db_arhivdans.dans_baidal",
+            //         "db_arhivdans.hadgalah_hugatsaa"
+            //     )
+            //     ->whereNotNull("db_hnnuuts.ustgasan_temdeglel")
+            //     ->where("db_hnnuuts.ustgasan_temdeglel", "!=", "")
+            //     ->get();
+
+            // return $ArchiveturNuuts;
+        } catch (\Throwable $th) {
+            return response([
+                "status" => "error",
+                "msg" => "татаж чадсангүй."
+            ], 500);
+        }
+    }
+
+    public function getTurNuuts()
+    {
+        try {
+
+            //   $baingaIlt = DB::table("db_hnnuuts")
+            //         ->join("db_humrug", "db_humrug.humrug_dugaar", "=", "db_arhivbaingahad.humrug_id")
+            //         ->leftJoin("db_arhivdans", "db_arhivdans.dans_dugaar", "=", "db_arhivbaingahad.dans_id")
+            //         ->select(
+            //             "db_arhivbaingahad.*",
+            //             "db_humrug.humrug_ner",
+            //             "db_arhivdans.dans_ner",
+            //             "db_arhivdans.dans_baidal",
+            //             "db_arhivdans.hadgalah_hugatsaa"
+            //         )
+            //         ->where(function ($query) {
+            //             $query->whereNull("ustgasan_temdeglel")
+            //                 ->orWhere("ustgasan_temdeglel", "");
+            //         })
+            //         ->orderByDesc("db_arhivbaingahad.id")
+
+            //         ->get();
+
+            //     return $baingaIlt;
+            $turNuuts = DB::table("db_hnnuuts")
+                ->select(
+                    "db_hnnuuts.*",
+
+                    // humrug нэрийг 1 ширхэгээр авах
+                    DB::raw("(SELECT humrug_ner
+              FROM db_humrug
+              WHERE db_humrug.id = db_hnnuuts.humrug_id
+              LIMIT 1) as humrug_ner"),
+
+                    // dans нэрийг 1 ширхэгээр авах
+                    DB::raw("(SELECT dans_ner
+              FROM db_arhivdans
+              WHERE db_arhivdans.id = db_hnnuuts.dans_id
+              LIMIT 1) as dans_ner"),
+
+                    // db_arhivdans доторх dans_baidal утгыг нэмэх
+                    "db_arhivdans.dans_baidal",
+
+                    // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
+                    "db_arhivdans.hadgalah_hugatsaa"
+                )
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_hnnuuts.dans_id")
+                ->where(function ($query) {
+                    $query->whereNull("ustgasan_temdeglel")
+                        ->orWhere("ustgasan_temdeglel", "");
+                })
+                ->orderByDesc("db_hnnuuts.id")
+                ->get();
+
+            return $turNuuts;
+        } catch (\Throwable $th) {
+            return response([
+                "status" => "error",
+                "msg" => "татаж чадсангүй.",
+                "error" => $th->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function getDansburtgelByTurNuutsHumrug($humrugID)
+    {
+        try {
+            $dans = DB::table("db_arhivdans")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
+                ->where("db_arhivdans.hadgalah_hugatsaa", "Түр хадгалагдах")
+                ->where("db_arhivdans.dans_baidal", "Нууц")
+                ->where("db_arhivdans.humrugID", $humrugID)
+                ->select(
+                    "db_arhivdans.id",
+                    "db_arhivdans.humrugID",
+                    "db_arhivdans.dans_ner",
+                    "db_arhivdans.humrug_niit",
+                    "db_arhivdans.dans_niit",
+                    "db_arhivdans.on_ehen",
+                    "db_arhivdans.on_suul",
+                    "db_arhivdans.hubi_dans",
+                    "db_arhivdans.dans_tailbar",
+                    "db_arhivdans.dans_baidal",
+                    "db_arhivdans.hadgalah_hugatsaa",
+                    DB::raw("MAX(db_humrug.humrug_ner) as humrug_ner")
+                )
+                ->groupBy(
+                    "db_arhivdans.id",
+                    "db_arhivdans.humrugID",
+                    "db_arhivdans.dans_ner",
+                    "db_arhivdans.humrug_niit",
+                    "db_arhivdans.dans_niit",
+                    "db_arhivdans.on_ehen",
+                    "db_arhivdans.on_suul",
+                    "db_arhivdans.hubi_dans",
+                    "db_arhivdans.dans_tailbar",
+                    "db_arhivdans.dans_baidal",
+                    "db_arhivdans.hadgalah_hugatsaa",
+                )
+                ->get();
+
+            return $dans;
+        } catch (\Throwable $th) {
+            return response([
+                "status" => "error",
+                "message" => $th->getMessage(),
+                "file" => $th->getFile(),
+                "line" => $th->getLine(),
+            ], 500);
+        }
+    }
+}

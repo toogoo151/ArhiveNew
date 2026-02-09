@@ -1,0 +1,30 @@
+#canvas_container {
+    /* width: 100%;
+    height: 100%; */
+    width: 100%;
+    height: auto;
+    overflow: auto;
+    background: #fff;
+    text-align: center;
+    border: solid 1px;
+
+    /* overflow: auto; */
+}
+#current_page {
+    width: 40px;
+    text-align: center;
+}
+#pdf_renderer {
+    width: 100%;
+    height: 100%;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Ruda", sans-serif !important;
+    font-family: "Ruda", sans-serif;
+    font-weight: 700;
+}

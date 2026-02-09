@@ -1,0 +1,29 @@
+// Fonts
+@import url("https://fonts.googleapis.com/css?family=Nunito");
+
+// Variables
+@import "variables";
+
+// Bootstrap
+@import "~bootstrap/scss/bootstrap";
+@import "datepicker";
+.bgroundClass {
+    background-color: grey;
+}
+#surveyTableID tr td p {
+    color: rgb(24, 1, 150);
+    padding: 0;
+    margin: 0;
+}
+.pointer-on-hover {
+    cursor: pointer;
+}
+.animated-check {
+    animation: checkmark 0.5s ease forwards;
+    /*Applythecheckmarkanimation*/-webkit-animation: checkmark 0.5s ease forwards;
+    -webkit-animation: checkmark 0.5s ease forwards;
+}
+.invalid-feedback .h5{
+color: red;
+
+}

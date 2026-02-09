@@ -1,0 +1,89 @@
+body {
+	font-family: sans-serif;
+	background: url(/photos/world.png), linear-gradient(to right, #005B6E, #04668C, #3C6CA7, #AB6BBA, #DA66AC, #FF6792);
+	overflow: hidden;
+	background-size: cover;
+    padding: 80px;
+}
+
+.container {
+	width: 390px;
+	margin:7% auto;
+	border-radius: 25px;
+	background-color: rgba(255,255,255,0.5);
+	box-shadow: 0 0 37px #333;
+}
+
+.header {
+	text-align: center;
+	padding-top: 15px;
+}
+
+
+
+.header h1 {
+	color: rgb(0, 0, 0);
+	font-size: 45px;
+	margin-bottom: 15px;
+    text-shadow: 0 0 10px #333;
+}
+
+.main {
+	text-align: center;
+}
+
+.main input {
+	width: 300px;
+	height: 40px;
+	border:none;
+    border-radius: 5px;
+	outline: none;
+	padding-left: 40px;
+	box-sizing: border-box;
+	font-size: 15px;
+	color: rgb(0, 0, 0);
+	margin-bottom: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.main button {
+  width: 320px;
+	height: 40px;
+	border:none;
+	outline: none;
+	padding-left: 40px;
+	box-sizing: border-box;
+	font-size: 15px;
+	color: #333;
+	margin-bottom: 40px;
+}
+
+.main button {
+	padding-left: 0;
+	background-color: rgba(0, 0, 0, 0.2);
+	letter-spacing: 1px;
+	font-weight: bold;
+	margin-bottom: 25px;
+    font-size: 20px;
+}
+
+.main button:hover {
+	box-shadow: 2px 2px 5px #555;
+	background-color: #829dcf9d;
+}
+.main input:hover {
+	box-shadow: 2px 2px 5px #555;
+	background-color: #ddd;
+}
+
+.main span {
+	position: relative;
+}
+
+.main i {
+	position: absolute;
+	left: 15px;
+	color: #333;
+	font-size: 16px;
+	top: 2px;
+}

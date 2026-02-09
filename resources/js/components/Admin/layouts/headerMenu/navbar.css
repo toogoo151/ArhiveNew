@@ -1,0 +1,70 @@
+/* ===== Navbar container ===== */
+.main-header {
+    background: #0f172a; /* dark slate */
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ===== left menu icon ===== */
+.main-header .nav-link {
+    color: #cbd5e1 !important;
+    font-size: 16px;
+    transition: color 0.2s ease;
+}
+
+.main-header .nav-link:hover {
+    color: #ffffff !important;
+}
+
+/* ===== clock text ===== */
+.navbar-time {
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== user button ===== */
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 6px 10px;
+    border-radius: 10px;
+    color: #e5e7eb;
+    transition: all 0.18s ease;
+}
+
+.user-btn:hover {
+    background: rgba(255,255,255,0.06);
+    transform: translateY(-1px);
+}
+
+/* ===== avatar ===== */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+    color: white;
+}
+
+/* ===== dropdown ===== */
+.dropdown-menu {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.dropdown-item:hover {
+    background: rgba(37, 99, 235, 0.08);
+}

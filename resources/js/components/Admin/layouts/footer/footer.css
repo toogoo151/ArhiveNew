@@ -1,0 +1,21 @@
+/* ===== Footer ===== */
+.main-footer {
+    background: #0f172a;              /* same as navbar */
+    color: #94a3b8;                  /* soft gray text */
+    text-align: center;
+    padding: 10px 0;
+    font-size: 13px;
+    font-weight: 500;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    letter-spacing: 0.3px;
+}
+
+/* optional highlight */
+.main-footer strong {
+    color: #e5e7eb;
+}
+
+/* sticky bottom look */
+.main-footer small {
+    opacity: 0.8;
+}

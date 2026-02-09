@@ -1,0 +1,7 @@
+.sub_active {
+    background-color: #3498db;
+    /* border-radius: 5px 5px 5px 5px; */
+}
+.sub_active .aColor {
+    color: white;
+}
