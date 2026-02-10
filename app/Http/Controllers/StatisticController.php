@@ -40,6 +40,41 @@ class StatisticController extends Controller
         return $HutheregCount;
     }
     // GANBAT NEMSEN START
+    public function BaingaILtCount(Request $req)
+    {
+        $BaingIltCount = DB::table("db_arhivbaingahad")
+            ->where("user_id", $this->userId())
+            ->where("hadgalamj_turul", 0)
+            ->count();
+        return $BaingIltCount;
+    }
+    public function BaingaNuutsCount(Request $req)
+    {
+        $BaingaNuutsCount = DB::table("db_arhivhnnuuts")
+            ->where("user_id", $this->userId())
+            ->where("hn_turul", 0)
+            ->count();
+        return $BaingaNuutsCount;
+    }
+
+    public function TurIltCount(Request $req)
+    {
+        $TurIltCount = DB::table("db_arhivbaingahad")
+            ->where("user_id", $this->userId())
+            ->where("hadgalamj_turul", 2)
+            ->count();
+        return $TurIltCount;
+    }
+
+    public function TurNuutsCount(Request $req)
+    {
+        $TurNuutsCount = DB::table("db_arhivhnnuuts")
+            ->where("user_id", $this->userId())
+            ->where("hn_turul", 2)
+            ->count();
+        return $TurNuutsCount;
+    }
+
     public function JagsaaltCount(Request $req)
     {
         $JagsaaltCount = DB::table("jagsaaltzuildugaar")

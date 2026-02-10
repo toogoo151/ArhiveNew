@@ -36,9 +36,9 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
     }, [selectedHumrug, selectedDans]);
 
     const formSchema = Yup.object().shape({
-        hn_dugaar: Yup.string().required("Дугаар оруулна уу"),
-        hn_garchig: Yup.string().required("Гарчиг оруулна уу"),
-        hn_zbn: Yup.string().required("ЗБ нэгжийн нэр оруулна уу"),
+        hadgalamj_dugaar: Yup.string().required("Дугаар оруулна уу"),
+        hadgalamj_garchig: Yup.string().required("Гарчиг оруулна уу"),
+        hadgalamj_zbn: Yup.string().required("ЗБ нэгжийн нэр оруулна уу"),
         hergiin_indeks: Yup.string().required("Хэргийн индекс оруулна уу"),
         harya_on: Yup.string().required("Харьяа он оруулна уу"),
         on_ehen: Yup.string().required("Эхэлсэн он,сар,өдөр оруулна уу"),
@@ -76,9 +76,9 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
             .post("/new/TurIlt", {
                 humrug_id: selectedHumrug,
                 dans_id: selectedDans,
-                hn_dugaar: data.hn_dugaar,
-                hn_garchig: data.hn_garchig,
-                hn_zbn: data.hn_zbn,
+                hadgalamj_dugaar: data.hadgalamj_dugaar,
+                hadgalamj_garchig: data.hadgalamj_garchig,
+                hadgalamj_zbn: data.hadgalamj_zbn,
                 hergiin_indeks: data.hergiin_indeks,
                 harya_on: data.harya_on,
                 on_ehen: data.on_ehen,
@@ -92,9 +92,9 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
                 Swal.fire(res.data.msg);
                 reset(
                     {
-                        hn_dugaar: "",
-                        hn_garchig: "",
-                        hn_zbn: "",
+                        hadgalamj_dugaar: "",
+                        hadgalamj_garchig: "",
+                        hadgalamj_zbn: "",
                         hergiin_indeks: "",
                         harya_on: "",
                         on_ehen: "",
@@ -152,7 +152,7 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
                                             <input
                                                 type="number"
                                                 {...register(
-                                                    "hn_dugaar",
+                                                    "hadgalamj_dugaar",
                                                     {
                                                         valueAsNumber: true,
                                                     }
@@ -161,7 +161,7 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
                                             />
                                         </div>
                                         <p className="alerts">
-                                            {errors.hn_dugaar?.message}
+                                            {errors.hadgalamj_dugaar?.message}
                                         </p>
                                     </div>
 
@@ -174,13 +174,13 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
                                             </div>
                                             <input
                                                 {...register(
-                                                    "hn_garchig"
+                                                    "hadgalamj_garchig"
                                                 )}
                                                 className="form-control"
                                             />
                                         </div>
                                         <p className="alerts">
-                                            {errors.hn_garchig?.message}
+                                            {errors.hadgalamj_garchig?.message}
                                         </p>
                                     </div>
                                 </div>
@@ -193,12 +193,12 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
                                                 </span>
                                             </div>
                                             <input
-                                                {...register("hn_zbn")}
+                                                {...register("hadgalamj_zbn")}
                                                 className="form-control"
                                             />
                                         </div>
                                         <p className="alerts">
-                                            {errors.hn_zbn?.message}
+                                            {errors.hadgalamj_zbn?.message}
                                         </p>
                                     </div>
 
