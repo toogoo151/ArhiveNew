@@ -36,7 +36,6 @@ const TurIltEdit = ({
         if (isEditBtnClick && changeDataRow) {
             setOnehen(formatDateForInput(changeDataRow.on_ehen));
             setOnsuul(formatDateForInput(changeDataRow.on_suul));
-
             sethn_dd(changeDataRow.hn_dd);
             sethn_garchig(changeDataRow.hn_garchig);
             sethn_zbn(changeDataRow.hn_zbn);

@@ -42,15 +42,15 @@ class BaingaNuuts extends Model
                     "db_arhivhnnuuts.*",
 
                     // humrug нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT humrug_ner 
-              FROM db_humrug 
-              WHERE db_humrug.ud = db_arhivhnnuuts.humrug_id 
+                    DB::raw("(SELECT humrug_ner
+              FROM db_humrug
+              WHERE db_humrug.ud = db_arhivhnnuuts.humrug_id
               LIMIT 1) as humrug_ner"),
 
                     // dans нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT dans_ner 
-              FROM db_arhivdans 
-              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id 
+                    DB::raw("(SELECT dans_ner
+              FROM db_arhivdans
+              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
               LIMIT 1) as dans_ner"),
 
                     // db_arhivdans доторх dans_baidal утгыг нэмэх
@@ -131,15 +131,15 @@ class BaingaNuuts extends Model
                     "db_arhivhnnuuts.*",
 
                     // humrug нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT humrug_ner 
-              FROM db_humrug 
-              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id 
+                    DB::raw("(SELECT humrug_ner
+              FROM db_humrug
+              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
               LIMIT 1) as humrug_ner"),
 
                     // dans нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT dans_ner 
-              FROM db_arhivdans 
-              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id 
+                    DB::raw("(SELECT dans_ner
+              FROM db_arhivdans
+              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
               LIMIT 1) as dans_ner"),
 
                     // db_arhivdans доторх dans_baidal утгыг нэмэх
