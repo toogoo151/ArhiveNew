@@ -32,35 +32,78 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
         const printWindow = window.open("", "_blank", "width=900,height=650");
 
         printWindow.document.write(`
-            <html>
-            <head>
-                <title>Хэвлэх</title>
-                <style>
-                    body {
-                        margin-left: 3cm;
-                        margin-top: 2cm;
-                        margin-right: 1.5cm;
-                        margin-bottom: 2cm;
-                        font-family: "Times New Roman";
-                        font-size: 12pt;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    th, td {
-                        border: 1px solid #000;
-                        padding: 5px;
-                        text-align: center;
-                    }
-                </style>
-            </head>
-            <body>
-                ${clone.innerHTML}
-            </body>
-            </html>
-        `);
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Хэвлэх</title>
+    <style>
+      @page {
+    size: A4 portrait;
+    margin-left: 3cm;
+    margin-top: 2cm;
+    margin-right: 1.5cm;
+    margin-bottom: 2cm;
+}
 
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    color: #000;
+}
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            margin-bottom: 6mm;
+        }
+
+        .top-row > div {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .left-box { width: 40mm; }
+        .right-box { width: 60mm; }
+        .center-row {
+    display: flex;
+    justify-content: center; /* хөндлөн тэнхлэг дээр төв */
+    align-items: center; /* босоо тэнхлэг дээр төв */
+    margin-top: 6mm;
+}
+    .center-box 
+    {
+    display: flex;
+    flex-direction: column; /* дотоод div-үүдийг босоо байрлуулах */
+    align-items: center; /* дотоод элементийг голдоо */
+    font-weight: bold;
+    line-height: 1.6;
+    }
+
+        textarea, input {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    ${clone.innerHTML}
+</body>
+</html>
+    `);
         // Устгах
         printWindow.document.close();
         printWindow.focus();
@@ -113,10 +156,59 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
                     </div>
 
                     {/* BODY */}
-                    <div className="modal-body" id="printable-content">
+                    <div
+                        className="modal-body bainga-print"
+                        id="printable-content"
+                    >
                         <div className="input-wrapper">
-                            <div className="top-inputs">
-                                {/* ЗҮҮН */}
+                            <div className="top-table">
+                                {/* 1-р мөр */}
+                                <div className="top-row">
+                                    <div className="left-box">
+                                        <textarea
+                                            style={{ width: "100%" }}
+                                            defaultValue="БАТЛАВ"
+                                            className="no-border center-text"
+                                        />
+                                    </div>
+
+                                    <div className="right-box">
+                                        <textarea
+                                            style={{ width: "100%" }}
+                                            defaultValue={`БАТЛАВ
+2019 оны 01 дүгээр сарын …-ны өдөр`}
+                                            className="no-border center-text"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* 2-р мөр – ГОЛ */}
+                                <div className="center-row">
+                                    <div
+                                        className="center-box"
+                                        style={{ width: "100%" }}
+                                    >
+                                        <div>
+                                            <input
+                                                style={{
+                                                    width: "100%",
+                                                    fontWeight: "bold",
+                                                    textAlign: "center",
+                                                }}
+                                                defaultValue="ЗЭВСЭГТ ХҮЧНИЙ ЖАНЖИН ШТАБ"
+                                            />
+                                        </div>
+                                        <div>
+                                            <input
+                                                style={{ width: "100%" }}
+                                                defaultValue="НУУЦ БАРИМТ БИЧИГ УСТГАХ АКТ № …"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* <div className="top-inputs">
+                          
                                 <div className="left-box">
                                     <textarea
                                         className="word-text auto-textarea"
@@ -125,7 +217,7 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
                                     />
                                 </div>
 
-                                {/* ГОЛ */}
+                             
                                 <div className="center-box">
                                     <input
                                         id="3"
@@ -137,7 +229,7 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
                                     />
                                 </div>
 
-                                {/* БАРУУН */}
+                             
                                 <div className="right-box">
                                     <textarea
                                         id
@@ -145,7 +237,7 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
 2019 оны 01 дүгээр сарын ........–ны өдөр"
                                     />
                                 </div>
-                            </div>
+                            </div> */}
                             <textarea
                                 className="word-text auto-textarea"
                                 style={{ width: "100%" }}
@@ -265,6 +357,7 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
                             <div className="bottom-section">
                                 &nbsp;
                                 <textarea
+                                    style={{ width: "100%" }}
                                     className="word-text auto-textarea bottom-text"
                                     defaultValue={`КОМИССЫН НАРИЙН БИЧГИЙН ДАРГА: ...................
 ГИШҮҮД: ....................................
