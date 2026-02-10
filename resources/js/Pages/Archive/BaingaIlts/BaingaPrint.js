@@ -22,10 +22,10 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
         clone.querySelectorAll("input, textarea").forEach((el) => {
             const div = document.createElement("div");
             div.innerText = el.value;
+            div.className = el.className; // ⭐ class дамжуулна
             div.style.whiteSpace = "pre-wrap";
-            div.style.fontFamily = "Times New Roman";
+            div.style.fontFamily = "Arial";
             div.style.fontSize = "12pt";
-            div.style.marginBottom = "6px";
             el.replaceWith(div);
         });
 
@@ -36,12 +36,12 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Хэвлэх</title>
+    <title>Байнга илт</title>
     <style>
       @page {
     size: A4 portrait;
     margin-left: 3cm;
-    margin-top: 2cm;
+    margin-top: 2cm; 
     margin-right: 1.5cm;
     margin-bottom: 2cm;
 }
@@ -78,7 +78,20 @@ html, body {
         }
 
         .left-box { width: 40mm; }
-        .right-box { width: 60mm; }
+ .right-box {
+    display: flex !important;
+    justify-content: flex-end !important; /* box баруун талдаа */
+    align-items: flex-start !important;
+}
+
+.right-box * {
+    width: 80mm;
+    text-align: center !important;
+    white-space: nowrap !important;   /* ⬅️ мөр хугарахыг зогсооно */
+    word-break: keep-all !important;  /* ⬅️ -ны дээр тасрахгүй */
+}
+    
+    
         .center-row {
     display: flex;
     justify-content: center; /* хөндлөн тэнхлэг дээр төв */
@@ -191,7 +204,7 @@ html, body {
                                         <div>
                                             <input
                                                 style={{
-                                                    width: "100%",
+                                                    width: "160%",
                                                     fontWeight: "bold",
                                                     textAlign: "center",
                                                 }}
@@ -200,7 +213,7 @@ html, body {
                                         </div>
                                         <div>
                                             <input
-                                                style={{ width: "100%" }}
+                                                style={{ width: "160%" }}
                                                 defaultValue="НУУЦ БАРИМТ БИЧИГ УСТГАХ АКТ № …"
                                             />
                                         </div>
@@ -357,7 +370,11 @@ html, body {
                             <div className="bottom-section">
                                 &nbsp;
                                 <textarea
-                                    style={{ width: "100%" }}
+                                    style={{
+                                        width: "100%",
+                                        minHeight: "40mm",
+                                        lineHeight: 1.6,
+                                    }}
                                     className="word-text auto-textarea bottom-text"
                                     defaultValue={`КОМИССЫН НАРИЙН БИЧГИЙН ДАРГА: ...................
 ГИШҮҮД: ....................................

@@ -18,14 +18,18 @@
     width: 48%; /* зай гаргах, нийт 100% хүрэхгүй */
 }
 .bainga-print .right-box {
-    width: 48%;
-    display: flex;
-    justify-content: center; /* хөндлөн тэнхлэг */
-    align-items: center; /* босоо тэнхлэг */
+    display: flex !important;
+    justify-content: flex-end !important; /* баруун буланд */
+    align-items: flex-start !important;
+    text-align: right !important;
+}
+
+.bainga-print .right-box * {
+    text-align: right !important; /* textarea → div болсон ч ажиллана */
+    width: 100%;
 }
 .bainga-print .right-box textarea {
-    text-align: center;
-    line-height: 1.6;
+    text-align: right; /* текст баруун талдаа */
     white-space: pre-line;
 }
 .bainga-print .spacer {
@@ -56,7 +60,7 @@
 }
 .bainga-print .center-box input {
     width: 100%;
-    font-size: 20px;
+    font-size: 12px;
     font-weight: bold;
     text-align: center;
     border: none;
@@ -162,11 +166,11 @@
     }
     .bainga-print .right-box {
         display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
+        justify-content: flex-end !important; /* ✅ баруун буланд */
+        align-items: flex-start !important;
     }
 
     .bainga-print .right-box textarea {
-        text-align: center !important;
+        text-align: right !important;
     }
 }
