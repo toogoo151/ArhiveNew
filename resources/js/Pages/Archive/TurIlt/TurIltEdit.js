@@ -11,9 +11,9 @@ const TurIltEdit = ({
     setRowsSelected,
 }) => {
     const [showModal, setShowModal] = useState("");
-    const [hn_dd, sethn_dd] = useState("");
-    const [hn_garchig, sethn_garchig] = useState("");
-    const [hn_zbn, sethn_zbn] = useState("");
+    const [hadgalamj_dugaar, sethadgalamj_dugaar] = useState("");
+    const [hadgalamj_garchig, sethadgalamj_garchig] = useState("");
+    const [hadgalamj_zbn, sethadgalamj_zbn] = useState("");
     const [hergiin_indeks, sethergiin_indeks] = useState("");
     const [harya_on, setharya_on] = useState("");
     const [on_ehen, setOnehen] = useState("");
@@ -36,9 +36,9 @@ const TurIltEdit = ({
         if (isEditBtnClick && changeDataRow) {
             setOnehen(formatDateForInput(changeDataRow.on_ehen));
             setOnsuul(formatDateForInput(changeDataRow.on_suul));
-            sethn_dd(changeDataRow.hn_dd);
-            sethn_garchig(changeDataRow.hn_garchig);
-            sethn_zbn(changeDataRow.hn_zbn);
+            sethadgalamj_dugaar(changeDataRow.hadgalamj_dugaar);
+            sethadgalamj_garchig(changeDataRow.hadgalamj_garchig);
+            sethadgalamj_zbn(changeDataRow.hadgalamj_zbn);
             sethergiin_indeks(changeDataRow.hergiin_indeks);
             setharya_on(changeDataRow.harya_on);
             sethuudas_too(changeDataRow.huudas_too);
@@ -62,9 +62,9 @@ const TurIltEdit = ({
                 humrug_id: selectedHumrug,
                 dans_id: selectedDans,
                 id: changeDataRow.id,
-                hn_dd: hn_dd,
-                hn_garchig: hn_garchig,
-                hn_zbn: hn_zbn,
+                hadgalamj_dugaar: hadgalamj_dugaar,
+                hadgalamj_garchig: hadgalamj_garchig,
+                hadgalamj_zbn: hadgalamj_zbn,
                 hergiin_indeks: hergiin_indeks,
                 harya_on: harya_on,
                 on_ehen: on_ehen,
@@ -76,9 +76,9 @@ const TurIltEdit = ({
             })
             .then((res) => {
                 Swal.fire(res.data.msg);
-                sethn_dd("");
-                sethn_garchig("");
-                sethn_zbn("");
+                sethadgalamj_dugaar("");
+                sethadgalamj_garchig("");
+                sethadgalamj_zbn("");
                 sethergiin_indeks("");
                 setharya_on("");
                 setOnehen("");
@@ -99,13 +99,13 @@ const TurIltEdit = ({
     };
 
     const changehndd = (e) => {
-        sethn_dd(e.target.value);
+        sethadgalamj_dugaar(e.target.value);
     };
     const changeHadgarchig = (e) => {
-        sethn_garchig(e.target.value);
+        sethadgalamj_garchig(e.target.value);
     };
     const changeHadZbn = (e) => {
-        sethn_zbn(e.target.value);
+        sethadgalamj_zbn(e.target.value);
     };
 
     const changeIndex = (e) => {
@@ -165,7 +165,7 @@ const TurIltEdit = ({
                                             type="number"
                                             className="form-control"
                                             onChange={changehndd}
-                                            value={hn_dd}
+                                            value={hadgalamj_dugaar}
                                         />
                                     </div>
                                 </div>
@@ -180,7 +180,7 @@ const TurIltEdit = ({
                                         <input
                                             className="form-control"
                                             onChange={changeHadgarchig}
-                                            value={hn_garchig}
+                                            value={hadgalamj_garchig}
                                         />
                                     </div>
                                 </div>
@@ -197,7 +197,7 @@ const TurIltEdit = ({
                                         <input
                                             className="form-control"
                                             onChange={changeHadZbn}
-                                            value={hn_zbn}
+                                            value={hadgalamj_zbn}
                                         />
                                     </div>
                                 </div>

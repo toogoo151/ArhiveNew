@@ -52,9 +52,10 @@ class TurIltController extends Controller
             $insertTurIlt = new TurIlt();
             $insertTurIlt->humrug_id = $req->humrug_id;
             $insertTurIlt->dans_id = $req->dans_id;
-            $insertTurIlt->hn_dd = $req->hn_dd;
-            $insertTurIlt->hn_garchig = $req->hn_garchig;
-            $insertTurIlt->hn_zbn = $req->hn_zbn;
+            $insertTurIlt->hadgalamj_dugaar = $req->hadgalamj_dugaar;
+            $insertTurIlt->hadgalamj_turul = 2;
+            $insertTurIlt->hadgalamj_garchig = $req->hadgalamj_garchig;
+            $insertTurIlt->hadgalamj_zbn = $req->hadgalamj_zbn;
             $insertTurIlt->hergiin_indeks = $req->hergiin_indeks;
             $insertTurIlt->harya_on = $req->harya_on;
             $insertTurIlt->on_ehen = $req->on_ehen;
@@ -84,9 +85,10 @@ class TurIltController extends Controller
             $edit = TurIlt::find($req->id);
             $edit->humrug_id = $req->humrug_id;
             $edit->dans_id = $req->dans_id;
-            $edit->hn_dd = $req->hn_dd;
-            $edit->hn_garchig = $req->hn_garchig;
-            $edit->hn_zbn = $req->hn_zbn;
+            $edit->hadgalamj_dugaar = $req->hadgalamj_dugaar;
+            $edit->hadgalamj_turul = 2;
+            $edit->hadgalamj_garchig = $req->hadgalamj_garchig;
+            $edit->hadgalamj_zbn = $req->hadgalamj_zbn;
             $edit->hergiin_indeks = $req->hergiin_indeks;
             $edit->harya_on = $req->harya_on;
             $edit->on_ehen = $req->on_ehen;

@@ -38,10 +38,10 @@ const MyRoutes = (props) => {
     return (
         <Routes>
             {/* 👉 Root redirect */}
-            <Route path="/" element={<Navigate to="/Home" />} />
+            <Route path="/" element={<Navigate to="/home" />} />
 
             <Route
-                path="/Home"
+                path="/home"
                 element={
                     <HomePage
                         handleFirstMenuClick={handleFirstMenuClick}

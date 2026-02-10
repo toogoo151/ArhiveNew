@@ -1,29 +1,47 @@
 import { useEffect, useState } from "react";
 import CountUp from "react-countup";
-import { MdBook, MdFolder, MdPeople, MdSchool, MdSearch, MdTimer, MdWidgets } from "react-icons/md";
+import { MdBook, MdFolder, MdLock, MdPeople, MdSchool, MdSearch, MdTimer, MdWidgets } from "react-icons/md";
 import axios from "../../../AxiosUser";
 
 const Statistic = () => {
-    const [classCount, setClassCount] = useState(0);
-    const [userCount, setUserCount] = useState(0);
+
     const [hutheregCount, setHutheregCount] = useState(0);
     // GANBAT
+    const [baingaIltCount, setBaingaIltCount] = useState(0);
+    const [baingaNuutsCount, setBaingaNuutsCount] = useState(0);
+    const [turIltCount, setTurIltCount] = useState(0);
+    const [turNuutsCount, setTurNuutsCount] = useState(0);
     const [jagsaaltCount, setJagsaaltCount] = useState(0);
     const [sedevzuiCount, setSedevzuiCount] = useState(0);
     const [nomCount, setNomCount] = useState(0);
     const [tovchlolCount, setTovchlolCount] = useState(0);
+
 
     useEffect(() => {
         refreshStatic();
     }, []);
 
     const refreshStatic = () => {
-        axios.post("/get/ClaccCount").then((res) => setClassCount(res.data));
-        axios.post("/get/Usercount").then((res) => setUserCount(res.data));
-        axios
-            .post("/get/HutheregCount")
-            .then((res) => setHutheregCount(res.data));
+        // axios
+        //     .post("/get/HutheregCount")
+        //     .then((res) => setHutheregCount(res.data));
+
+
         // GANBAT
+
+        axios
+            .post("/get/BaingaIltCount")
+            .then((res) => setBaingaIltCount(res.data));
+        axios
+            .post("/get/BaingaNuutsCount")
+            .then((res) => setBaingaNuutsCount(res.data));
+        axios
+            .post("/get/TurIltCount")
+            .then((res) => setTurIltCount(res.data));
+        axios
+            .post("/get/TurNuutsCount")
+            .then((res) => setTurNuutsCount(res.data));
+
         axios
             .post("/get/JagsaaltCount")
             .then((res) => setJagsaaltCount(res.data));
@@ -135,18 +153,18 @@ const Statistic = () => {
             </div>
 
             <div className="row g-3">
+                {/* Архив  */}
                 <StatCard
-                    title="Нийт бүртгэгдсэн анги"
-                    value={classCount}
-                    icon={MdSchool}
+                    title="Нийт байнга хадгалагдах архив - Илт"
+                    value={baingaIltCount}
+                    icon={MdFolder}
                     cardBg={cardBackgrounds[0]}
                     iconGradient={iconGradients[0]}
                 />
-
                 <StatCard
-                    title="Нийт бүртгэгдсэн системийн хэрэглэгч"
-                    value={userCount}
-                    icon={MdPeople}
+                    title="Нийт байнга хадгалагдах архив - Нууц"
+                    value={baingaNuutsCount}
+                    icon={MdLock}
                     cardBg={cardBackgrounds[1]}
                     iconGradient={iconGradients[1]}
                 />
@@ -159,13 +177,7 @@ const Statistic = () => {
                     iconGradient={iconGradients[2]}
                 />
 
-                <StatCard
-                    title="Нэмэлт статистик"
-                    value={1234}
-                    icon={MdFolder}
-                    cardBg={cardBackgrounds[3]}
-                    iconGradient={iconGradients[3]}
-                />
+
                 {/* Ganbat nemsen start */}
                  <StatCard
                     title="Нийт хадгалах хугацааны зүйл"
