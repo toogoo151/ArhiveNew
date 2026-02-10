@@ -77,8 +77,9 @@ class TurNuutsController extends Controller
             $insertTurNuuts->humrug_id = $req->humrug_id;
             $insertTurNuuts->dans_id = $req->dans_id;
             $insertTurNuuts->hn_dd = $req->hn_dd;
+            $insertTurNuuts->hn_turul = 2;
             $insertTurNuuts->hn_zbn = $req->hn_zbn;
-            $insertTurNuuts->hereg_burtgel = $req->hereg_burtgel;
+            $insertTurNuuts->hereg_burgtel = $req->hereg_burgtel;
             $insertTurNuuts->harya_on = $req->harya_on;
             $insertTurNuuts->hn_garchig = $req->hn_garchig;
             $insertTurNuuts->nuuts_zereglel = $req->nuuts_zereglel;
@@ -110,8 +111,9 @@ class TurNuutsController extends Controller
             $edit->humrug_id = $req->humrug_id;
             $edit->dans_id = $req->dans_id;
             $edit->hn_dd = $req->hn_dd;
+            $edit->hn_turul = 2;
             $edit->hn_zbn = $req->hn_zbn;
-            $edit->hereg_burtgel = $req->hereg_burtgel;
+            $edit->hereg_burgtel = $req->hereg_burgtel;
             $edit->harya_on = $req->harya_on;
             $edit->hn_garchig = $req->hn_garchig;
             $edit->nuuts_zereglel = $req->nuuts_zereglel;

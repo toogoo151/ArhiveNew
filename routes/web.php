@@ -235,7 +235,8 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');;
+    ->middleware('auth');
+;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -420,7 +421,7 @@ Route::post("/delete/TurIltChildFile", [TurIltChildController::class, "DeleteChi
 
 
 
-//Dalan jil Hunii Nuuts start 
+//Dalan jil Hunii Nuuts start
 Route::get("/get/DalanJilHun", function () {
     $dalanjilHun = new DalanJilHun();
     return $dalanjilHun->getDalanJilHun();
@@ -436,11 +437,10 @@ Route::post("/new/DalanJilHun", [DalanJilHunController::class, "NewDalanJilHun"]
     ->middleware('auth');
 Route::post("/edit/DalanJilHun", [DalanJilHunController::class, "EditDalanJilHun"])
     ->middleware('auth');
+//Dalan jil Hunii Nuuts end
 
-//Dalan jil Hunii Nuuts end 
 
-
-//Dalan jil Hunii nuuts Child start 
+//Dalan jil Hunii nuuts Child start
 Route::post("/get/DalanJilhunChild", [DalanJilhunChildController::class, "ChildDalanJilhunChild"]);
 Route::post("/delete/DalanJilhunChild", [DalanJilhunChildController::class, "DeleteDalanJilhunChild"]);
 Route::post("/new/DalanJilhunChild", [DalanJilhunChildController::class, "NewDalanJilhunChild"])
@@ -450,17 +450,17 @@ Route::post("/edit/DalanJilhunChild", [DalanJilhunChildController::class, "EditD
 Route::post("/delete/DalanJilhunChildFile", [DalanJilhunChildController::class, "DeleteChildFile"]);
 //Dalan jil hunii nuuts child end
 
-//Dalan jil hunii nuuuts archive start 
+//Dalan jil hunii nuuuts archive start
 Route::post("/archive/DalanJilHun", [DalanJilHunController::class, "ArchiveDalanJilHun"]);
 
 Route::get("/get/ArchiveDHun", function () {
     $ArchiveDaljilHun = new DalanJilHun();
     return $ArchiveDaljilHun->getArchiveDalanJilhun();
 });
-//Dalan jil hunii nuuuts archive end 
+//Dalan jil hunii nuuuts archive end
 
 
-//Dalan jil Sanhuu start 
+//Dalan jil Sanhuu start
 Route::get("/get/DalanJilSanhuu", function () {
     $DalanJilSanhuu = new DalanJilSanhuu();
     return $DalanJilSanhuu->getDalanJilSanhuu();
@@ -476,11 +476,10 @@ Route::post("/new/DalanJilSanhuu", [DalanJilSanhuuController::class, "NewDalanJi
     ->middleware('auth');
 Route::post("/edit/DalanJilSanhuu", [DalanJilSanhuuController::class, "EditDalanJilSanhuu"])
     ->middleware('auth');
+//Dalan jil Sanhuu  end
 
-//Dalan jil Sanhuu  end 
 
-
-//Dalan jil Sanhuu  Child start 
+//Dalan jil Sanhuu  Child start
 Route::post("/get/DalanJilsanhuuChild", [DalanJilSanhuuChildController::class, "ChildDalanJilsanhuuChild"]);
 Route::post("/delete/DalanJilsanhuuChild", [DalanJilSanhuuChildController::class, "DeleteDalanJilsanhuuChild"]);
 Route::post("/new/DalanJilsanhuuChild", [DalanJilSanhuuChildController::class, "NewDalanJilsanhuuChild"])
@@ -490,14 +489,14 @@ Route::post("/edit/DalanJilsanhuuChild", [DalanJilSanhuuChildController::class, 
 Route::post("/delete/DalanJilsanhuuChildFile", [DalanJilSanhuuChildController::class, "DeleteChildFile"]);
 //Dalan jil Sanhuu child end
 
-//Dalan jil Sanhuu archive start 
+//Dalan jil Sanhuu archive start
 Route::post("/archive/DalanJilSanhuu", [DalanJilSanhuuController::class, "ArchiveDalanJilSanhuu"]);
 
 Route::get("/get/ArchiveDalanJilSanhuu", function () {
     $ArchiveDaljilSanhuu = new DalanJilSanhuu();
     return $ArchiveDaljilSanhuu->getArchiveDalanJilSanhuu();
 });
-//Dalan jil Sanhuu archive end 
+//Dalan jil Sanhuu archive end
 
 
 
@@ -587,13 +586,18 @@ Route::post("/get/group-stat", [StatisticController::class, "groupStat"]);
 Route::post("/get/ClaccCount", [StatisticController::class, "ClassCount"]);
 Route::post("/get/Usercount", [StatisticController::class, "UserCount"]);
 Route::post("/get/HutheregCount", [StatisticController::class, "HutheregCount"]);
-// Ganbat nemeh
+
+// GANBAT NEMSEN START
+Route::post("/get/JagsaaltCount", [StatisticController::class, "JagsaaltCount"])->middleware('auth');
+Route::post("/get/BaingaIltCount", [StatisticController::class, "BaingaIltCount"])->middleware('auth');
+Route::post("/get/BaingaNuutsCount", [StatisticController::class, "BaingaNuutsCount"])->middleware('auth');
+Route::post("/get/TurIltCount", [StatisticController::class, "TurIltCount"])->middleware('auth');
+Route::post("/get/TurNuutsCount", [StatisticController::class, "TurNuutsCount"])->middleware('auth');
 Route::post("/get/JagsaaltCount", [StatisticController::class, "JagsaaltCount"]);
 Route::post("/get/SedevZuiCount", [StatisticController::class, "SedevZuiCount"])->middleware('auth');
 Route::post("/get/NomCount", [StatisticController::class, "NomCount"])->middleware('auth');
 Route::post("/get/TovchCount", [StatisticController::class, "TovchCount"])->middleware('auth');
-// GANBAT NEMSEN START
-Route::post("/get/JagsaaltCount", [StatisticController::class, "JagsaaltCount"])->middleware('auth');
+
 //STATISTIC END
 
 

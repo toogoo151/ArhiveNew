@@ -492,14 +492,14 @@ const Index = () => {
                                             <tr>
                                                 <td>Хадгаламжийн дугаар</td>
                                                 <td>
-                                                    {clickedRowData.hn_dugaar ||
+                                                    {clickedRowData.hadgalamj_dugaar ||
                                                         "-"}
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>Хадгаламжийн гарчиг</td>
                                                 <td>
-                                                    {clickedRowData.hn_garchig ||
+                                                    {clickedRowData.hadgalamj_garchig ||
                                                         "-"}
                                                 </td>
                                             </tr>
@@ -509,7 +509,7 @@ const Index = () => {
                                                     нэр
                                                 </td>
                                                 <td>
-                                                    {clickedRowData.hn_zbn ||
+                                                    {clickedRowData.hadgalamj_zbn ||
                                                         "-"}
                                                 </td>
                                             </tr>
@@ -720,7 +720,7 @@ const columns = [
         },
     },
     {
-        name: "hn_dd",
+        name: "hadgalamj_dugaar",
         label: "Дугаар",
         options: {
             filter: true,
@@ -736,7 +736,7 @@ const columns = [
         },
     },
     {
-        name: "hn_garchig",
+        name: "hadgalamj_garchig",
         label: "Хадгаламжийн нэгжийн гарчиг",
         options: {
             filter: true,
@@ -752,7 +752,7 @@ const columns = [
         },
     },
     {
-        name: "hn_zbn",
+        name: "hadgalamj_zbn",
         label: "Зохион байгуулалтын нэгжийн нэр",
         options: {
             filter: true,
@@ -913,9 +913,9 @@ const columns = [
 ];
 
 const excelHeaders = [
-    { label: "Дугаар", key: "hn_dd" },
-    { label: "Хадгаламжийн нэгжийн гарчиг", key: "hn_garchig" },
-    { label: "Зохион байгуулалтын нэгжийн нэр", key: "hn_zbn" },
+    { label: "Дугаар", key: "hadgalamj_dugaar" },
+    { label: "Хадгаламжийн нэгжийн гарчиг", key: "hadgalamj_garchig" },
+    { label: "Зохион байгуулалтын нэгжийн нэр", key: "hadgalamj_zbn" },
     { label: "Хэргийн индекс", key: "hergiin_indeks" },
     { label: "Харьяа он ", key: "harya_on" },
     { label: "Эхэлсэн он,сар,өдөр", key: "on_ehen" },
