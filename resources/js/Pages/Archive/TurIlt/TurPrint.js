@@ -161,7 +161,7 @@ html, body {
                     {/* HEADER */}
                     <div className="modal-header">
                         <h5 className="modal-title">
-                            🗂 ИЛ БАРИМТ БИЧИГ УСТГАХ АКТ
+                            🗂 ТҮР ИЛТ БАРИМТ БИЧИГ УСТГАХ АКТ
                         </h5>
                         <button className="close" onClick={onClose}>
                             ×
@@ -265,7 +265,7 @@ html, body {
                                         <th rowSpan="3">ЗБ нэгжийн нэр</th>
                                         <th rowSpan="3">№</th>
                                         <th rowSpan="3">
-                                            Хэрэг данс бүртгэлийн нэр
+                                            Хадгаламжийн нэгжийн гарчиг
                                         </th>
 
                                         <th

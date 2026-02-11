@@ -41,7 +41,7 @@ const BaingaPrint = ({ show, onClose, selectedRowsData }) => {
       @page {
     size: A4 portrait;
     margin-left: 3cm;
-    margin-top: 2cm;
+    margin-top: 2cm; 
     margin-right: 1.5cm;
     margin-bottom: 2cm;
 }

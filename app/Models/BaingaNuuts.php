@@ -146,9 +146,12 @@ class BaingaNuuts extends Model
                     "db_arhivdans.dans_baidal",
 
                     // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
-                    "db_arhivdans.hadgalah_hugatsaa"
+                    "db_arhivdans.hadgalah_hugatsaa",
+                    "jagsaaltzuildugaar.hugatsaa as hugatsaa"
                 )
                 ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
+                ->leftjoin("jagsaaltzuildugaar", "jagsaaltzuildugaar.barimt_dd", "=", "db_arhivhnnuuts.jagsaalt_zuildugaar")
+
                 ->where(function ($query) {
                     $query->whereNull("ustgasan_temdeglel")
                         ->orWhere("ustgasan_temdeglel", "");
