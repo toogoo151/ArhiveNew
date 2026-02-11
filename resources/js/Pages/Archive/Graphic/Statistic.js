@@ -15,6 +15,7 @@ const Statistic = () => {
     const [sedevzuiCount, setSedevzuiCount] = useState(0);
     const [nomCount, setNomCount] = useState(0);
     const [tovchlolCount, setTovchlolCount] = useState(0);
+    const [dalanJilHRCount, setDalanJilHRCount] = useState(0);
 
 
     useEffect(() => {
@@ -28,6 +29,9 @@ const Statistic = () => {
 
 
         // GANBAT
+        axios
+            .post("/get/DalanJilHRCount")
+            .then((res) => setDalanJilHRCount(res.data));
 
         axios
             .post("/get/BaingaIltCount")
@@ -181,6 +185,13 @@ const Statistic = () => {
                     icon={MdLock}
                     cardBg={cardBackgrounds[4]}
                     iconGradient={iconGradients[4]}
+                />
+                <StatCard
+                    title="70 жил хадгалагдах архив - Хүний нөөц"
+                    value={dalanJilHRCount}
+                    icon={MdLock}
+                    cardBg={cardBackgrounds[5]}
+                    iconGradient={iconGradients[5]}
                 />
 
                 <StatCard

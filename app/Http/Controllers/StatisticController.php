@@ -103,6 +103,16 @@ class StatisticController extends Controller
             ->count();
         return $TovchCount;
     }
+
+    public function DalanJilHRCount(Request $req)
+    {
+        $DalanJilHRCount = DB::table("db_arhivbaingahad")
+            ->where("user_id", $this->userId())
+            ->where("hadgalamj_turul", "1")
+            ->count();
+        return $DalanJilHRCount;
+    }
+
     // GANBAT NEMSEN END
 
     // Graphic start
