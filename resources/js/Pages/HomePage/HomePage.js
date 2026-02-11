@@ -16,7 +16,7 @@ const HomePage = () => {
             strings={[
               "Архивын программд тавтай морил!",
               "...........................",
-              "Find any record instantly",
+
             ]}
             typeSpeed={60}
             backSpeed={40}

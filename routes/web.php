@@ -235,8 +235,7 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');
-;
+    ->middleware('auth');;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -579,6 +578,9 @@ Route::get('/get/hugatsaaTurul', function () {
 
 // STATISTIC START
 Route::post("/get/summary", [StatisticController::class, "summary"]);
+Route::post("/get/graphic-year-counts", [StatisticController::class, "graphicYearCounts"]);
+Route::post("/get/graphic-year-range-counts", [StatisticController::class, "graphicYearRangeCounts"]);
+Route::post("/get/graphic-available-years", [StatisticController::class, "graphicAvailableYears"]);
 Route::post("/get/monthly-stat", [StatisticController::class, "monthlyStat"]);
 Route::post("/get/group-stat", [StatisticController::class, "groupStat"]);
 Route::post("/get/ClaccCount", [StatisticController::class, "ClassCount"]);

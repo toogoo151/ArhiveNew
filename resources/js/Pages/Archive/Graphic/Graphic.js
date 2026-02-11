@@ -1,49 +1,31 @@
 import {
     ArcElement,
-    BarElement,
-    CategoryScale,
     Chart as ChartJS,
-    Filler,
-    Legend,
-    LinearScale,
     Tooltip,
+    Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { useEffect, useMemo, useState } from "react";
-import { Bar, Doughnut } from "react-chartjs-2";
+import { Doughnut, Pie } from "react-chartjs-2";
 import axios from "../../../AxiosUser";
 
-/* ================= REGISTER ================= */
-ChartJS.register(
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-    Filler,
-    ChartDataLabels
-);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-/* ================= CENTER TEXT PLUGIN ================= */
+/* ================= CENTER TEXT (Donut) ================= */
 const centerTextPlugin = {
     id: "centerText",
-    beforeDraw(chart, args, opts) {
-        const { ctx, chartArea } = chart;
-        if (!chartArea) return;
-
+    beforeDraw(chart) {
+        const { ctx } = chart;
         const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+        const x = chart.getDatasetMeta(0).data[0].x;
+        const y = chart.getDatasetMeta(0).data[0].y;
 
         ctx.save();
         ctx.font = "bold 26px sans-serif";
-        ctx.fillStyle = opts.color || "#000";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(
-            total || 0,
-            (chartArea.left + chartArea.right) / 2,
-            (chartArea.top + chartArea.bottom) / 2
-        );
+        ctx.fillText(total, x, y);
         ctx.restore();
     },
 };
@@ -52,229 +34,410 @@ ChartJS.register(centerTextPlugin);
 
 /* ================= COMPONENT ================= */
 const Graphic = () => {
-    const [dark, setDark] = useState(
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
+    // Available years from database
+    const [availableYears, setAvailableYears] = useState([]);
+    const [minYear, setMinYear] = useState(null);
+    const [maxYear, setMaxYear] = useState(null);
+    const [yearsLoading, setYearsLoading] = useState(true);
 
-    const [summary, setSummary] = useState({
-        class: 0,
-        user: 0,
-        huthereg: 0,
-    });
+    // Per-card filters (From/To) - auto-set from DB min/max
+    const [baingaFrom, setBaingaFrom] = useState(null);
+    const [baingaTo, setBaingaTo] = useState(null);
+    const [turFrom, setTurFrom] = useState(null);
+    const [turTo, setTurTo] = useState(null);
 
-    const [monthly, setMonthly] = useState([]);
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+    const [baingaCounts, setBaingaCounts] = useState({ baingaIlt: 0, baingaNuuts: 0 });
+    const [turCounts, setTurCounts] = useState({ turIlt: 0, turNuuts: 0 });
 
-    const [loading, setLoading] = useState(false);
-    const [chartKey, setChartKey] = useState(0);
+    const [baingaLoading, setBaingaLoading] = useState(true);
+    const [turLoading, setTurLoading] = useState(true);
+    const [baingaError, setBaingaError] = useState(null);
+    const [turError, setTurError] = useState(null);
 
-    /* ================= DARK MODE LISTENER ================= */
+    // Fetch available years from database on mount
     useEffect(() => {
-        const media = window.matchMedia("(prefers-color-scheme: dark)");
-        const listener = () => setDark(media.matches);
-        media.addEventListener("change", listener);
-        return () => media.removeEventListener("change", listener);
+        setYearsLoading(true);
+        axios
+            .post("/get/graphic-available-years")
+            .then((res) => {
+                const years = res.data?.years || [];
+                const min = res.data?.minYear;
+                const max = res.data?.maxYear;
+                setAvailableYears(years);
+                setMinYear(min);
+                setMaxYear(max);
+                // Auto-set FROM/TO to min/max
+                if (min !== null && max !== null) {
+                    setBaingaFrom(min);
+                    setBaingaTo(max);
+                    setTurFrom(min);
+                    setTurTo(max);
+                }
+            })
+            .catch((e) => {
+                console.error("Failed to fetch available years:", e);
+                // Fallback to current year if DB fails
+                const currentYear = new Date().getFullYear();
+                const fallbackYears = [currentYear];
+                setAvailableYears(fallbackYears);
+                setMinYear(currentYear);
+                setMaxYear(currentYear);
+                setBaingaFrom(currentYear);
+                setBaingaTo(currentYear);
+                setTurFrom(currentYear);
+                setTurTo(currentYear);
+            })
+            .finally(() => setYearsLoading(false));
     }, []);
 
-    /* ================= AUTO FETCH ================= */
-    useEffect(() => {
-        fetchData();
-    }, [startDate, endDate]);
-
-    /* ================= FETCH ================= */
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const summaryRes = await axios.post("/get/summary", {
-                startDate: startDate || null,
-                endDate: endDate || null,
-            });
-            setSummary(summaryRes.data);
-
-            const monthlyRes = await axios.post("/get/monthly-stat", {
-                startDate: startDate || null,
-                endDate: endDate || null,
-            });
-            setMonthly(Array.isArray(monthlyRes.data) ? monthlyRes.data : []);
-
-            setChartKey((k) => k + 1); // 🔑 force redraw
-        } catch (e) {
-            console.error(e);
-            setMonthly([]);
-        } finally {
-            setLoading(false);
-        }
+    const fetchBainga = () => {
+        setBaingaLoading(true);
+        setBaingaError(null);
+        return axios
+            .post("/get/graphic-year-range-counts", { startYear: baingaFrom, endYear: baingaTo })
+            .then((res) => {
+                setBaingaCounts({
+                    baingaIlt: res.data?.baingaIlt ?? 0,
+                    baingaNuuts: res.data?.baingaNuuts ?? 0,
+                });
+            })
+            .catch((e) => {
+                console.error(e);
+                setBaingaError("Өгөгдөл ачааллахад алдаа гарлаа.");
+                setBaingaCounts({ baingaIlt: 0, baingaNuuts: 0 });
+            })
+            .finally(() => setBaingaLoading(false));
     };
 
-    /* ================= DONUT ================= */
-    const donutData = useMemo(
+    const fetchTur = () => {
+        setTurLoading(true);
+        setTurError(null);
+        return axios
+            .post("/get/graphic-year-range-counts", { startYear: turFrom, endYear: turTo })
+            .then((res) => {
+                setTurCounts({
+                    turIlt: res.data?.turIlt ?? 0,
+                    turNuuts: res.data?.turNuuts ?? 0,
+                });
+            })
+            .catch((e) => {
+                console.error(e);
+                setTurError("Өгөгдөл ачааллахад алдаа гарлаа.");
+                setTurCounts({ turIlt: 0, turNuuts: 0 });
+            })
+            .finally(() => setTurLoading(false));
+    };
+
+    useEffect(() => {
+        if (baingaFrom !== null && baingaTo !== null) {
+            fetchBainga();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [baingaFrom, baingaTo]);
+
+    useEffect(() => {
+        if (turFrom !== null && turTo !== null) {
+            fetchTur();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [turFrom, turTo]);
+
+    /* ================= PIE: Bainga (Bainga Ilt + Bainga Nuuts) ================= */
+    const baingaChartData = useMemo(
         () => ({
-            labels: ["Анги", "Хэрэглэгч", "Хөтлөх хэрэг"],
+            labels: ["Байна хадгалах хадгаламжийн нэгж - Илт", "Байнга хадгалах хадгаламжийн нэгж - Нууц"],
             datasets: [
                 {
-                    data: [summary.class, summary.user, summary.huthereg],
-                    backgroundColor: ["#4facfe", "#43e97b", "#fa709a"],
+                    data: [baingaCounts.baingaIlt, baingaCounts.baingaNuuts],
+                    backgroundColor: ["#4facfe", "#43e97b"],
                     borderWidth: 2,
                 },
             ],
         }),
-        [summary]
+        [baingaCounts.baingaIlt, baingaCounts.baingaNuuts]
     );
 
-    const donutOptions = {
+    /* ================= DONUT: Tur (Tur Ilt + Tur Nuuts) ================= */
+    const turChartData = useMemo(
+        () => ({
+            labels: ["Түр хадгалагдах хадгаламжийн нэгж - Илт", "Түр хадгалагдах хадгаламжийн нэгж - Нууц"],
+            datasets: [
+                {
+                    data: [turCounts.turIlt, turCounts.turNuuts],
+                    backgroundColor: ["#fa709a", "#fee140"],
+                    borderWidth: 2,
+                },
+            ],
+        }),
+        [turCounts.turIlt, turCounts.turNuuts]
+    );
+
+    const options = {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: "70%",
         plugins: {
-            legend: {
-                position: "bottom",
-                labels: { color: dark ? "#fff" : "#111" },
-            },
+            legend: { position: "bottom" },
             datalabels: {
-                formatter: (v) => (v ? v : ""),
                 color: "#fff",
-                font: { weight: "bold", size: 14 },
-            },
-            centerText: {
-                color: dark ? "#fff" : "#111",
-            },
-        },
-    };
-
-    /* ================= BAR ================= */
-    const barData = {
-        labels: monthly.map((m) => m.label),
-        datasets: [
-            {
-                label: "Сарын график",
-                data: monthly.map((m) => m.total),
-                backgroundColor: dark
-                    ? "rgba(79,172,254,0.85)"
-                    : "rgba(54,162,235,0.85)",
-                borderRadius: 10,
-                barThickness: 32,
-            },
-        ],
-    };
-
-    const barOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                labels: { color: dark ? "#fff" : "#111" },
-            },
-            datalabels: {
-                anchor: "end",
-                align: "top",
-                color: dark ? "#fff" : "#111",
                 font: { weight: "bold" },
             },
         },
-        scales: {
-            x: {
-                ticks: { color: dark ? "#e5e7eb" : "#111" },
-                grid: { display: false },
-            },
-            y: {
-                beginAtZero: true,
-                ticks: { color: dark ? "#e5e7eb" : "#111" },
-            },
-        },
     };
 
-    const noData =
-        summary.class + summary.user + summary.huthereg === 0 &&
-        monthly.length === 0;
-
-    /* ================= RENDER ================= */
     return (
-        <div className={dark ? "wrapper dark" : "wrapper light"}>
+        <div className="GraphicWrapper">
             <div className="header">
-                <h2>📊 График</h2>
-                <button onClick={() => setDark(!dark)}>
-                    {dark ? "🌞 Өдөр" : "🌙 Шөнө"}
-                </button>
+                <h2>📊 Жилийн график</h2>
             </div>
 
-            {/* FILTER */}
-            <div className="filter">
-                <div>
-                    <label>Эхлэх</label>
-                    <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Дуусах</label>
-                    <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                    />
-                </div>
-            </div>
+            {yearsLoading && (
+                <div className="loading-box">Жилийн мэдээлэл ачааллаж байна...</div>
+            )}
 
-            {/* CONTENT */}
-            {loading ? (
-                <div className="loading">⏳ Ачаалж байна...</div>
-            ) : noData ? (
-                <div className="nodata">📭 Мэдээлэл олдсонгүй</div>
-            ) : (
-                <div className="row">
-                    <div className="col">
-                        <div className="card">
-                            <h4>Нийт</h4>
-                            <div className="chart-box">
-                                <Doughnut
-                                    key={`d-${chartKey}`}
-                                    data={donutData}
-                                    options={donutOptions}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="col">
-                        <div className="card">
-                            <h4>📈 Сарын</h4>
-                            <div className="chart-box">
-                                <Bar
-                                    key={`b-${chartKey}`}
-                                    data={barData}
-                                    options={barOptions}
-                                />
-                            </div>
-                        </div>
-                    </div>
+            {!yearsLoading && availableYears.length === 0 && (
+                <div className="error-msg">
+                    Өгөгдөл олдсонгүй. Хадгаламжийн мэдээлэл байхгүй байна.
                 </div>
             )}
 
-            {/* STYLES */}
+            {!yearsLoading && availableYears.length > 0 && (
+            <div className="row">
+                <div className="card">
+                    <div className="card-head">
+                        <h4>🥧 Байнга</h4>
+                        <div className="filters">
+                            <select
+                                value={baingaFrom ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setBaingaFrom(v);
+                                    if (v > baingaTo) setBaingaTo(v);
+                                }}
+                                disabled={baingaLoading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`b-from-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                            <span className="to">→</span>
+                            <select
+                                value={baingaTo ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setBaingaTo(v);
+                                    if (v < baingaFrom) setBaingaFrom(v);
+                                }}
+                                disabled={baingaLoading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`b-to-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </div>
+                    </div>
+
+                    {baingaError && (
+                        <div className="error-msg">
+                            {baingaError}
+                            <button type="button" onClick={fetchBainga}>
+                                Дахин оролдох
+                            </button>
+                        </div>
+                    )}
+
+                    {baingaLoading ? (
+                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
+                    ) : (
+                        <div className="chart-box">
+                            <Pie data={baingaChartData} options={options} />
+                        </div>
+                    )}
+                </div>
+
+                <div className="card">
+                    <div className="card-head">
+                        <h4>⭕ Түр</h4>
+                        <div className="filters">
+                            <select
+                                value={turFrom ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setTurFrom(v);
+                                    if (v > turTo) setTurTo(v);
+                                }}
+                                disabled={turLoading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`t-from-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                            <span className="to">→</span>
+                            <select
+                                value={turTo ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setTurTo(v);
+                                    if (v < turFrom) setTurFrom(v);
+                                }}
+                                disabled={turLoading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`t-to-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </div>
+                    </div>
+
+                    {turError && (
+                        <div className="error-msg">
+                            {turError}
+                            <button type="button" onClick={fetchTur}>
+                                Дахин оролдох
+                            </button>
+                        </div>
+                    )}
+
+                    {turLoading ? (
+                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
+                    ) : (
+                        <div className="chart-box">
+                            <Doughnut
+                                data={turChartData}
+                                options={{
+                                    ...options,
+                                    cutout: "70%",
+                                    plugins: {
+                                        ...options.plugins,
+                                        centerText: true,
+                                    },
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
+            </div>
+            )}
+
             <style>{`
-                .wrapper { min-height: 100vh; padding: 25px; }
-                .dark { background: #0f172a; color: #fff; }
-                .light { background: #f3f4f6; color: #111; }
-                .header { display: flex; justify-content: space-between; }
-                .filter { display: flex; gap: 15px; margin: 15px 0; }
-                .row { display: flex; gap: 20px; flex-wrap: wrap; }
-                .col { flex: 1; min-width: 320px; }
-                .card {
-                    background: rgba(255,255,255,0.08);
-                    padding: 20px;
-                    border-radius: 16px;
+                .GraphicWrapper {
+                    min-height: 100vh;
+                    padding: 25px;
+                    background: #f3f4f6;
                 }
+
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+
+                .card-head {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    margin-bottom: 8px;
+                }
+
+                .filters {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+
+                .filters .to {
+                    color: #64748b;
+                    font-weight: 600;
+                }
+
+                .error-msg {
+                    background: #fef2f2;
+                    color: #b91c1c;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .error-msg button {
+                    padding: 6px 12px;
+                    border-radius: 6px;
+                    border: 1px solid #b91c1c;
+                    background: #fff;
+                    color: #b91c1c;
+                    cursor: pointer;
+                }
+
+                .loading-box {
+                    text-align: center;
+                    padding: 60px 20px;
+                    color: #6b7280;
+                }
+                    .row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+
+                .card {
+                    width: 100%;
+                    background: #fff;
+                    padding: 20px;
+                    border-radius: 14px;
+                    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+                }
+
+                .card h4 {
+                    margin: 0 0 16px 0;
+                    font-size: 1rem;
+                }
+
                 .chart-box {
-                    position: relative;
                     height: 360px;
                 }
-                .loading, .nodata {
-                    text-align: center;
-                    padding: 60px;
-                    font-size: 18px;
+
+                select {
+                    padding: 8px 14px;
+                    border-radius: 8px;
+                    border: 1px solid #d1d5db;
                 }
             `}</style>
         </div>

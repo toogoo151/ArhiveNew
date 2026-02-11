@@ -131,7 +131,7 @@ const DalanJilSanhuuNew = ({
                         <div className="modal-header">
                             <h4 className="modal-title">
                                 {" "}
-                                ХАДГАЛАМЖИЙН НЭГЖ НЭМЭХ{" "}
+                                Хадгаламжийн нэгж нэмэх{" "}
                             </h4>
 
                             <button

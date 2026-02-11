@@ -272,7 +272,7 @@ const Index = () => {
                                             : null
                                     }
                                     spanIconClassName="fas fa-plus"
-                                    buttonName="НЭМЭХ"
+                                    buttonName="Нэмэх"
                                     excelDownloadData={getDans}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={true}

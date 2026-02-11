@@ -3,6 +3,7 @@
     background: #111827; /* dark slate */
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.35);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
+    width: 260px;
 }
 
 /* ===== Brand ===== */

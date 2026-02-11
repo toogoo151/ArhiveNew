@@ -226,7 +226,7 @@ const ArhivDhunChild = (props) => {
                                     modelType={"modal"}
                                     dataTargetID={"#baingaIltsChildNew"}
                                     spanIconClassName={"fas fa-solid fa-plus"}
-                                    buttonName={"НЭМЭХ"}
+                                    buttonName={"Нэмэх"}
                                     excelDownloadData={getdalanhunChild}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={false}

@@ -161,7 +161,7 @@ const DalanJilSanhuuChildNew = ({ _parentID, refreshdalanSanhuuChild }) => {
                         <div className="modal-header">
                             <h4 className="modal-title">
                                 {" "}
-                                БАРИМТ БИЧИГ НЭМЭХ{" "}
+                                Баримт бичиг нэмэх{" "}
                             </h4>
 
                             <button

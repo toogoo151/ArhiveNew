@@ -228,7 +228,7 @@ const DalanJilSanhuuChild = (props) => {
                                     modelType={"modal"}
                                     dataTargetID={"#dalanSanhuuNew"}
                                     spanIconClassName={"fas fa-solid fa-plus"}
-                                    buttonName={"НЭМЭХ"}
+                                    buttonName={"Нэмэх"}
                                     excelDownloadData={getdalansanhuuChild}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={true}

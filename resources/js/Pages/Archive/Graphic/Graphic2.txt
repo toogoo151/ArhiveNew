@@ -1,0 +1,230 @@
+import {
+    ArcElement,
+    Chart as ChartJS,
+    Tooltip,
+    Legend,
+} from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Doughnut, Pie } from "react-chartjs-2";
+import { useEffect, useMemo, useState } from "react";
+import axios from "../../../AxiosUser";
+
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
+
+/* ================= CENTER TEXT PLUGIN ================= */
+const centerTextPlugin = {
+    id: "centerText",
+    beforeDraw(chart) {
+        const { ctx } = chart;
+        const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+
+        const x = chart.getDatasetMeta(0).data[0].x;
+        const y = chart.getDatasetMeta(0).data[0].y;
+
+        ctx.save();
+        ctx.font = "bold 26px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(total, x, y);
+        ctx.restore();
+    },
+};
+
+ChartJS.register(centerTextPlugin);
+
+/* ================= COMPONENT ================= */
+const Graphic = () => {
+    const currentYear = new Date().getFullYear();
+
+    const [year, setYear] = useState(currentYear);
+    const [summary, setSummary] = useState({
+        class: 0,
+        user: 0,
+        huthereg: 0,
+    });
+
+    const [loading, setLoading] = useState(false);
+    /* ================= DARK MODE ================= */
+    const [dark, setDark] = useState(
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+
+    /* ================= FETCH API ================= */
+    useEffect(() => {
+        fetchSummary();
+    }, [year]);
+
+    const fetchSummary = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.post("/get/year-summary", { year });
+            setSummary(res.data);
+        } catch (e) {
+            console.error(e);
+            setSummary({ class: 0, user: 0, huthereg: 0 });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /* ================= CHART DATA ================= */
+    const chartData = useMemo(() => ({
+        labels: ["Анги", "Хэрэглэгч", "Хөтлөх хэрэг"],
+        datasets: [
+            {
+                data: [summary.class, summary.user, summary.huthereg],
+                backgroundColor: ["#4facfe", "#43e97b", "#fa709a"],
+                borderWidth: 2,
+            },
+        ],
+    }), [summary]);
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: { color: dark ? "#fff" : "#111" },
+            },
+            datalabels: {
+                color: "#fff",
+                font: { weight: "bold" },
+            },
+        },
+    };
+
+    const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
+    const noData =
+        summary.class + summary.user + summary.huthereg === 0;
+
+    /* ================= RENDER ================= */
+    return (
+        <div className={dark ? "GraphicWrapper dark" : "GraphicWrapper light"}>
+            <div className="header">
+                <h2>📊 Жилийн график</h2>
+
+                <div className="controls">
+                    <select
+                        value={year}
+                        onChange={(e) => setYear(Number(e.target.value))}
+                    >
+                        {years.map((y) => (
+                            <option key={y}>{y}</option>
+                        ))}
+                    </select>
+
+                    <button onClick={() => setDark(!dark)}>
+                        {dark ? "🌞 Light" : "🌙 Dark"}
+                    </button>
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="info">⏳ Уншиж байна...</div>
+            ) : noData ? (
+                <div className="info">📭 Өгөгдөл байхгүй байна</div>
+            ) : (
+                <div className="row">
+                    {/* PIE */}
+                    <div className="card">
+                        <h4>🥧 Pie Chart</h4>
+                        <div className="chart-box">
+                            <Pie data={chartData} options={options} />
+                        </div>
+                    </div>
+
+                    {/* DONUT */}
+                    <div className="card">
+                        <h4 className={dark ? "text-dark" : "text-light"}>Donut Chart</h4>
+                        <div className="chart-box">
+                            <Doughnut
+                                data={chartData}
+                                options={{
+                                    ...options,
+                                    cutout: "70%",
+                                    plugins: {
+                                        ...options.plugins,
+                                        centerText: true,
+                                    },
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ================= STYLES ================= */}
+            <style>{`
+                .GraphicWrapper {
+                    min-height:100vh;
+                    padding:25px;
+                    transition:0.3s;
+                }
+
+                text-dark {
+                    color: #11111;
+                }
+                text-light {
+                    color: #fffff;
+                }
+
+                .dark {
+                    background:#0f172a;
+                    color:#fff;
+                }
+
+                .light {
+                    background:#f3f4f6;
+                    color:#111;
+                }
+
+                .header {
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:20px;
+                }
+
+                .controls {
+                    display:flex;
+                    gap:10px;
+                }
+
+                .row {
+                    display:flex;
+                    gap:20px;
+                    flex-wrap:wrap;
+                }
+
+                .card {
+                    flex:1;
+                    min-width:350px;
+                    background:rgba(255,255,255,0.08);
+                    padding:20px;
+                    border-radius:16px;
+                    backdrop-filter: blur(6px);
+                }
+
+                .chart-box {
+                    height:360px;
+                }
+
+                .info {
+                    text-align:center;
+                    padding:80px;
+                }
+
+                button, select {
+                    padding:6px 10px;
+                    border-radius:6px;
+                    border:none;
+                    cursor:pointer;
+                }
+            `}</style>
+        </div>
+    );
+};
+
+export default Graphic;
