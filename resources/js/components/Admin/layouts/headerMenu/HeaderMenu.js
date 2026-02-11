@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 import axios from "../../../../AxiosUser";
 import { AppContext } from "../../../../Context/MyContext";
 
@@ -14,6 +15,115 @@ export default function HeaderMenu(props) {
     const [getRows, setRows] = useState([]);
     const [loadData, setData] = useState([]);
     const [getName, setFirstName] = useState("");
+    const openChangePassword = () => {
+        Swal.fire({
+            title: "🔐 Нууц үг солих",
+            html: `
+        <div class="swal-password-wrapper">
+            <div class="swal-password-field">
+                <input type="password" id="current_password" class="swal2-input" placeholder="Одоогийн нууц үг">
+                <span class="hover-password" data-target="current_password">👁️</span>
+            </div>
+
+            <div class="swal-password-field">
+                <input type="password" id="new_password" class="swal2-input" placeholder="Шинэ нууц үг">
+                <span class="hover-password" data-target="new_password">👁️</span>
+            </div>
+
+            <div class="swal-password-field">
+                <input type="password" id="new_password_confirmation" class="swal2-input" placeholder="Шинэ нууц үг давтах">
+                <span class="hover-password" data-target="new_password_confirmation">👁️</span>
+            </div>
+        </div>
+        `,
+            showCancelButton: true,
+            confirmButtonText: "Хадгалах",
+            cancelButtonText: "Болих",
+            didOpen: () => {
+                document.querySelectorAll(".hover-password").forEach((icon) => {
+                    const input = document.getElementById(
+                        icon.getAttribute("data-target")
+                    );
+
+                    icon.addEventListener("mouseenter", () => {
+                        input.type = "text";
+                    });
+
+                    icon.addEventListener("mouseleave", () => {
+                        input.type = "password";
+                    });
+                });
+            },
+            preConfirm: () => {
+                const current_password =
+                    document.getElementById("current_password").value;
+                const new_password =
+                    document.getElementById("new_password").value;
+                const new_password_confirmation = document.getElementById(
+                    "new_password_confirmation"
+                ).value;
+
+                if (
+                    !current_password ||
+                    !new_password ||
+                    !new_password_confirmation
+                ) {
+                    Swal.showValidationMessage("Бүх талбарыг бөглөнө үү");
+                    return false;
+                }
+
+                if (new_password !== new_password_confirmation) {
+                    Swal.showValidationMessage("Шинэ нууц үг таарахгүй байна");
+                    return false;
+                }
+
+                return {
+                    current_password,
+                    new_password,
+                    new_password_confirmation,
+                };
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios
+                    .post("/change-password", result.value)
+                    .then(() => {
+                        Swal.fire(
+                            "Амжилттай",
+                            "Нууц үг амжилттай солигдлоо",
+                            "success"
+                        );
+                    })
+                    .catch((error) => {
+                        const res = error.response?.data;
+
+                        let errorMsg = "Алдаа гарлаа";
+
+                        if (res?.errors) {
+                            // errors object доторх бүх мессежийг нэгтгэх
+                            errorMsg = Object.values(res.errors)
+                                .flat()
+                                .join("\n");
+                        } else if (res?.message) {
+                            errorMsg = res.message;
+                        }
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Алдаа",
+                            text: errorMsg,
+                        });
+                    });
+            }
+        });
+    };
+
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        current_password: "",
+        new_password: "",
+        new_password_confirmation: "",
+    });
 
     const [getTime, setTime] = useState("");
     const capitalizeFirstLetter = (str) => {
@@ -88,59 +198,120 @@ export default function HeaderMenu(props) {
     };
 
     return (
-      <nav className="main-header navbar navbar-expand">
-    {/* LEFT */}
-    <ul className="navbar-nav">
-        <li className="nav-item">
-            <a
-                className="nav-link"
-                data-widget="pushmenu"
-                href="#"
-                role="button"
-            >
-                <i className="fa fa-bars" />
-            </a>
-        </li>
-    </ul>
+        <nav className="main-header navbar navbar-expand">
+            {/* LEFT */}
+            <ul className="navbar-nav">
+                <li className="nav-item">
+                    <a
+                        className="nav-link"
+                        data-widget="pushmenu"
+                        href="#"
+                        role="button"
+                    >
+                        <i className="fa fa-bars" />
+                    </a>
+                </li>
+            </ul>
 
-    {/* RIGHT */}
-    <ul className="navbar-nav ml-auto align-items-center">
+            {/* RIGHT */}
+            <ul className="navbar-nav ml-auto align-items-center">
+                {/* clock */}
+                <li className="nav-item navbar-time">🕒 {getTime} (MN)</li>
 
-        {/* clock */}
-        <li className="nav-item navbar-time">
-            🕒 {getTime} (MN)
-        </li>
+                {/* user */}
+                <li className="nav-item dropdown">
+                    <button className="user-btn" data-toggle="dropdown">
+                        <span className="user-avatar">
+                            {capitalizeFirstLetter(getName?.trim()[0] || "")}
+                        </span>
 
-        {/* user */}
-        <li className="nav-item dropdown">
-            <button
-                className="user-btn"
-                data-toggle="dropdown"
-            >
-                <span className="user-avatar">
-                    {capitalizeFirstLetter(getName?.trim()[0] || "")}
-                </span>
+                        <span>
+                            {capitalizeFirstLetter(getName?.trim() || "")}
+                        </span>
 
-                <span>
-                    {capitalizeFirstLetter(getName?.trim() || "")}
-                </span>
+                        <i className="fa fa-angle-down" />
+                    </button>
 
-                <i className="fa fa-angle-down" />
-            </button>
+                    <div className="dropdown-menu dropdown-menu-right">
+                        <Link
+                            to="/login"
+                            onClick={logout}
+                            className="dropdown-item"
+                        >
+                            <i className="fa fa-sign-out-alt mr-2 "></i>
+                            <strong>Гарах</strong>
+                        </Link>
 
-            <div className="dropdown-menu dropdown-menu-right">
-                <Link
-                    to="/login"
-                    onClick={logout}
-                    className="dropdown-item"
-                >
-                    <i className="fa fa-sign-out-alt mr-2 "></i>
-                    <strong>Гарах</strong>
-                </Link>
-            </div>
-        </li>
-    </ul>
-</nav>
+                        <button
+                            className="dropdown-item"
+                            onClick={openChangePassword}
+                        >
+                            <i className="fa fa-key mr-2"></i>
+                            <strong>Нууц үг солих</strong>
+                        </button>
+                    </div>
+                </li>
+                {showPasswordModal && (
+                    <div className="password-modal-backdrop">
+                        <div className="password-modal">
+                            <h4>🔐 Нууц үг солих</h4>
+
+                            <input
+                                type="password"
+                                placeholder="Одоогийн нууц үг"
+                                value={passwordData.current_password}
+                                onChange={(e) =>
+                                    setPasswordData({
+                                        ...passwordData,
+                                        current_password: e.target.value,
+                                    })
+                                }
+                            />
+
+                            <input
+                                type="password"
+                                placeholder="Шинэ нууц үг"
+                                value={passwordData.new_password}
+                                onChange={(e) =>
+                                    setPasswordData({
+                                        ...passwordData,
+                                        new_password: e.target.value,
+                                    })
+                                }
+                            />
+
+                            <input
+                                type="password"
+                                placeholder="Шинэ нууц үг давтах"
+                                value={passwordData.new_password_confirmation}
+                                onChange={(e) =>
+                                    setPasswordData({
+                                        ...passwordData,
+                                        new_password_confirmation:
+                                            e.target.value,
+                                    })
+                                }
+                            />
+
+                            <div className="modal-actions">
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={changePassword}
+                                >
+                                    Хадгалах
+                                </button>
+                                <button
+                                    className="btn btn-danger"
+                                    onClick={() => setShowPasswordModal(false)}
+                                >
+                                    Болих
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </ul>
+        </nav>
     );
 }
 const style = {

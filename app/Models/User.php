@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 

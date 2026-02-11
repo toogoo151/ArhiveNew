@@ -132,6 +132,9 @@ Route::get("/get/auth/tuvshin", function () {
     return $user ? $user->getTuvshin() : "Нэвтрээгүй байна";
 });
 
+Route::post('/change-password', [UserController::class, 'changePassword'])
+    ->middleware('auth');
+
 
 
 

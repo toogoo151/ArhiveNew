@@ -11,8 +11,6 @@ use Redirect, Response, File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
-
-
 class UserController extends Controller
 {
 
@@ -129,5 +127,39 @@ class UserController extends Controller
                 500
             );
         }
+    }
+
+
+    public function changePassword(Request $request)
+    {
+        $request->validate(
+            [
+                'current_password' => 'required',
+                'new_password' => 'required|min:6|confirmed',
+            ],
+            [
+                'new_password.confirmed' => 'Шинэ нууц үг таарахгүй байна',
+                'new_password.min' => 'Нууц үг хамгийн багадаа 6 тэмдэгтэй байна',
+                'current_password.required' => 'Одоогийн нууц үгээ оруулна уу',
+            ]
+        );
+
+        $user = Auth::user();
+
+
+        if (!Hash::check($request->current_password, $user->nuuts_ug)) {
+            return response()->json([
+                'message' => 'Одоогийн нууц үг буруу байна'
+            ], 422);
+        }
+
+
+        $user->update([
+            'nuuts_ug' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json([
+            'message' => 'Амжилттай солигдлоо'
+        ], 200);
     }
 }
