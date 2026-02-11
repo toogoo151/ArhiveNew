@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-import "../BaingaIlts/Print.css";
+import "../TurIlt/Print.css";
 
 const TurNuutsPrint = ({ show, onClose, selectedRowsData }) => {
     const [expandedRows, setExpandedRows] = useState([]);
@@ -36,12 +36,12 @@ const TurNuutsPrint = ({ show, onClose, selectedRowsData }) => {
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Түр хадгалах нууц</title>
+    <title>Байнга илт</title>
     <style>
       @page {
     size: A4 portrait;
     margin-left: 3cm;
-    margin-top: 2cm; 
+    margin-top: 2cm;
     margin-right: 1.5cm;
     margin-bottom: 2cm;
 }
@@ -90,15 +90,15 @@ html, body {
     white-space: nowrap !important;   /* ⬅️ мөр хугарахыг зогсооно */
     word-break: keep-all !important;  /* ⬅️ -ны дээр тасрахгүй */
 }
-    
-    
+
+
         .center-row {
     display: flex;
     justify-content: center; /* хөндлөн тэнхлэг дээр төв */
     align-items: center; /* босоо тэнхлэг дээр төв */
     margin-top: 6mm;
 }
-    .center-box 
+    .center-box
     {
     display: flex;
     flex-direction: column; /* дотоод div-үүдийг босоо байрлуулах */
@@ -161,7 +161,7 @@ html, body {
                     {/* HEADER */}
                     <div className="modal-header">
                         <h5 className="modal-title">
-                            🗂 ТҮР НУУЦ БАРИМТ БИЧИГ УСТГАХ АКТ
+                            🗂 ИЛ БАРИМТ БИЧИГ УСТГАХ АКТ
                         </h5>
                         <button className="close" onClick={onClose}>
                             ×
@@ -221,7 +221,7 @@ html, body {
                                 </div>
                             </div>
                             {/* <div className="top-inputs">
-                          
+
                                 <div className="left-box">
                                     <textarea
                                         className="word-text auto-textarea"
@@ -230,7 +230,7 @@ html, body {
                                     />
                                 </div>
 
-                             
+
                                 <div className="center-box">
                                     <input
                                         id="3"
@@ -242,11 +242,11 @@ html, body {
                                     />
                                 </div>
 
-                             
+
                                 <div className="right-box">
                                     <textarea
                                         id
-                                        defaultValue="БАТЛАВ 
+                                        defaultValue="БАТЛАВ
 2019 оны 01 дүгээр сарын ........–ны өдөр"
                                     />
                                 </div>
@@ -267,7 +267,6 @@ html, body {
                                         <th rowSpan="3">
                                             Хэрэг данс бүртгэлийн нэр
                                         </th>
-                                        <th rowSpan="3">Нууцын зэрэг</th>
 
                                         <th
                                             colSpan="2"
@@ -330,25 +329,27 @@ html, body {
                                                     (row, index) => (
                                                         <tr key={index}>
                                                             <td>
-                                                                {row.hn_zbn}
+                                                                {
+                                                                    row.hadgalamj_zbn
+                                                                }
                                                             </td>
                                                             <td>{row.id}</td>
                                                             <td>
-                                                                {row.hn_garchig}
-                                                            </td>
-                                                            <td>
                                                                 {
-                                                                    row.nuuts_zereglel
+                                                                    row.hadgalamj_garchig
                                                                 }
                                                             </td>
-
                                                             <td>
                                                                 {row.on_ehen}
                                                             </td>
                                                             <td>
                                                                 {row.on_suul}
                                                             </td>
-                                                            <td>{row.hn_dd}</td>
+                                                            <td>
+                                                                {
+                                                                    row.hadgalamj_dugaar
+                                                                }
+                                                            </td>
                                                             <td>
                                                                 {row.huudas_too}
                                                             </td>

@@ -576,10 +576,11 @@ Route::get('/get/hugatsaaTurul', function () {
 // GANBAT NEMSEN END
 
 
-
-
 // STATISTIC START
 Route::post("/get/summary", [StatisticController::class, "summary"]);
+Route::post("/get/graphic-year-counts", [StatisticController::class, "graphicYearCounts"]);
+Route::post("/get/graphic-year-range-counts", [StatisticController::class, "graphicYearRangeCounts"]);
+Route::post("/get/graphic-available-years", [StatisticController::class, "graphicAvailableYears"]);
 Route::post("/get/monthly-stat", [StatisticController::class, "monthlyStat"]);
 Route::post("/get/group-stat", [StatisticController::class, "groupStat"]);
 Route::post("/get/ClaccCount", [StatisticController::class, "ClassCount"]);
@@ -596,7 +597,6 @@ Route::post("/get/JagsaaltCount", [StatisticController::class, "JagsaaltCount"])
 Route::post("/get/SedevZuiCount", [StatisticController::class, "SedevZuiCount"])->middleware('auth');
 Route::post("/get/NomCount", [StatisticController::class, "NomCount"])->middleware('auth');
 Route::post("/get/TovchCount", [StatisticController::class, "TovchCount"])->middleware('auth');
-
 //STATISTIC END
 
 

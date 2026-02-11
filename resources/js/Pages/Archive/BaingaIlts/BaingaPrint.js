@@ -90,15 +90,15 @@ html, body {
     white-space: nowrap !important;   /* ⬅️ мөр хугарахыг зогсооно */
     word-break: keep-all !important;  /* ⬅️ -ны дээр тасрахгүй */
 }
-    
-    
+
+
         .center-row {
     display: flex;
     justify-content: center; /* хөндлөн тэнхлэг дээр төв */
     align-items: center; /* босоо тэнхлэг дээр төв */
     margin-top: 6mm;
 }
-    .center-box 
+    .center-box
     {
     display: flex;
     flex-direction: column; /* дотоод div-үүдийг босоо байрлуулах */
@@ -221,7 +221,7 @@ html, body {
                                 </div>
                             </div>
                             {/* <div className="top-inputs">
-                          
+
                                 <div className="left-box">
                                     <textarea
                                         className="word-text auto-textarea"
@@ -230,7 +230,7 @@ html, body {
                                     />
                                 </div>
 
-                             
+
                                 <div className="center-box">
                                     <input
                                         id="3"
@@ -242,11 +242,11 @@ html, body {
                                     />
                                 </div>
 
-                             
+
                                 <div className="right-box">
                                     <textarea
                                         id
-                                        defaultValue="БАТЛАВ 
+                                        defaultValue="БАТЛАВ
 2019 оны 01 дүгээр сарын ........–ны өдөр"
                                     />
                                 </div>

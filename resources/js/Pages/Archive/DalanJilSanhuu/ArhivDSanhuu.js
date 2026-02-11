@@ -231,7 +231,7 @@ const ArhivDSanhuu = () => {
                                             : null
                                     }
                                     spanIconClassName="fas fa-plus"
-                                    buttonName="НЭМЭХ"
+                                    buttonName="Нэмэх"
                                     excelDownloadData={getArchiveDsanhuu}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={false}

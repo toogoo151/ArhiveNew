@@ -536,7 +536,7 @@ const Index = () => {
                                     }}
                                 >
                                     <i className="fas fa-file-export"></i> 📂
-                                    АРХИВТ ШИЛЖҮҮЛЭХ
+                                    Архивт шилжүүлэх
                                 </button>
                             </div>
                         </div>
@@ -587,7 +587,7 @@ const Index = () => {
                                             : null
                                     }
                                     spanIconClassName="fas fa-plus"
-                                    buttonName="НЭМЭХ"
+                                    buttonName="Нэмэх"
                                     excelDownloadData={getDalHun}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={true}
@@ -920,7 +920,7 @@ const Index = () => {
                         </div>
                     </div>
                 </div>
-                
+
             )} */}
         </>
     );

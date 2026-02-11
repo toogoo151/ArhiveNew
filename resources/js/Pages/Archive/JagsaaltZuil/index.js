@@ -1,12 +1,36 @@
 import { format, subDays } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import Checkbox from "@mui/material/Checkbox";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import JagsaaltEdit from "./JagsaaltEdit";
 import JagsaaltNew from "./JagsaaltNew";
+
+const MERGE_COLUMN = "jagsaalt_turul";
+
+/** Compute rowSpan per row for Жагсаалтын төрөл: same consecutive value = one merged cell. */
+function computeMergeRowSpans(data) {
+    if (!data || !data.length) return [];
+    const spans = [];
+    let i = 0;
+    while (i < data.length) {
+        const val = String(data[i][MERGE_COLUMN] ?? "");
+        let count = 1;
+        while (i + count < data.length && String(data[i + count][MERGE_COLUMN] ?? "") === val) {
+            count++;
+        }
+        spans[i] = count;
+        for (let j = 1; j < count; j++) spans[i + j] = 0;
+        i += count;
+    }
+    return spans;
+}
+
 const Index = () => {
     // ================= DATA =================
     const [allJagsaalt, setAllJagsaalt] = useState([]);
@@ -135,6 +159,11 @@ const Index = () => {
 
     // (debug logging removed)
 
+    /** Row spans for Жагсаалтын төрөл: merge consecutive same values into one cell. */
+    const jagsaaltRowSpans = useMemo(
+        () => computeMergeRowSpans(getJagsaalt),
+        [getJagsaalt]
+    );
 
     const columns = [
         {
@@ -396,6 +425,69 @@ const Index = () => {
         },
     ];
 
+    /** Custom row render: merge "Жагсаалтын төрөл" cells when same name in consecutive rows. */
+    const customRowRender = (data, dataIndex) => {
+        const rowIndex = dataIndex;
+        const row = data && typeof data === "object" && !Array.isArray(data) ? data : getJagsaalt[rowIndex];
+        if (!row) return null;
+
+        const renderCellValue = (col, value) => {
+            if (value === null || value === "" || value === 0 || value === undefined) return "-";
+            if (col.name === MERGE_COLUMN) {
+                const foundById = getJname.find((el) => String(el.id) === String(value));
+                if (foundById) return foundById.jName;
+                const foundByName = getJname.find((el) => String(el.jName) === String(value));
+                return foundByName?.jName ?? value;
+            }
+            const opt = col.options?.customBodyRender;
+            return opt ? opt(value) : value;
+        };
+
+        const isSelected = getRowsSelected.length && getRowsSelected[0] === dataIndex;
+
+        return (
+            <TableRow
+                hover
+                selected={isSelected}
+                onClick={() => setRowsSelected([dataIndex])}
+                role="checkbox"
+                aria-checked={isSelected}
+                tabIndex={-1}
+                key={dataIndex}
+            >
+                <TableCell padding="checkbox">
+                    <Checkbox
+                        checked={isSelected}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() => setRowsSelected([dataIndex])}
+                    />
+                </TableCell>
+                {columns.map((col) => {
+                    if (col.name === MERGE_COLUMN) {
+                        const span = jagsaaltRowSpans[rowIndex];
+                        if (span === 0) return null;
+                        const value = row[col.name];
+                        return (
+                            <TableCell
+                                key={col.name}
+                                rowSpan={span}
+                                style={{ verticalAlign: "middle" }}
+                            >
+                                {renderCellValue(col, value)}
+                            </TableCell>
+                        );
+                    }
+                    const value = col.name === "id" ? dataIndex + 1 : row[col.name];
+                    return (
+                        <TableCell key={col.name} align={col.options?.align || (col.name === "id" ? "center" : undefined)}>
+                            {col.name === "id" ? value : renderCellValue(col, value)}
+                        </TableCell>
+                    );
+                })}
+            </TableRow>
+        );
+    };
+
     //RENDER
     return (
         <>
@@ -472,6 +564,7 @@ const Index = () => {
                             data={getJagsaalt}
                             setdata={setJagsaalt}
                             columns={columns}
+                            customRowRender={customRowRender}
                             sortOrder={{ name: "id", direction: "desc" }}
                             costumToolbar={
                                 <CustomToolbar

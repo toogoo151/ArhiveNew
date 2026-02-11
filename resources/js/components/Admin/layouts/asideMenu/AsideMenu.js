@@ -18,26 +18,7 @@ export default function AsideMenu() {
     const [openSubMenu, setOpenSubMenu] = useState({});
 
     const menuData = [
-        // { type: "header", label: "АЛБАН ХЭРЭГ ХӨТЛӨЛТ" },
 
-        // {
-        //     type: "menu",
-        //     title: "Туслах сан",
-        //     icon: "fa fa-th-large",
-        //     level: [1, 2, 3],
-        //     subMenu: [
-        //         {
-        //             name: "Хөтлөх хэргийн жагсаалт",
-        //             url: "/get/hutheregs",
-        //             icon: "fa fa-list",
-        //         },
-        //         {
-        //             name: "Хадгаламжийн нэгжийн бүртгэл",
-        //             url: "/get/hadgalamj",
-        //             icon: "fa fa-list",
-        //         },
-        //     ],
-        // },
         { type: "header", label: "Архив" },
         {
             type: "menu",
@@ -69,11 +50,6 @@ export default function AsideMenu() {
                         },
                     ],
                 },
-                // {
-                //     name: "Архивт шилжүүлсэн",
-                //     url: "/get/tovchililsonUgs",
-                //     icon: "fa fa-list",
-                // },
             ],
         },
         {
@@ -110,11 +86,6 @@ export default function AsideMenu() {
                         },
                     ],
                 },
-                // {
-                //     name: "Архивт шилжүүлсэн",
-                //     url: "/get/tovchililsonUgs",
-                //     icon: "fa fa-list",
-                // },
             ],
         },
         // Архив түр хадгалах
@@ -262,19 +233,6 @@ export default function AsideMenu() {
         setOpenMenu(menuState);
         setOpenSubMenu(subMenuState);
     }, [currentUrl]);
-
-    // useEffect(() => {
-    //     const initialState = {};
-    //     menuData.forEach((menu, index) => {
-    //         if (menu.type === "menu") {
-    //             const isActive = menu.subMenu.some(
-    //                 (item) => item.url === currentUrl
-    //             );
-    //             initialState[index] = isActive;
-    //         }
-    //     });
-    //     setOpenMenu(initialState);
-    // }, [currentUrl]);
 
     const resetContextIsMission = () => {
         localStorage.removeItem("whatIsMission");

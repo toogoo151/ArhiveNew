@@ -228,7 +228,7 @@ const ArhivDhun = () => {
                                             : null
                                     }
                                     spanIconClassName="fas fa-plus"
-                                    buttonName="НЭМЭХ"
+                                    buttonName="Нэмэх"
                                     excelDownloadData={getArchiveDhun}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={false}

@@ -155,18 +155,32 @@ const Statistic = () => {
             <div className="row g-3">
                 {/* Архив  */}
                 <StatCard
-                    title="Нийт байнга хадгалагдах архив - Илт"
+                    title="Байнга хадгалагдах архив - Илт"
                     value={baingaIltCount}
                     icon={MdFolder}
                     cardBg={cardBackgrounds[0]}
                     iconGradient={iconGradients[0]}
                 />
                 <StatCard
-                    title="Нийт байнга хадгалагдах архив - Нууц"
+                    title="Байнга хадгалагдах архив - Нууц"
                     value={baingaNuutsCount}
                     icon={MdLock}
                     cardBg={cardBackgrounds[1]}
                     iconGradient={iconGradients[1]}
+                />
+                <StatCard
+                    title="Түр хадгалагдах архив - Илт"
+                    value={turIltCount}
+                    icon={MdFolder}
+                    cardBg={cardBackgrounds[3]}
+                    iconGradient={iconGradients[3]}
+                />
+                <StatCard
+                    title="Түр хадгалагдах архив - Нууц"
+                    value={turNuutsCount}
+                    icon={MdLock}
+                    cardBg={cardBackgrounds[4]}
+                    iconGradient={iconGradients[4]}
                 />
 
                 <StatCard

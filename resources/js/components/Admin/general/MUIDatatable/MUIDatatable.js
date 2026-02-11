@@ -221,6 +221,7 @@ const MUIDatatable = (props) => {
             props.setRowsSelected(rowsSelected);
             // props.setRowSelectedIndex(rowsSelectedData[0].index);
         },
+        ...(props.customRowRender && { customRowRender: props.customRowRender }),
     };
     const optionsWithServerSide = {
         textLabels: {
@@ -483,6 +484,7 @@ const MUIDatatable = (props) => {
             props.setRowsSelected(rowsSelected);
             // props.setRowSelectedIndex(rowsSelectedData[0].index);
         },
+        ...(props.customRowRender && { customRowRender: props.customRowRender }),
     };
 
   const getMuiTheme = createTheme({
