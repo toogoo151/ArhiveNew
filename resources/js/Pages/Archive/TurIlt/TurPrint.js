@@ -1,8 +1,16 @@
-import { Fragment, useState } from "react";
-
+import { Fragment, useEffect, useState } from "react";
+import "../BaingaIlts/Print.css";
 
 const TurPrint = ({ show, onClose, selectedRowsData }) => {
     const [expandedRows, setExpandedRows] = useState([]);
+
+    useEffect(() => {
+        if (show) {
+            // Эхэнд бүх жилүүдийг өргөжүүлсэн байдалтай тохируулна
+            setExpandedRows(Object.keys(groupedData));
+        }
+    }, [show, selectedRowsData]);
+
     if (!show) return null;
 
     // Хэвлэх функц
@@ -21,75 +29,43 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
             el.replaceWith(div);
         });
 
-        const printWindow = window.open("", "", "width=900,height=650");
+        const printWindow = window.open("", "_blank", "width=900,height=650");
 
         printWindow.document.write(`
-        <html>
-<head>
-<title>Хэвлэх</title>
-<style>
-  @page {
-    size: A4;
-    margin: 20mm 20mm 20mm 25mm;
-  }
+            <html>
+            <head>
+                <title>Түр хадгалах илт</title>
+                <style>
+                    body {
+                        margin-left: 3cm;
+                        margin-top: 2cm;
+                        margin-right: 1.5cm;
+                        margin-bottom: 2cm;
+                        font-family: "Times New Roman";
+                        font-size: 12pt;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        border: 1px solid #000;
+                        padding: 5px;
+                        text-align: center;
+                    }
+                </style>
+            </head>
+            <body>
+                ${clone.innerHTML}
+            </body>
+            </html>
+        `);
 
-  body {
-    font-family: "Times New Roman", serif;
-    font-size: 12pt;
-    margin: 0;
-    color: #000;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8mm;
-  }
-
-  th, td {
-    border: 1px solid #000;
-    padding: 5px 6px;
-    text-align: center;
-    vertical-align: middle;
-  }
-
-  th {
-    font-weight: bold;
-  }
-
-  textarea, input {
-    border: none;
-  }
-
-  .top-inputs {
-    display: grid;
-    grid-template-columns: 100mm auto 55mm;
-    gap: 8mm;
-    margin-bottom: 8mm;
-  }
-
-  .left-box,
-  .center-box,
-  .right-box {
-    border: 1px solid #000;
-    padding: 4mm;
-  }
-
-  .bottom-text {
-    border: 1px solid #000;
-    padding: 5mm;
-    margin-top: 8mm;
-  }
-</style>
-</head>
-<body>
-            ${clone.innerHTML}
-        </body>
-        </html>
-    `);
-
+        // Устгах
         printWindow.document.close();
         printWindow.focus();
+
+        // Хэвлэх товчийг дарах
         printWindow.print();
     };
 
@@ -129,7 +105,7 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
                     {/* HEADER */}
                     <div className="modal-header">
                         <h5 className="modal-title">
-                            🗂 ИЛ БАРИМТ БИЧИГ УСТГАХ АКТ
+                            🗂 ТҮР ИЛТ БАРИМТ БИЧИГ УСТГАХ АКТ
                         </h5>
                         <button className="close" onClick={onClose}>
                             ×
@@ -139,41 +115,6 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
                     {/* BODY */}
                     <div className="modal-body" id="printable-content">
                         <div className="input-wrapper">
-                            {/* <div className="doc-top">
-
-                                <div className="doc-box">
-                                    <textarea
-                                        className="doc-textarea"
-                                        defaultValue="БАТЛАВ"
-                                    />
-                                </div>
-
-
-                                <div className="doc-center">
-                                    <input
-                                        className="doc-input"
-                                        defaultValue="ЗЭВСЭГТ ХҮЧНИЙ ЖАНЖИН ШТАБ"
-                                    />
-                                    <input
-                                        className="doc-input bold"
-                                        defaultValue="НУУЦ БАРИМТ БИЧИГ УСТГАХ АКТ № …"
-                                    />
-                                    <textarea
-                                        className="doc-textarea center-area"
-                                        defaultValue=""
-                                    />
-                                </div>
-
-
-                                <div className="doc-box">
-                                    <textarea
-                                        className="doc-textarea"
-                                        defaultValue="БАТЛАВ
-2019 оны 01 дүгээр сарын ........–ны өдөр"
-                                    />
-                                </div>
-                            </div>
-                            */}
                             <div className="top-inputs">
                                 {/* ЗҮҮН */}
                                 <div className="left-box">
@@ -200,8 +141,8 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
                                 <div className="right-box">
                                     <textarea
                                         id
-                                        defaultValue={`БАТЛАВ
-2019 оны 01 дүгээр сарын ........–ны өдөр`}
+                                        defaultValue="БАТЛАВ 
+2019 оны 01 дүгээр сарын ........–ны өдөр"
                                     />
                                 </div>
                             </div>
@@ -211,16 +152,15 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
                                 defaultValue="Зэвсэгт хүчний Жанжин штабын дэргэдэх Баримт бичиг нягтлан шалгах комисс .......... нарын бүрэлдэхүүнтэй комисс нь дараах нууц баримт бичгийг устгахаар тогтов. Үүнд:"
                                 onInput={autoResize}
                             />
-
+                            &nbsp;
                             {/* TABLE */}
                             <table className="table table-bordered">
                                 <thead>
-                                    {/* 1-р мөр */}
                                     <tr>
                                         <th rowSpan="3">ЗБ нэгжийн нэр</th>
                                         <th rowSpan="3">№</th>
                                         <th rowSpan="3">
-                                            Хэрэг данс бүртгэлийн нэр
+                                            Хадгаламжийн нэгжийн гарчиг
                                         </th>
 
                                         <th
@@ -244,7 +184,6 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
                                         <th rowSpan="3">Тайлбар</th>
                                     </tr>
 
-                                    {/* 2-р мөр */}
                                     <tr>
                                         <th>Эхлэл</th>
                                         <th>Төгсгөл</th>
@@ -322,9 +261,9 @@ const TurPrint = ({ show, onClose, selectedRowsData }) => {
                                     ))}
                                 </tbody>
                             </table>
-
                             {/* Доод input */}
                             <div className="bottom-section">
+                                &nbsp;
                                 <textarea
                                     className="word-text auto-textarea bottom-text"
                                     defaultValue={`КОМИССЫН НАРИЙН БИЧГИЙН ДАРГА: ...................

@@ -19,12 +19,14 @@ class TurIlt extends Model
             $turIlt = DB::table("db_arhivbaingahad")
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
+                ->leftjoin("jagsaaltzuildugaar", "jagsaaltzuildugaar.barimt_dd", "=", "db_arhivbaingahad.jagsaalt_zuildugaar")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.dans_baidal",
-                    "db_arhivdans.hadgalah_hugatsaa"
+                    "db_arhivdans.hadgalah_hugatsaa",
+                    "jagsaaltzuildugaar.hugatsaa as hugatsaa"
                 )
                 ->where(function ($query) {
                     $query->whereNull("ustgasan_temdeglel")

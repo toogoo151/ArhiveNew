@@ -161,7 +161,7 @@ html, body {
                     {/* HEADER */}
                     <div className="modal-header">
                         <h5 className="modal-title">
-                            🗂 ИЛ БАРИМТ БИЧИГ УСТГАХ АКТ
+                            🗂 НУУЦ БАРИМТ БИЧИГ УСТГАХ АКТ
                         </h5>
                         <button className="close" onClick={onClose}>
                             ×
@@ -267,6 +267,7 @@ html, body {
                                         <th rowSpan="3">
                                             Хэрэг данс бүртгэлийн нэр
                                         </th>
+                                        <th rowSpan="3">Нууцын зэрэг</th>
 
                                         <th
                                             colSpan="2"
@@ -329,27 +330,25 @@ html, body {
                                                     (row, index) => (
                                                         <tr key={index}>
                                                             <td>
-                                                                {
-                                                                    row.hadgalamj_zbn
-                                                                }
+                                                                {row.hn_zbn}
                                                             </td>
                                                             <td>{row.id}</td>
                                                             <td>
+                                                                {row.hn_garchig}
+                                                            </td>
+                                                            <td>
                                                                 {
-                                                                    row.hadgalamj_garchig
+                                                                    row.nuuts_zereglel
                                                                 }
                                                             </td>
+
                                                             <td>
                                                                 {row.on_ehen}
                                                             </td>
                                                             <td>
                                                                 {row.on_suul}
                                                             </td>
-                                                            <td>
-                                                                {
-                                                                    row.hadgalamj_dugaar
-                                                                }
-                                                            </td>
+                                                            <td>{row.hn_dd}</td>
                                                             <td>
                                                                 {row.huudas_too}
                                                             </td>

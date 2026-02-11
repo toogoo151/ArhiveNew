@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-// import "../BaingaIlts/Print.css";
+import "../BaingaIlts/Print.css";
 
 const DalanJIlhunPrint = ({ show, onClose, selectedRowsData }) => {
     const [expandedRows, setExpandedRows] = useState([]);
@@ -105,7 +105,7 @@ const DalanJIlhunPrint = ({ show, onClose, selectedRowsData }) => {
                     {/* HEADER */}
                     <div className="modal-header">
                         <h5 className="modal-title">
-                            🗂 ИЛ БАРИМТ БИЧИГ УСТГАХ АКТ
+                            🗂 70 ЖИЛ ХҮНИЙ НӨӨЦ БАРИМТ БИЧИГ УСТГАХ АКТ
                         </h5>
                         <button className="close" onClick={onClose}>
                             ×

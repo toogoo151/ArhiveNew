@@ -1,93 +1,112 @@
-/* Modal-ийн гадаад хэсэг */
-.bainga-print .top-inputs {
-    position: relative;
-    display: grid;
-    grid-template-columns: 40mm auto 60mm;
-    gap: 8mm;
-    height: 120mm; /* тохируулна */
-}
-
-/* ЗҮҮН хэсэг */
-.bainga-print .left-box {
-    position: relative; /* absolute биш */
-    width: auto;
-}
-
-.bainga-print .left-box textarea {
-    border: none;
-    height: 20mm;
-    resize: none;
-    text-align: center;
-    font-weight: bold;
-    line-height: 20mm;
-}
-
-/* ГОЛ хэсэг */
-.bainga-print .center-box {
-    position: relative;
-    left: 84mm;
-    top: 25mm;
-    text-align: center;
-}
-
-.bainga-print .center-box input {
-    border: none;
-    border-bottom: 1px solid #000;
-    font-size: 12pt;
-    text-align: center;
-}
-
-.bainga-print .center-box input#4 {
-    left: -6mm;
-    margin-top: 6mm;
-}
-
-/* БАРУУН хэсэг */
-.bainga-print .right-box {
-    position: relative; /* absolute биш */
-    width: auto;
-}
-
-.bainga-print .right-box textarea {
-    border: none;
-    resize: none;
-    height: 100%;
-    font-weight: bold;
-    text-align: center;
-}
-
-/* Доор байрлах хэсэг */
-.bainga-print .bottom-section {
+.bainga-print .top-table {
     width: 100%;
-    margin-top: 8mm;
 }
 
-.bainga-print .bottom-text {
-    width: 200mm;
-    max-width: 200mm;
-    min-height: 45mm;
-    max-height: 120mm;
-    padding: 5mm;
-    border: 1px solid #000;
-    box-sizing: border-box;
-    margin: 0 auto;
+/* 1-р мөр */
+.bainga-print .top-row {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
-/* Hэвлэх үед тохиргоо */
+.bainga-print .top-row > div {
+    display: table-cell;
+    vertical-align: top;
+}
+
+.bainga-print .left-box {
+    width: 48%; /* зай гаргах, нийт 100% хүрэхгүй */
+}
+.bainga-print .right-box {
+    display: flex !important;
+    justify-content: flex-end !important; /* баруун буланд */
+    align-items: flex-start !important;
+    text-align: right !important;
+}
+
+.bainga-print .right-box * {
+    text-align: right !important; /* textarea → div болсон ч ажиллана */
+    width: 100%;
+}
+.bainga-print .right-box textarea {
+    text-align: right; /* текст баруун талдаа */
+    white-space: pre-line;
+}
+.bainga-print .spacer {
+    width: auto;
+}
+.no-border {
+    border: none;
+    resize: none;
+}
+
+/* 2-р мөр – CENTER ROW */
+/* .bainga-print .center-row {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    margin-top: 6mm;
+} */
+.bainga-print .center-row {
+    display: flex;
+    width: 100%; /* ← ЧУХАЛ */
+}
+.bainga-print .center-box {
+    flex: 1; /* ← ЭНЭ БАЙХГҮЙ БОЛ АГШИНА */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.bainga-print .center-box input {
+    width: 100%;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+}
+/* .bainga-print .center-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    font-weight: bold;
+    line-height: 1.6;
+    width: 100%;
+} */
+/* .bainga-print .center-box input {
+    width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    outline: none;
+    line-height: 1.4;
+}
+.bainga-print .center-box input:nth-child(2) {
+    font-size: 18px;
+    font-weight: normal;
+} */
+
+/* ===== PRINT MODE ===== */
 @media print {
     * {
-        font-family: "Times New Roman", Times, serif !important;
+        font-family: Arial, Helvetica, sans-serif !important;
         font-size: 12pt !important;
         color: #000 !important;
+        box-sizing: border-box;
+    }
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     @page {
-        size: A4;
-        margin: 20mm 20mm 20mm 25mm; /* Хуудасны захын зай */
-    }
-
-    body {
-        background: none !important;
+        size: A4 portrait !important;
+        margin-left: 3cm !important;
+        margin-top: 2cm !important;
+        margin-right: 1.5cm !important;
+        margin-bottom: 2cm !important;
     }
 
     .modal,
@@ -98,137 +117,60 @@
     }
 
     #printable-content {
-        width: 100%;
-        margin: 0;
         padding: 0;
+        margin: 0;
     }
 
     input,
     textarea {
         border: none !important;
+        background: transparent !important;
         outline: none !important;
         resize: none !important;
-        background: transparent !important;
-        font-family: "Times New Roman";
-        font-size: 12pt;
         white-space: pre-wrap;
+        text-align: center; /* input/textarea текст төвлөрүүлэх */
     }
-}
 
-/* Документын дээд хэсэг */
-.bainga-print .doc-top {
-    display: grid;
-    grid-template-columns: 55mm auto 55mm;
-    gap: 8mm;
-    margin-bottom: 8mm;
-}
-
-.bainga-print .doc-box {
-    border: 1px solid #000;
-    display: flex;
-    flex-direction: column;
-    height: 40mm;
-}
-
-.bainga-print .doc-title {
-    text-align: center;
-    font-weight: bold;
-    border-bottom: 1px solid #000;
-    padding: 2mm 0;
-}
-
-/* INPUT болон TEXTAREA */
-.bainga-print .doc-input {
-    border: none;
-    border-bottom: 1px solid #000;
-    text-align: center;
-    font-size: 12pt;
-    height: 8mm;
-    line-height: 8mm;
-}
-
-.bainga-print .doc-input.bold {
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.bainga-print .doc-textarea {
-    border: none;
-    resize: none;
-    flex: 1;
-    padding: 3mm;
-    font-size: 12pt;
-}
-
-.bainga-print .center-area {
-    border-top: 1px solid #000;
-    margin-top: 2mm;
-    min-height: 14mm;
-}
-
-/* Хэвлэх үеийн CSS */
-@media print {
-    input,
-    textarea {
-        outline: none;
+    /* TOP-ROW PRINT LOCK */
+    .bainga-print .top-row {
+        display: flex; /* flex ашиглаж зэрэгцүүлнэ */
+        justify-content: space-between; /* left & right хооронд зай гаргах */
+        margin-bottom: 6mm;
     }
-}
 
-/* Центрэд байрлах текст */
-.bainga-print .top-center {
-    border: 1px solid #000;
-    padding: 6mm;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.bainga-print .center-line {
-    font-size: 12pt;
-    margin-bottom: 3mm;
-}
-
-.bainga-print .center-line.bold {
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-/* Хүснэгт */
-.bainga-print table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.bainga-print table th,
-.bainga-print table td {
-    border: 1px solid #000;
-    padding: 4px 6px;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 12pt;
-}
-
-.bainga-print table th {
-    font-weight: bold;
-}
-
-/* Хүснэгтийн баганын өргөн */
-.bainga-print table th:nth-child(1),
-.bainga-print table td:nth-child(1) {
-    width: 35mm;
-}
-
-/* Хэвлэх үед давтах */
-@media print {
-    .bainga-print table thead {
-        display: table-header-group;
+    .bainga-print .top-row > div {
+        display: table-cell;
+        vertical-align: top;
     }
-}
 
-/* Хүснэгт бүлэглэх */
-.bainga-print td[colspan] {
-    background: #eee;
-    font-weight: bold;
-    text-align: left;
+    .bainga-print .top-row > div:first-child {
+        width: 40mm;
+    }
+
+    .bainga-print .top-row > div:last-child {
+        width: 60mm;
+    }
+
+    .bainga-print .center-row {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin-top: 6mm;
+    }
+
+    .bainga-print .center-box {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        font-weight: bold !important;
+    }
+    .bainga-print .right-box {
+        display: flex !important;
+        justify-content: flex-end !important; /* ✅ баруун буланд */
+        align-items: flex-start !important;
+    }
+
+    .bainga-print .right-box textarea {
+        text-align: right !important;
+    }
 }

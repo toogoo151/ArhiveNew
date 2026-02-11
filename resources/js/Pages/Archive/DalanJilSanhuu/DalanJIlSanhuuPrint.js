@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-// import "../BaingaIlts/Print.css";
+import "../BaingaIlts/Print.css";
 
 const DalanJIlSanhuuPrint = ({ show, onClose, selectedRowsData }) => {
     const [expandedRows, setExpandedRows] = useState([]);
