@@ -235,7 +235,8 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');;
+    ->middleware('auth');
+;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -531,7 +532,7 @@ Route::post("delete/sedevzui", [SedevZuiController::class, "DeleteSedevZui"])
 
 // Arhiv tovchlol  start
 Route::get("/get/tovchlol", function () {
-    $arhivtovchlol = new \App\Models\ArhivTovchlolModel();
+    $arhivtovchlol = new ArhivTovchlolModel();
     return $arhivtovchlol->getTovchlol();
 });
 Route::post("new/tovchlol", [\App\Http\Controllers\ArhivTovchlolController::class, "NewTovchlol"])
@@ -597,6 +598,7 @@ Route::post("/get/JagsaaltCount", [StatisticController::class, "JagsaaltCount"])
 Route::post("/get/SedevZuiCount", [StatisticController::class, "SedevZuiCount"])->middleware('auth');
 Route::post("/get/NomCount", [StatisticController::class, "NomCount"])->middleware('auth');
 Route::post("/get/TovchCount", [StatisticController::class, "TovchCount"])->middleware('auth');
+Route::post("/get/DalanJilHRCount", [StatisticController::class, "DalanJilHRCount"])->middleware('auth');
 //STATISTIC END
 
 
