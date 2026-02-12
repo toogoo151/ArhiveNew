@@ -213,7 +213,7 @@ const Graphic = () => {
     /* ================= 70 жил: Хүний нөөц (DalanJilHun) ================= */
     const dalan70HunChartData = useMemo(
         () => ({
-            labels: ["70 жил хадгалах хүний нөөц"],
+            labels: ["70 жил хадгалах - Хүний нөөц"],
             datasets: [
                 {
                     data: [dalan70Counts.dalanJilHun],
@@ -228,7 +228,7 @@ const Graphic = () => {
     /* ================= 70 жил: Санхүү (DalanJilSanhuu) ================= */
     const dalan70SanhuuChartData = useMemo(
         () => ({
-            labels: ["70 жил хадгалах санхүү"],
+            labels: ["70 жил хадгалах - Санхүү"],
             datasets: [
                 {
                     data: [dalan70Counts.dalanJilSanhuu],
@@ -411,7 +411,7 @@ const Graphic = () => {
                 {/* 70 жил хадгалах хүний нөөц (DalanJilHun) */}
                 <div className="card">
                     <div className="card-head">
-                        <h4>📋 70 жил хадгалах хүний нөөц</h4>
+                        <h4>📋 70 жил хадгалах - Хүний нөөц</h4>
                         <div className="filters">
                             <select
                                 value={dalan70From ?? ""}
@@ -484,7 +484,7 @@ const Graphic = () => {
                 {/* 70 жил хадгалах санхүү (DalanJilSanhuu) */}
                 <div className="card">
                     <div className="card-head">
-                        <h4>📋 70 жил хадгалах санхүү</h4>
+                        <h4>📋 70 жил хадгалах - Санхүү</h4>
                         <div className="filters">
                             <select
                                 value={dalan70From ?? ""}

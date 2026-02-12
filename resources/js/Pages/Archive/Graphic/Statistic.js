@@ -5,7 +5,6 @@ import axios from "../../../AxiosUser";
 
 const Statistic = () => {
 
-    const [hutheregCount, setHutheregCount] = useState(0);
     // GANBAT
     const [baingaIltCount, setBaingaIltCount] = useState(0);
     const [baingaNuutsCount, setBaingaNuutsCount] = useState(0);
@@ -193,26 +192,18 @@ const Statistic = () => {
                     iconGradient={iconGradients[4]}
                 />
                 <StatCard
-                    title="70 жил хадгалах хүний нөөц"
+                    title="70 жил хадгалагдах - Хүний нөөц"
                     value={dalanJilHunCount}
                     icon={MdPeople}
                     cardBg={cardBackgrounds[5]}
                     iconGradient={iconGradients[5]}
                 />
                 <StatCard
-                    title="70 жил хадгалах санхүү"
+                    title="70 жил хадгалагдах - Санхүү"
                     value={dalanJilSanhuuCount}
                     icon={MdFolder}
                     cardBg={cardBackgrounds[7]}
                     iconGradient={iconGradients[7]}
-                />
-
-                <StatCard
-                    title="Нийт бүртгэгдсэн хөтлөх хэргийн жагсаалт"
-                    value={hutheregCount}
-                    icon={MdFolder}
-                    cardBg={cardBackgrounds[2]}
-                    iconGradient={iconGradients[2]}
                 />
 
 
