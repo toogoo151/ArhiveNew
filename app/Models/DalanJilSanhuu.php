@@ -35,7 +35,6 @@ class DalanJilSanhuu extends Model
                         ->orWhere("ustgasan_temdeglel", "");
                 })
                 ->orderByDesc("db_arhivbaingahad.id")
-
                 ->get();
 
             return $dalanjilSanhuu;

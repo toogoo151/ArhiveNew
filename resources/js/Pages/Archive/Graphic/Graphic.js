@@ -45,14 +45,19 @@ const Graphic = () => {
     const [baingaTo, setBaingaTo] = useState(null);
     const [turFrom, setTurFrom] = useState(null);
     const [turTo, setTurTo] = useState(null);
+    const [dalan70From, setDalan70From] = useState(null);
+    const [dalan70To, setDalan70To] = useState(null);
 
     const [baingaCounts, setBaingaCounts] = useState({ baingaIlt: 0, baingaNuuts: 0 });
     const [turCounts, setTurCounts] = useState({ turIlt: 0, turNuuts: 0 });
+    const [dalan70Counts, setDalan70Counts] = useState({ dalanJilHun: 0, dalanJilSanhuu: 0 });
 
     const [baingaLoading, setBaingaLoading] = useState(true);
     const [turLoading, setTurLoading] = useState(true);
+    const [dalan70Loading, setDalan70Loading] = useState(true);
     const [baingaError, setBaingaError] = useState(null);
     const [turError, setTurError] = useState(null);
+    const [dalan70Error, setDalan70Error] = useState(null);
 
     // Fetch available years from database on mount
     useEffect(() => {
@@ -72,6 +77,8 @@ const Graphic = () => {
                     setBaingaTo(max);
                     setTurFrom(min);
                     setTurTo(max);
+                    setDalan70From(min);
+                    setDalan70To(max);
                 }
             })
             .catch((e) => {
@@ -86,9 +93,33 @@ const Graphic = () => {
                 setBaingaTo(currentYear);
                 setTurFrom(currentYear);
                 setTurTo(currentYear);
+                setDalan70From(currentYear);
+                setDalan70To(currentYear);
             })
             .finally(() => setYearsLoading(false));
     }, []);
+
+    const fetchDalan70 = () => {
+        setDalan70Loading(true);
+        setDalan70Error(null);
+        return axios
+            .post("/get/graphic-70year-counts", {
+                startYear: dalan70From,
+                endYear: dalan70To,
+            })
+            .then((res) => {
+                setDalan70Counts({
+                    dalanJilHun: res.data?.dalanJilHun ?? 0,
+                    dalanJilSanhuu: res.data?.dalanJilSanhuu ?? 0,
+                });
+            })
+            .catch((e) => {
+                console.error(e);
+                setDalan70Error("Өгөгдөл ачааллахад алдаа гарлаа.");
+                setDalan70Counts({ dalanJilHun: 0, dalanJilSanhuu: 0 });
+            })
+            .finally(() => setDalan70Loading(false));
+    };
 
     const fetchBainga = () => {
         setBaingaLoading(true);
@@ -142,6 +173,13 @@ const Graphic = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [turFrom, turTo]);
 
+    useEffect(() => {
+        if (dalan70From !== null && dalan70To !== null) {
+            fetchDalan70();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dalan70From, dalan70To]);
+
     /* ================= PIE: Bainga (Bainga Ilt + Bainga Nuuts) ================= */
     const baingaChartData = useMemo(
         () => ({
@@ -170,6 +208,36 @@ const Graphic = () => {
             ],
         }),
         [turCounts.turIlt, turCounts.turNuuts]
+    );
+
+    /* ================= 70 жил: Хүний нөөц (DalanJilHun) ================= */
+    const dalan70HunChartData = useMemo(
+        () => ({
+            labels: ["70 жил хадгалах хүний нөөц"],
+            datasets: [
+                {
+                    data: [dalan70Counts.dalanJilHun],
+                    backgroundColor: ["#6366f1"],
+                    borderWidth: 2,
+                },
+            ],
+        }),
+        [dalan70Counts.dalanJilHun]
+    );
+
+    /* ================= 70 жил: Санхүү (DalanJilSanhuu) ================= */
+    const dalan70SanhuuChartData = useMemo(
+        () => ({
+            labels: ["70 жил хадгалах санхүү"],
+            datasets: [
+                {
+                    data: [dalan70Counts.dalanJilSanhuu],
+                    backgroundColor: ["#14b8a6"],
+                    borderWidth: 2,
+                },
+            ],
+        }),
+        [dalan70Counts.dalanJilSanhuu]
     );
 
     const options = {
@@ -327,6 +395,152 @@ const Graphic = () => {
                         <div className="chart-box">
                             <Doughnut
                                 data={turChartData}
+                                options={{
+                                    ...options,
+                                    cutout: "70%",
+                                    plugins: {
+                                        ...options.plugins,
+                                        centerText: true,
+                                    },
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* 70 жил хадгалах хүний нөөц (DalanJilHun) */}
+                <div className="card">
+                    <div className="card-head">
+                        <h4>📋 70 жил хадгалах хүний нөөц</h4>
+                        <div className="filters">
+                            <select
+                                value={dalan70From ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setDalan70From(v);
+                                    if (v > dalan70To) setDalan70To(v);
+                                }}
+                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`d70-from-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                            <span className="to">→</span>
+                            <select
+                                value={dalan70To ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setDalan70To(v);
+                                    if (v < dalan70From) setDalan70From(v);
+                                }}
+                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`d70-to-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </div>
+                    </div>
+                    {dalan70Error && (
+                        <div className="error-msg">
+                            {dalan70Error}
+                            <button type="button" onClick={fetchDalan70}>
+                                Дахин оролдох
+                            </button>
+                        </div>
+                    )}
+                    {dalan70Loading ? (
+                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
+                    ) : (
+                        <div className="chart-box">
+                            <Doughnut
+                                data={dalan70HunChartData}
+                                options={{
+                                    ...options,
+                                    cutout: "70%",
+                                    plugins: {
+                                        ...options.plugins,
+                                        centerText: true,
+                                    },
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* 70 жил хадгалах санхүү (DalanJilSanhuu) */}
+                <div className="card">
+                    <div className="card-head">
+                        <h4>📋 70 жил хадгалах санхүү</h4>
+                        <div className="filters">
+                            <select
+                                value={dalan70From ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setDalan70From(v);
+                                    if (v > dalan70To) setDalan70To(v);
+                                }}
+                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`d70s-from-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                            <span className="to">→</span>
+                            <select
+                                value={dalan70To ?? ""}
+                                onChange={(e) => {
+                                    const v = Number(e.target.value);
+                                    setDalan70To(v);
+                                    if (v < dalan70From) setDalan70From(v);
+                                }}
+                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
+                            >
+                                {availableYears.length === 0 ? (
+                                    <option value="">...</option>
+                                ) : (
+                                    availableYears.map((y) => (
+                                        <option key={`d70s-to-${y}`} value={y}>
+                                            {y}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
+                        </div>
+                    </div>
+                    {dalan70Error && (
+                        <div className="error-msg">
+                            {dalan70Error}
+                            <button type="button" onClick={fetchDalan70}>
+                                Дахин оролдох
+                            </button>
+                        </div>
+                    )}
+                    {dalan70Loading ? (
+                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
+                    ) : (
+                        <div className="chart-box">
+                            <Doughnut
+                                data={dalan70SanhuuChartData}
                                 options={{
                                     ...options,
                                     cutout: "70%",
