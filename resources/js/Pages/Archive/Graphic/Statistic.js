@@ -5,7 +5,6 @@ import axios from "../../../AxiosUser";
 
 const Statistic = () => {
 
-    const [hutheregCount, setHutheregCount] = useState(0);
     // GANBAT
     const [baingaIltCount, setBaingaIltCount] = useState(0);
     const [baingaNuutsCount, setBaingaNuutsCount] = useState(0);
@@ -15,8 +14,8 @@ const Statistic = () => {
     const [sedevzuiCount, setSedevzuiCount] = useState(0);
     const [nomCount, setNomCount] = useState(0);
     const [tovchlolCount, setTovchlolCount] = useState(0);
-    const [dalanJilHRCount, setDalanJilHRCount] = useState(0);
-
+    const [dalanJilHunCount, setDalanJilHunCount] = useState(0);
+    const [dalanJilSanhuuCount, setDalanJilSanhuuCount] = useState(0);
 
     useEffect(() => {
         refreshStatic();
@@ -27,11 +26,17 @@ const Statistic = () => {
         //     .post("/get/HutheregCount")
         //     .then((res) => setHutheregCount(res.data));
 
-
-        // GANBAT
+        // 70 жил хадгалах: Хүний нөөц + Санхүү (same logic as Graphic)
         axios
-            .post("/get/DalanJilHRCount")
-            .then((res) => setDalanJilHRCount(res.data));
+            .post("/get/graphic-70year-counts")
+            .then((res) => {
+                setDalanJilHunCount(res.data?.dalanJilHun ?? 0);
+                setDalanJilSanhuuCount(res.data?.dalanJilSanhuu ?? 0);
+            })
+            .catch(() => {
+                setDalanJilHunCount(0);
+                setDalanJilSanhuuCount(0);
+            });
 
         axios
             .post("/get/BaingaIltCount")
@@ -187,19 +192,18 @@ const Statistic = () => {
                     iconGradient={iconGradients[4]}
                 />
                 <StatCard
-                    title="70 жил хадгалагдах архив - Хүний нөөц"
-                    value={dalanJilHRCount}
-                    icon={MdLock}
+                    title="70 жил хадгалагдах - Хүний нөөц"
+                    value={dalanJilHunCount}
+                    icon={MdPeople}
                     cardBg={cardBackgrounds[5]}
                     iconGradient={iconGradients[5]}
                 />
-
                 <StatCard
-                    title="Нийт бүртгэгдсэн хөтлөх хэргийн жагсаалт"
-                    value={hutheregCount}
+                    title="70 жил хадгалагдах - Санхүү"
+                    value={dalanJilSanhuuCount}
                     icon={MdFolder}
-                    cardBg={cardBackgrounds[2]}
-                    iconGradient={iconGradients[2]}
+                    cardBg={cardBackgrounds[7]}
+                    iconGradient={iconGradients[7]}
                 />
 
 

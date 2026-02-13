@@ -212,7 +212,7 @@ const TurIltsChild = (props) => {
             <div className="row clearfix">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center">БАРИМТ БИЧИГ</h1>
+                        <h1 className="text-center">Баримт бичиг</h1>
                         <MUIDatatable
                             data={getTurtIltsChild}
                             setdata={setTurIltsChild}
