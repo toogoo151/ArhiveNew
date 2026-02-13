@@ -38,7 +38,6 @@ function App() {
                     <AsideMenu />
                     <HeaderMenu />
                     <Content />
-
                     <Footer />
                 </AppContext.Provider>
             </BrowserRouter>

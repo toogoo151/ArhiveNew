@@ -537,7 +537,7 @@ const Index = () => {
                                     }}
                                 >
                                     <i className="fas fa-file-export"></i> 📂
-                                    АРХИВТ ШИЛЖҮҮЛЭХ
+                                    Архивт шилжүүлэх
                                 </button>
                             </div>
                         </div>

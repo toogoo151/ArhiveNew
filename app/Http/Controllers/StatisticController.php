@@ -108,124 +108,12 @@ class StatisticController extends Controller
     {
         $DalanJilHRCount = DB::table("db_arhivbaingahad")
             ->where("user_id", $this->userId())
-            ->where("hadgalamj_turul", "1")
+            ->where("dans_id", "1")
             ->count();
         return $DalanJilHRCount;
     }
 
-    // GANBAT NEMSEN END
 
-    // Graphic start
-
-    public function monthlyStat(Request $request)
-    {
-        $startDate = !empty($request->startDate)
-            ? Carbon::createFromFormat('Y-m-d', $request->startDate)->startOfMonth()
-            : Carbon::now()->subMonths(11)->startOfMonth();
-
-        $endDate = !empty($request->endDate)
-            ? Carbon::createFromFormat('Y-m-d', $request->endDate)->endOfMonth()
-            : Carbon::now()->endOfMonth();
-
-        $results = [];
-        $cursor = $startDate->copy();
-
-        while ($cursor <= $endDate) {
-            $monthStart = $cursor->copy()->startOfMonth();
-            $monthEnd = $cursor->copy()->endOfMonth();
-
-            $results[] = [
-                "month" => $cursor->format("Y-m"), // frontend-д ашиглагдана
-                "label" => $cursor->format("Y оны m-р сар"), // chart label
-                "total" => DB::table("db_huthereg")
-                    ->where("user_id", $this->userId())
-                    ->whereBetween("created_at", [$monthStart, $monthEnd])
-                    ->count(),
-            ];
-
-            $cursor->addMonth();
-        }
-
-        return response()->json($results);
-    }
-
-    public function groupStat(Request $request)
-    {
-        $startDate = $request->startDate
-            ? Carbon::parse($request->startDate)->startOfDay()
-            : Carbon::now()->startOfMonth();
-
-        $endDate = $request->endDate
-            ? Carbon::parse($request->endDate)->endOfDay()
-            : Carbon::now()->endOfDay();
-
-        $group = $request->group ?? "month"; // week | month
-        $results = [];
-
-        if ($group === "week") {
-            $cursor = $startDate->copy()->startOfWeek();
-            while ($cursor <= $endDate) {
-                $weekStart = $cursor->copy()->startOfWeek();
-                $weekEnd = $cursor->copy()->endOfWeek();
-
-                $results[] = [
-                    "label" => $weekStart->format("m/d") . " - " . $weekEnd->format("m/d"),
-                    "total" => DB::table("db_huthereg")
-                        ->where("user_id", $this->userId())
-                        ->whereBetween("created_at", [$weekStart, $weekEnd])
-                        ->count(),
-                ];
-
-                $cursor->addWeek();
-            }
-        } else {
-            // month
-            $cursor = $startDate->copy()->startOfMonth();
-            while ($cursor <= $endDate) {
-                $monthStart = $cursor->copy()->startOfMonth();
-                $monthEnd = $cursor->copy()->endOfMonth();
-
-                $results[] = [
-                    "label" => $cursor->format("Y оны m-р сар"),
-                    "total" => DB::table("db_huthereg")
-                        ->where("user_id", $this->userId())
-                        ->whereBetween("created_at", [$monthStart, $monthEnd])
-                        ->count(),
-                ];
-
-                $cursor->addMonth();
-            }
-        }
-
-        return response()->json($results);
-    }
-
-
-    public function summary(Request $request)
-    {
-        $startDate = !empty($request->startDate)
-            ? Carbon::createFromFormat('Y-m-d', $request->startDate)->startOfDay()
-            : Carbon::now()->startOfYear();
-
-        $endDate = !empty($request->endDate)
-            ? Carbon::createFromFormat('Y-m-d', $request->endDate)->endOfDay()
-            : Carbon::now()->endOfDay();
-
-        return response()->json([
-            "class" => DB::table("db_angi")
-                ->whereBetween("created_at", [$startDate, $endDate])
-                ->count(),
-
-            "user" => DB::table("db_user")
-                ->whereBetween("created_at", [$startDate, $endDate])
-                ->count(),
-
-            "huthereg" => DB::table("db_huthereg")
-                ->where("user_id", $this->userId())
-                ->whereBetween("created_at", [$startDate, $endDate])
-                ->count(),
-        ]);
-    }
 
     /**
      * Yearly counts for Graphic: Bainga (Pie) and Tur (Donut).
@@ -392,6 +280,47 @@ class StatisticController extends Controller
             'years' => $years,
             'minYear' => !empty($years) ? min($years) : null,
             'maxYear' => !empty($years) ? max($years) : null,
+        ]);
+    }
+
+    /**
+     * Counts for 70 жил хадгалах: Хүний нөөц (DalanJilHun) and Санхүү (DalanJilSanhuu).
+     * Both use db_arhivbaingahad (hadgalamj_turul=1) joined with db_arhivdans.
+     * Filter by dans: hadgalah_hugatsaa = '70 жил хадгалагдах' and dans_baidal = 'Хүний нөөц' or 'Санхүү'.
+     * Optional: startYear/endYear to filter by harya_on.
+     */
+    public function graphic70YearCounts(Request $request)
+    {
+        $startYear = $request->startYear ? (int) $request->startYear : null;
+        $endYear = $request->endYear ? (int) $request->endYear : null;
+
+        $baseQuery = function ($dansBaidal) use ($startYear, $endYear) {
+            $q = DB::table('db_arhivbaingahad')
+                ->join('db_arhivdans', 'db_arhivdans.id', '=', 'db_arhivbaingahad.dans_id')
+                ->where('db_arhivbaingahad.user_id', $this->userId())
+                ->where('db_arhivbaingahad.hadgalamj_turul', 1)
+                ->where('db_arhivdans.hadgalah_hugatsaa', '70 жил хадгалагдах')
+                ->where('db_arhivdans.dans_baidal', $dansBaidal);
+
+            if ($startYear !== null && $endYear !== null && $startYear >= 1900 && $endYear <= 2100) {
+                if ($startYear > $endYear) {
+                    [$startYear, $endYear] = [$endYear, $startYear];
+                }
+                $years = range($startYear, $endYear);
+                $haryaOnValues = [];
+                foreach ($years as $y) {
+                    $haryaOnValues[] = 'year/' . $y;
+                    $haryaOnValues[] = (string) $y;
+                }
+                $q->whereIn('db_arhivbaingahad.harya_on', $haryaOnValues);
+            }
+
+            return $q->count();
+        };
+
+        return response()->json([
+            'dalanJilHun' => $baseQuery('Хүний нөөц'),
+            'dalanJilSanhuu' => $baseQuery('Санхүү'),
         ]);
     }
 }
