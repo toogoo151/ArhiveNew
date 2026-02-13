@@ -233,6 +233,13 @@ export default function HeaderMenu(props) {
                     </button>
 
                     <div className="dropdown-menu dropdown-menu-right">
+                        <button
+                            className="dropdown-item"
+                            onClick={openChangePassword}
+                        >
+                            <i className="fa fa-key mr-2"></i>
+                            <strong>Нууц үг солих</strong>
+                        </button>
                         <Link
                             to="/login"
                             onClick={logout}
@@ -241,14 +248,6 @@ export default function HeaderMenu(props) {
                             <i className="fa fa-sign-out-alt mr-2 "></i>
                             <strong>Гарах</strong>
                         </Link>
-
-                        <button
-                            className="dropdown-item"
-                            onClick={openChangePassword}
-                        >
-                            <i className="fa fa-key mr-2"></i>
-                            <strong>Нууц үг солих</strong>
-                        </button>
                     </div>
                 </li>
                 {showPasswordModal && (

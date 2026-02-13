@@ -26,6 +26,9 @@ use App\Http\Controllers\DalanJilHunController;
 use App\Http\Controllers\DalanJilhunChildController;
 use App\Http\Controllers\DalanJilSanhuuController;
 use App\Http\Controllers\DalanJilSanhuuChildController;
+use App\Http\Controllers\AuthController;
+
+
 
 
 
@@ -127,10 +130,17 @@ Route::get("/get/auth/name", function () {
     return $user ? $user->getUserName() : "Нэвтрээгүй байна";
 });
 
-Route::get("/get/auth/tuvshin", function () {
-    $user = Auth::user();
-    return $user ? $user->getTuvshin() : "Нэвтрээгүй байна";
-});
+
+Route::get('/get/auth/tuvshin', [AuthController::class, 'getTuvshin']);
+
+
+// Route::get("/get/auth/tuvshin", function () {
+//     $user = Auth::user();
+//     return $user ? $user->getTuvshin() : "Нэвтрээгүй байна";
+// });
+
+
+
 
 Route::post('/change-password', [UserController::class, 'changePassword'])
     ->middleware('auth');
@@ -238,8 +248,7 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');
-;
+    ->middleware('auth');;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 

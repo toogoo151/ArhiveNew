@@ -18,7 +18,6 @@ export default function AsideMenu() {
     const [openSubMenu, setOpenSubMenu] = useState({});
 
     const menuData = [
-
         { type: "header", label: "Архив" },
         {
             type: "menu",
@@ -161,7 +160,7 @@ export default function AsideMenu() {
             type: "menu",
             title: "Хэрэглэгч",
             icon: "fa fa-user",
-            level: [1, 2, 3],
+            level: [3],
             subMenu: [
                 {
                     name: "Командлал",
@@ -201,7 +200,6 @@ export default function AsideMenu() {
 
         axios.get("/get/auth/tuvshin").then((res) => {
             setTuvshin(res.data);
-            localStorage.setItem("tuvshin", res.data);
         });
     }, []);
 

@@ -48,6 +48,11 @@ class AuthController extends Controller
         }
     }
 
+    public function getTuvshin()
+    {
+        return Auth::user()->userType;
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();

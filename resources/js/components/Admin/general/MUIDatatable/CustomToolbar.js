@@ -135,7 +135,7 @@ class CustomToolbar extends React.Component {
                     >
                         <ExcelIcon
                             style={{
-                                color: "white",
+                                color: "#3498db",
                                 width: 40,
                                 height: 40,
                             }}

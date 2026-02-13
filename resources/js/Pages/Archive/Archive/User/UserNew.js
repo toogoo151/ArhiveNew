@@ -41,11 +41,11 @@ const UserNew = ({ refreshUser }) => {
         hereglegch_ner: Yup.string().required("Хэрэглэгчийн нэр оруулна уу."),
         nuuts_ug: Yup.string().required("Нууц үг оруулна уу."),
         comand_id: Yup.string().required("Командлал сонгоно уу."),
-        angi: Yup.string().required("Анги сонгоно уу."),
+        angi: Yup.string(),
         salbar: Yup.string(),
         barimt_turul: Yup.string().required("Программын төрөл сонгоно уу."),
-        bichig_turul: Yup.string().required("Хэрэглэгчийн түвшин сонгоно уу."),
-        tubshin: Yup.string().required("Нууцын төрөл сонгоно уу."),
+        // bichig_turul: Yup.string().required("Хэрэглэгчийн түвшин сонгоно уу."),
+        // tubshin: Yup.string().required("Нууцын төрөл сонгоно уу."),
     });
 
     const {
