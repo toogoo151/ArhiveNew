@@ -445,11 +445,19 @@ const Index = () => {
 
         const isSelected = getRowsSelected.length && getRowsSelected[0] === dataIndex;
 
+        const toggleRowSelection = () => {
+            if (isSelected) {
+                setRowsSelected([]);
+            } else {
+                setRowsSelected([dataIndex]);
+            }
+        };
+
         return (
             <TableRow
                 hover
                 selected={isSelected}
-                onClick={() => setRowsSelected([dataIndex])}
+                onClick={toggleRowSelection}
                 role="checkbox"
                 aria-checked={isSelected}
                 tabIndex={-1}
@@ -459,7 +467,7 @@ const Index = () => {
                     <Checkbox
                         checked={isSelected}
                         onClick={(e) => e.stopPropagation()}
-                        onChange={() => setRowsSelected([dataIndex])}
+                        onChange={toggleRowSelection}
                     />
                 </TableCell>
                 {columns.map((col) => {

@@ -272,7 +272,7 @@ const Graphic = () => {
             <div className="row">
                 <div className="card">
                     <div className="card-head">
-                        <h4>🥧 Байнга</h4>
+                        <h4>📁 Байнга</h4>
                         <div className="filters">
                             <select
                                 value={baingaFrom ?? ""}
@@ -336,7 +336,7 @@ const Graphic = () => {
 
                 <div className="card">
                     <div className="card-head">
-                        <h4>⭕ Түр</h4>
+                        <h4>📁 Түр</h4>
                         <div className="filters">
                             <select
                                 value={turFrom ?? ""}

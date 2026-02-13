@@ -83,7 +83,6 @@ class DalanJilSanhuu extends Model
                     "db_arhivdans.dans_tailbar",
                     "db_arhivdans.dans_baidal",
                     "db_arhivdans.hadgalah_hugatsaa",
-
                 )
                 ->get();
 
