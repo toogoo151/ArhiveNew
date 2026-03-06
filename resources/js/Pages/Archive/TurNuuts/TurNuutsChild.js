@@ -4,8 +4,8 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import TurNuutsChildNew from "./TurNuutsChildNew";
 import TurNuutsChildEdit from "./TurNuutsChildEdit";
+import TurNuutsChildNew from "./TurNuutsChildNew";
 
 const TurNuutsChild = (props) => {
     const [getTurNuutsChild, setTurNuutsChild] = useState([]);
@@ -21,7 +21,7 @@ const TurNuutsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurNuutsChild(props.changeDataRow.id);
+        refreshTurNuutsChild(props.changeDataRow.desk_id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
@@ -96,7 +96,7 @@ const TurNuutsChild = (props) => {
                         setRowsSelected([]);
 
                         //  дахин татна
-                        refreshTurNuutsChild(props.changeDataRow.id);
+                        refreshTurNuutsChild(props.changeDataRow.desk_id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -187,14 +187,14 @@ const TurNuutsChild = (props) => {
                             isHideEdit={true}
                         />
                         <TurNuutsChildNew
-                            _parentID={props.changeDataRow.id}
+                            _parentID={props.changeDataRow.desk_id}
                             refreshTurNuutsChild={refreshTurNuutsChild}
                         />
                         <TurNuutsChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshTurNuutsChild={refreshTurNuutsChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.id}
+                            parentID={props.changeDataRow.desk_id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>

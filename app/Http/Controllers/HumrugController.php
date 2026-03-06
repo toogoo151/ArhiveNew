@@ -34,13 +34,13 @@ class HumrugController extends Controller
     public function NewHumrug(Request $req)
     {
 
-        $req->validate([
-            'humrug_dugaar' => 'required',
-            'humrug_ner' => 'required',
-            'humrug_zereglel' => 'required',
-            'anhnii_ognoo' => 'required',
+        // $req->validate([
+        //     'humrug_dugaar' => 'required',
+        //     'humrug_ner' => 'required',
+        //     'humrug_zereglel' => 'required',
+        //     'anhnii_ognoo' => 'required',
 
-        ]);
+        // ]);
 
         try {
             $insertHumrug = new Humrug();

@@ -455,7 +455,10 @@ const Index = () => {
                                 >
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
-                                        <option key={el.id} value={el.id}>
+                                        <option
+                                            key={el.desk_id}
+                                            value={el.desk_id}
+                                        >
                                             {el.humrug_ner}
                                         </option>
                                     ))}
@@ -484,7 +487,10 @@ const Index = () => {
                                     </option>
 
                                     {getDans.map((el) => (
-                                        <option key={el.id} value={el.id}>
+                                        <option
+                                            key={el.desk_id}
+                                            value={el.desk_id}
+                                        >
                                             {el.dans_ner}
                                         </option>
                                     ))}

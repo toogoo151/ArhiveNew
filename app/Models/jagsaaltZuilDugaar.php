@@ -25,6 +25,16 @@ class jagsaaltZuilDugaar extends Model
         'tobchlol',
     ];
 
+    protected static function booted()
+    {
+        static::created(function (jagsaaltZuilDugaar $jagsaalt) {
+            if (empty($jagsaalt->desk_id)) {
+                $jagsaalt->desk_id = $jagsaalt->id;
+                $jagsaalt->saveQuietly();
+            }
+        });
+    }
+
     public function getJagsaalt()
     {
         try {
@@ -34,6 +44,7 @@ class jagsaaltZuilDugaar extends Model
                 ->leftjoin("jagsaalt_turul", "jagsaalt_turul.id", "=", "jagsaaltzuildugaar.jagsaalt_turul")
                 ->join("retention_period", "retention_period.id", "=", "jagsaaltzuildugaar.hugatsaa_turul")
                 ->select("jagsaaltzuildugaar.*", "jagsaalt_turul.jName", "retention_period.RetName")
+                ->orderByDesc("jagsaaltzuildugaar.id")
                 ->get();
             return $jagsaalt;
         } catch (\Throwable $th) {

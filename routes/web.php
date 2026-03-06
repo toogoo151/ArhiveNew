@@ -191,7 +191,7 @@ Route::post("/delete/user", [UserController::class, "DeleteUser"]);
 
 //Хэрэглэгч end
 
-//Командлал start
+//Командлал start   
 
 
 Route::get("/get/comandlal", function () {

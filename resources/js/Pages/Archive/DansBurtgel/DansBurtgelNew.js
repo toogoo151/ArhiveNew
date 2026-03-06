@@ -8,9 +8,6 @@ import axios from "../../../AxiosUser";
 const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
     const [getSecType, setSecType] = useState([]);
 
-    // ===============================
-    // Нууцын зэрэг татах
-    // ===============================
     useEffect(() => {
         axios
             .get("/get/secretType")
@@ -78,12 +75,6 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
         dans_baidal: Yup.string().required("Нууцын зэрэг сонгоно уу"),
         dans_dugaar: Yup.string().required("Дансны дугаар оруулна уу"),
         dans_ner: Yup.string().required("Дансны нэр оруулна уу"),
-        humrug_niit: Yup.string().required("Хөмрөг нийт ХН оруулна уу"),
-        dans_niit: Yup.string().required("Тухайн дансны ХН оруулна уу"),
-        on_ehen: Yup.string().required("Оны хязгаар Эхэн оруулна уу"),
-        on_suul: Yup.string().required("Оны хязгаар Сүүл оруулна уу"),
-        hubi_dans: Yup.string().required("Дансны хувь оруулна уу"),
-        dans_tailbar: Yup.string().nullable(),
     });
     const {
         register,
@@ -214,7 +205,7 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
                                         <div className="input-group mb-2">
                                             <div className="input-group-prepend">
                                                 <span className="input-group-text">
-                                                    Дансны дугаар:1
+                                                    Дансны дугаар:
                                                 </span>
                                             </div>
                                             <input
@@ -258,9 +249,6 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
                                                 className="form-control"
                                             />
                                         </div>
-                                        <p className="alerts">
-                                            {errors.on_ehen?.message}
-                                        </p>
                                     </div>
 
                                     <div className="col-md-6">
@@ -275,9 +263,6 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
                                                 className="form-control"
                                             />
                                         </div>
-                                        <p className="alerts">
-                                            {errors.on_suul?.message}
-                                        </p>
                                     </div>
                                 </div>
 
@@ -294,9 +279,6 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
                                                 className="form-control"
                                             />
                                         </div>
-                                        <p className="alerts">
-                                            {errors.dans_niit?.message}
-                                        </p>
                                     </div>
 
                                     <div className="col-md-6">
@@ -311,9 +293,6 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
                                                 className="form-control"
                                             />
                                         </div>
-                                        <p className="alerts">
-                                            {errors.hubi_dans?.message}
-                                        </p>
                                     </div>
                                 </div>
 
@@ -329,9 +308,6 @@ const DansBurtgelNew = ({ refreshDans, selectedHumrug, selectedRetention }) => {
                                             className="form-control"
                                         />
                                     </div>
-                                    <p className="alerts">
-                                        {errors.dans_tailbar?.message}
-                                    </p>
                                 </div>
                             </div>
 

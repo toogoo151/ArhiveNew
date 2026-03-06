@@ -7,7 +7,7 @@ use App\Models\BaingaIltChild;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-// use Redirect, Response, File;
+// use Redirect, Response, File; 
 use Illuminate\Support\Facades\File;
 
 use Illuminate\Support\Str;
@@ -23,6 +23,7 @@ class BaingaIltChildController extends Controller
     {
         try {
             $baingaIltChild = BaingaIltChild::where("hnID", "=", $req->_parentID)
+                ->where("db_arhivbaingilt.user_id", Auth::id())
                 ->orderBy('id', 'desc')
                 // $baingaIltChild = DB::table("db_arhivbaingilt")
                 // ->where("way_parent", "=", $req->_parentID)

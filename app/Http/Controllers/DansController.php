@@ -43,9 +43,6 @@ class DansController extends Controller
             // 'hadgalah_hugatsaa' => 'required|integer',
             'dans_dugaar' => 'required',
             'dans_ner' => 'required',
-            'dans_baidal' => 'required',
-            'hubi_dans' => 'required',
-
         ]);
 
         try {

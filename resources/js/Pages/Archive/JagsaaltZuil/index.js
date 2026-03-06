@@ -21,7 +21,10 @@ function computeMergeRowSpans(data) {
     while (i < data.length) {
         const val = String(data[i][MERGE_COLUMN] ?? "");
         let count = 1;
-        while (i + count < data.length && String(data[i + count][MERGE_COLUMN] ?? "") === val) {
+        while (
+            i + count < data.length &&
+            String(data[i + count][MERGE_COLUMN] ?? "") === val
+        ) {
             count++;
         }
         spans[i] = count;
@@ -49,8 +52,6 @@ const Index = () => {
     const [getRetention, setGetRetention] = useState([]);
     const [selectedJname, setSelectedJname] = useState(0);
     const [selectedRetention, setSelectedRetention] = useState(0);
-
-
 
     // FETCH
     useEffect(() => {
@@ -83,7 +84,9 @@ const Index = () => {
         let filteredData = allJagsaalt;
 
         if (selectedJname !== 0) {
-            const selectedJ = getJname.find((el) => Number(el.id) === selectedJname);
+            const selectedJ = getJname.find(
+                (el) => Number(el.id) === selectedJname
+            );
             filteredData = filteredData.filter(
                 (item) =>
                     String(item.jagsaalt_turul) === String(selectedJname) ||
@@ -175,8 +178,8 @@ const Index = () => {
                 filter: false,
                 align: "center",
                 customBodyRenderLite: (rowIndex) => {
-                        return rowIndex + 1;
-                    },
+                    return rowIndex + 1;
+                },
                 //     if (rowIndex == 0) {
                 //         return rowIndex + 1;
                 //     } else {
@@ -212,13 +215,22 @@ const Index = () => {
                     };
                 },
                 customBodyRender: (value) => {
-                    if (value === null || value === "" || value === 0 || value === undefined) {
+                    if (
+                        value === null ||
+                        value === "" ||
+                        value === 0 ||
+                        value === undefined
+                    ) {
                         return "-";
                     }
                     // value may be stored as id or as text (jName). Handle both.
-                    const foundById = getJname.find((el) => String(el.id) === String(value));
+                    const foundById = getJname.find(
+                        (el) => String(el.id) === String(value)
+                    );
                     if (foundById) return foundById.jName;
-                    const foundByName = getJname.find((el) => String(el.jName) === String(value));
+                    const foundByName = getJname.find(
+                        (el) => String(el.jName) === String(value)
+                    );
                     return foundByName?.jName ?? value;
                 },
             },
@@ -428,22 +440,36 @@ const Index = () => {
     /** Custom row render: merge "Жагсаалтын төрөл" cells when same name in consecutive rows. */
     const customRowRender = (data, dataIndex) => {
         const rowIndex = dataIndex;
-        const row = data && typeof data === "object" && !Array.isArray(data) ? data : getJagsaalt[rowIndex];
+        const row =
+            data && typeof data === "object" && !Array.isArray(data)
+                ? data
+                : getJagsaalt[rowIndex];
         if (!row) return null;
 
         const renderCellValue = (col, value) => {
-            if (value === null || value === "" || value === 0 || value === undefined) return "-";
+            if (
+                value === null ||
+                value === "" ||
+                value === 0 ||
+                value === undefined
+            )
+                return "-";
             if (col.name === MERGE_COLUMN) {
-                const foundById = getJname.find((el) => String(el.id) === String(value));
+                const foundById = getJname.find(
+                    (el) => String(el.id) === String(value)
+                );
                 if (foundById) return foundById.jName;
-                const foundByName = getJname.find((el) => String(el.jName) === String(value));
+                const foundByName = getJname.find(
+                    (el) => String(el.jName) === String(value)
+                );
                 return foundByName?.jName ?? value;
             }
             const opt = col.options?.customBodyRender;
             return opt ? opt(value) : value;
         };
 
-        const isSelected = getRowsSelected.length && getRowsSelected[0] === dataIndex;
+        const isSelected =
+            getRowsSelected.length && getRowsSelected[0] === dataIndex;
 
         const toggleRowSelection = () => {
             if (isSelected) {
@@ -485,10 +511,19 @@ const Index = () => {
                             </TableCell>
                         );
                     }
-                    const value = col.name === "id" ? dataIndex + 1 : row[col.name];
+                    const value =
+                        col.name === "id" ? dataIndex + 1 : row[col.name];
                     return (
-                        <TableCell key={col.name} align={col.options?.align || (col.name === "id" ? "center" : undefined)}>
-                            {col.name === "id" ? value : renderCellValue(col, value)}
+                        <TableCell
+                            key={col.name}
+                            align={
+                                col.options?.align ||
+                                (col.name === "id" ? "center" : undefined)
+                            }
+                        >
+                            {col.name === "id"
+                                ? value
+                                : renderCellValue(col, value)}
                         </TableCell>
                     );
                 })}
@@ -502,70 +537,59 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Хадгалах хугацааны зүйлийн жагсаалт</h1>
-                        {/* FILTERS */
-                        <div className="col-md-8 mb-3">
-                                                    <div className="input-group">
-                                                        <span className="input-group-text">
-                                                            Жагсаалтын төрөл:
-                                                        </span>
+                        <h1 className="text-center mb-4">
+                            Хадгалах хугацааны зүйлийн жагсаалт
+                        </h1>
+                        {
+                            /* FILTERS */
+                            <div className="col-md-8 mb-3">
+                                <div className="input-group">
+                                    <span className="input-group-text">
+                                        Жагсаалтын төрөл:
+                                    </span>
 
-                                                        <select
-                                                            className="form-control"
-                                                            value={selectedJname}
-                                                            onChange={(e) => {
-                                                                const value = Number(e.target.value);
-                                                                setSelectedJname(value);
+                                    <select
+                                        className="form-control"
+                                        value={selectedJname}
+                                        onChange={(e) => {
+                                            const value = Number(
+                                                e.target.value
+                                            );
+                                            setSelectedJname(value);
+                                        }}
+                                    >
+                                        <option value={0}>Сонгоно уу</option>
+                                        {getJname.map((el) => (
+                                            <option key={el.id} value={el.id}>
+                                                {el.jName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="mx-2"></span>
+                                    <span className="input-group-text">
+                                        Хадгалах хугацаа:
+                                    </span>
 
-                                                                // 0 сонгосон бол alert
-                                                                // if (value === 0) {
-                                                                //     Swal.fire({
-                                                                //         icon: "warning",
-                                                                //         title: "Анхаар!",
-                                                                //         text: "Жагсаалтын төрөл сонгоно уу",
-                                                                //     });
-                                                                // }
-                                                            }}
-                                                        >
-                                                            <option value={0}>Сонгоно уу</option>
-                                                            {getJname.map((el) => (
-                                                                <option
-                                                                    key={el.id}
-                                                                    value={el.id}
-                                                                >
-                                                                    {el.jName}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                        <span className="mx-2"></span>
-                                                        <span className="input-group-text">
-                                                            Хадгалах хугацаа:
-                                                        </span>
-
-                                                        <select
-                                                            className="form-control"
-                                                            value={selectedRetention}
-                                                            onChange={(e) => {
-                                                                const value = Number(e.target.value);
-                                                                setSelectedRetention(value);
-                                                                // if (value === 0) {
-                                                                //     Swal.fire({
-                                                                //         icon: "warning",
-                                                                //         title: "Анхаар!",
-                                                                //         text: "Хадгалах хугацааг сонгоно уу",
-                                                                //     });
-                                                                // }
-                                                            }}
-                                                        >
-                                                            <option value={0}>Сонгоно уу</option>
-                                                            {getRetention.map((el) => (
-                                                                <option key={el.id} value={el.id}>
-                                                                    {el.RetName}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                </div>}
+                                    <select
+                                        className="form-control"
+                                        value={selectedRetention}
+                                        onChange={(e) => {
+                                            const value = Number(
+                                                e.target.value
+                                            );
+                                            setSelectedRetention(value);
+                                        }}
+                                    >
+                                        <option value={0}>Сонгоно уу</option>
+                                        {getRetention.map((el) => (
+                                            <option key={el.id} value={el.id}>
+                                                {el.RetName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        }
 
                         {/* TABLE */}
                         <MUIDatatable
@@ -585,19 +609,19 @@ const Index = () => {
                                     excelHeaders={excelHeaders}
                                     isHideInsert={true}
                                     onClick={() => {
-                                                                            if (
-                                                                                selectedJname === 0 ||
-                                                                                selectedRetention === 0
-                                                                            ) {
-                                                                                // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                                                                // Swal.fire({
-                                                                                //     icon: "warning",
-                                                                                //     title: "Анхааруулга",
-                                                                                //     text: "Жагсаалтын төрөл болон хадгалах хугацааг сонгоно уу!",
-                                                                                // });
-                                                                            }
-                                                                            // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
-                                                                        }}
+                                        if (
+                                            selectedJname === 0 ||
+                                            selectedRetention === 0
+                                        ) {
+                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
+                                            // Swal.fire({
+                                            //     icon: "warning",
+                                            //     title: "Анхааруулга",
+                                            //     text: "Жагсаалтын төрөл болон хадгалах хугацааг сонгоно уу!",
+                                            // });
+                                        }
+                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                                    }}
                                 />
                             }
                             btnEdit={btnEdit}

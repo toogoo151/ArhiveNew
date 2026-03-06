@@ -52,9 +52,9 @@ class UserController extends Controller
             $insertUser->comand_id = $req->comand_id;
             $insertUser->angi_id = $req->angi_id;
             $insertUser->salbar_id = $req->salbar_id;
-            $insertUser->barimt_turul = $req->barimt_turul;
-            $insertUser->bichig_turul = $req->bichig_turul;
-            $insertUser->tubshin = $req->tubshin;
+            $insertUser->userType = $req->userType;
+            // $insertUser->bichig_turul = $req->bichig_turul;
+            // $insertUser->tubshin = $req->tubshin;
             $insertUser->save();
             return response(
                 array(
@@ -80,12 +80,15 @@ class UserController extends Controller
             $edit = User::find($req->id);
 
             $edit->hereglegch_ner = $req->hereglegch_ner;
-            $edit->comand_id      = $req->comand_id;
-            $edit->angi_id        = $req->angi_id;
-            $edit->salbar_id      = $req->salbar_id ?? null;
-            $edit->barimt_turul   = $req->barimt_turul ?? null;
-            $edit->bichig_turul   = $req->bichig_turul ?? null;
-            $edit->tubshin        = $req->tubshin ?? null;
+            $edit->comand_id = $req->comand_id;
+            $edit->angi_id = $req->angi_id;
+            $edit->salbar_id = $req->salbar_id ?? null;
+            $edit->userType = $req->userType ?? null;
+
+
+            // $edit->barimt_turul   = $req->barimt_turul ?? null;
+            // $edit->bichig_turul   = $req->bichig_turul ?? null;
+            // $edit->tubshin        = $req->tubshin ?? null;
 
             // Нууц үг шинэчлэх, хоосон бол хуучнаараа үлдээх
             if ($req->nuuts_ug && trim($req->nuuts_ug) !== "") {

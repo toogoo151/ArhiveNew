@@ -228,22 +228,6 @@ const columns = [
     },
     {
         name: "Pname",
-        label: "Программын төрөл",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "Uname",
         label: "Хэрэглэгчийн түвшин",
         options: {
             filter: true,
@@ -258,22 +242,38 @@ const columns = [
             },
         },
     },
-    {
-        name: "Nname",
-        label: "Нууцын төрөл",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
+    // {
+    //     name: "Uname",
+    //     label: "Хэрэглэгчийн түвшин",
+    //     options: {
+    //         filter: true,
+    //         sort: false,
+    //         setCellHeaderProps: (value) => {
+    //             return {
+    //                 style: {
+    //                     backgroundColor: "#5DADE2",
+    //                     color: "white",
+    //                 },
+    //             };
+    //         },
+    //     },
+    // },
+    // {
+    //     name: "Nname",
+    //     label: "Нууцын төрөл",
+    //     options: {
+    //         filter: true,
+    //         sort: false,
+    //         setCellHeaderProps: (value) => {
+    //             return {
+    //                 style: {
+    //                     backgroundColor: "#5DADE2",
+    //                     color: "white",
+    //                 },
+    //             };
+    //         },
+    //     },
+    // },
 ];
 
 const excelHeaders = [
@@ -281,7 +281,7 @@ const excelHeaders = [
     { label: "Командлал", key: "ShortName" },
     { label: "Анги", key: "ner" },
     { label: "Салбар", key: "salbar" },
-    { label: "Программын төрөл", key: "Pname" },
-    { label: "Хэрэглэгчийн түвшин", key: "Uname" },
-    { label: "Нууцын төрөл", key: "Nname" },
+    { label: "Хэрэглэгчийн түвшин", key: "Pname" },
+    // { label: "Хэрэглэгчийн түвшин", key: "Uname" },
+    // { label: "Нууцын төрөл", key: "Nname" },
 ];

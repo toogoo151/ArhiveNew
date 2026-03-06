@@ -11,13 +11,6 @@ const BaingaIltsChildNew = ({ _parentID, refreshbaingaIltsChild }) => {
         barimt_ner: Yup.string().required("Баримт нэр оруулна уу"),
         barimt_ognoo: Yup.string().required("Баримт огноо оруулна уу"),
         barimt_dugaar: Yup.string().required("Баримт дугаар оруулна уу"),
-        irsen_dugaar: Yup.string().required("Ирсэн дугаар оруулна уу"),
-        yabsan_dugaar: Yup.string().required("Явсан дугаар оруулна уу"),
-        uild_gazar: Yup.string().required("Үйлдсэн газар оруулна уу"),
-        huudas_too: Yup.string().required("Хуудас тоо оруулна уу"),
-        habsralt_too: Yup.string().required("Хавсралт тоо оруулна уу"),
-        huudas_dugaar: Yup.string().required("Хуудас дугаар оруулна уу"),
-        aguulga: Yup.string().required("Агуулга оруулна уу"),
         bichsen_ner: Yup.string().nullable(),
         bichsen_ognoo: Yup.string().nullable(),
     });

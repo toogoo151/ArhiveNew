@@ -75,14 +75,16 @@ class User extends Authenticatable
         try {
             $user = DB::table("db_user")
                 ->join("db_comandlal", "db_comandlal.id", "=", "db_user.comand_id")
-                ->join("db_angi", "db_angi.id", "=", "db_user.angi_id")
+                ->leftJoin("db_angi", "db_angi.id", "=", "db_user.angi_id")
                 ->leftJoin("db_salbar", "db_salbar.id", "=", "db_user.salbar_id")
-                ->join("programm_type", "programm_type.id", "=", "db_user.barimt_turul")
-                ->join("user_type", "user_type.id", "=", "db_user.bichig_turul")
-                ->join("nuuts_turul", "nuuts_turul.id", "=", "db_user.tubshin")
-                ->select("db_user.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu", "db_salbar.salbar", "db_salbar.id as salbarIDshuu", "programm_type.Pname", "user_type.Uname", "nuuts_turul.Nname")->get();
+                ->leftJoin("programm_type", "programm_type.id", "=", "db_user.userType")
+                // ->leftJoin("user_type", "user_type.id", "=", "db_user.bichig_turul")
+                // ->leftJoin("nuuts_turul", "nuuts_turul.id", "=", "db_user.tubshin")
+                ->orderBy("db_user.id", "DESC")
+                ->select("db_user.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu", "db_salbar.salbar", "db_salbar.id as salbarIDshuu", "programm_type.Pname")->get();
             return $user;
         } catch (\Throwable $th) {
+            return $th;
             return response(
                 array(
                     "status" => "error",

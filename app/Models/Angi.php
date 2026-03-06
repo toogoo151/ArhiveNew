@@ -20,16 +20,15 @@ class Angi extends Model
             $angi = DB::table("db_angi")
                 ->join("db_comandlal", "db_comandlal.id", "=", "db_angi.comand_id")
                 ->select("db_angi.*", "db_comandlal.name")
+                ->orderBy("db_angi.id", "DESC")
                 ->get();
+
             return $angi;
         } catch (\Throwable $th) {
-            return response(
-                array(
-                    "status" => "error",
-                    "msg" => "Анги татаж чадсангүй."
-                ),
-                500
-            );
+            return response([
+                "status" => "error",
+                "msg" => "Анги татаж чадсангүй."
+            ], 500);
         }
     }
 }

@@ -98,7 +98,7 @@
                                 <label>Нууц үг</label>
 
                                 <!-- 👁 show/hide button -->
-                                <!-- <span class="toggle-password" onclick="togglePassword()">👁</span> -->
+                                <span class="toggle-password" onclick="togglePassword()">👁</span> 
 
                                 @error('nuuts_ug')
                                     <span class="text-danger">{{ $message }}</span>
@@ -127,7 +127,7 @@
             book.classList.toggle('open');
         });
     </script>
-    <!-- <script>
+    <script>
         function togglePassword() {
             const input = document.getElementById('nuuts_ug');
             const icon = document.querySelector('.toggle-password');
@@ -140,7 +140,7 @@
                 icon.textContent = '👁'; // change icon when hidden
             }
         }
-    </script> -->
+    </script> 
 </body>
 
 

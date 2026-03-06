@@ -115,7 +115,9 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Хөтлөх хэргийн жагсаалт</h1>
+                        <h1 className="text-center mb-4">
+                            Хөтлөх хэргийн жагсаалт
+                        </h1>
 
                         {/* DATE FILTER */}
                         <div className="col-md-8 mb-3">

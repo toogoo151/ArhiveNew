@@ -135,7 +135,12 @@ const JagsaaltNew = (props) => {
         const jagsaaltId = watch("jagsaalt_turul");
         const retentionId = watch("hugatsaa_turul");
 
-        if (!jagsaaltId || jagsaaltId === "0" || !retentionId || retentionId === "0") {
+        if (
+            !jagsaaltId ||
+            jagsaaltId === "0" ||
+            !retentionId ||
+            retentionId === "0"
+        ) {
             setValue("tobchlol", "");
             return;
         }
@@ -186,23 +191,22 @@ const JagsaaltNew = (props) => {
     };
 
     const TimeOptions = [
-        {  bainga: "Байнга" },
-        {  dalanJil: "70 жил" },
-        {  jil: "Жил" },
+        { bainga: "Байнга" },
+        { dalanJil: "70 жил" },
+        { jil: "Жил" },
     ];
 
     const TovchlolOptions = [
-        {  VJbainga: "ҮЖ--Байнга" },
-        {  VJdalanJil: "ҮЖ--70 жил" },
-        {  VJjil: "ҮЖ--Жил" },
-        {  SJbainga: "СЖ--Байнга" },
-        {  SJdalanJil: "СЖ--70 жил" },
-        {  SJjil: "СЖ--Жил" },
-        {  BJbainga: "БЖ--Байнга" },
-        {  BJdalanJil: "БЖ--70 жил" },
-        {  BJjil: "БЖ--Жил" },
+        { VJbainga: "ҮЖ--Байнга" },
+        { VJdalanJil: "ҮЖ--70 жил" },
+        { VJjil: "ҮЖ--Жил" },
+        { SJbainga: "СЖ--Байнга" },
+        { SJdalanJil: "СЖ--70 жил" },
+        { SJjil: "СЖ--Жил" },
+        { BJbainga: "БЖ--Байнга" },
+        { BJdalanJil: "БЖ--70 жил" },
+        { BJjil: "БЖ--Жил" },
     ];
-
 
     return (
         <>
@@ -228,13 +232,14 @@ const JagsaaltNew = (props) => {
                                         <div className="input-group mb-2">
                                             <div className="input-group-prepend">
                                                 <span className="input-group-text">
-                                                   Жагсаалтын төрөл:
+                                                    Жагсаалтын төрөл:
                                                 </span>
                                             </div>
-                                             <select
+                                            <select
                                                 className="form-control"
                                                 {...register("jagsaalt_turul", {
-                                                    onChange: changeJagsaaltType,
+                                                    onChange:
+                                                        changeJagsaaltType,
                                                 })}
                                             >
                                                 <option value="0">
@@ -259,7 +264,7 @@ const JagsaaltNew = (props) => {
                                         <div className="input-group mb-2">
                                             <div className="input-group-prepend">
                                                 <span className="input-group-text">
-                                                   Баримтын төрөл:
+                                                    Баримтын төрөл:
                                                 </span>
                                             </div>
                                             <input
@@ -295,7 +300,7 @@ const JagsaaltNew = (props) => {
                                         <div className="input-group mb-2">
                                             <div className="input-group-prepend">
                                                 <span className="input-group-text">
-                                                   Дэс дугаар:
+                                                    Дэс дугаар:
                                                 </span>
                                             </div>
                                             <input
@@ -317,14 +322,11 @@ const JagsaaltNew = (props) => {
                                                     Баримтын нэр:
                                                 </span>
                                             </div>
-                                           <input
+                                            <input
                                                 {...register("barimt_ner")}
                                                 className="form-control"
                                             />
                                         </div>
-                                        <p className="alerts">
-                                            {errors.barimt_ner?.message}
-                                        </p>
                                     </div>
 
                                     <div className="col-md-6">
@@ -371,7 +373,7 @@ const JagsaaltNew = (props) => {
                                                 </span>
                                             </div>
 
-                                           <input
+                                            <input
                                                 {...register("hugatsaa")}
                                                 className="form-control"
                                                 // readOnly

@@ -21,7 +21,7 @@ const TurIltsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurIltsChild(props.changeDataRow.id);
+        refreshTurIltsChild(props.changeDataRow.desk_id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
@@ -96,7 +96,7 @@ const TurIltsChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshTurIltsChild(props.changeDataRow.id);
+                        refreshTurIltsChild(props.changeDataRow.desk_id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -248,14 +248,14 @@ const TurIltsChild = (props) => {
                             showArchive={false}
                         />
                         <TurIltsChildNew
-                            _parentID={props.changeDataRow.id}
+                            _parentID={props.changeDataRow.desk_id}
                             refreshTurIltsChild={refreshTurIltsChild}
                         />
                         <TurIltsChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshTurIltsChild={refreshTurIltsChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.id}
+                            parentID={props.changeDataRow.desk_id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>

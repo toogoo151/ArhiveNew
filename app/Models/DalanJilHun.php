@@ -17,9 +17,17 @@ class DalanJilHun extends Model
     {
         try {
             $dalanjilHun = DB::table("db_arhivbaingahad")
-                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
-                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
-                ->leftjoin("jagsaaltzuildugaar", "jagsaaltzuildugaar.barimt_dd", "=", "db_arhivbaingahad.jagsaalt_zuildugaar")
+                ->where("db_arhivbaingahad.user_id", Auth::id())
+                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->leftJoin("jagsaaltzuildugaar", function ($join) {
+                    $join->on(
+                        "jagsaaltzuildugaar.barimt_dd",
+                        "=",
+                        "db_arhivbaingahad.jagsaalt_zuildugaar"
+                    )
+                        ->where("jagsaaltzuildugaar.userID", Auth::id());
+                })
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -53,12 +61,15 @@ class DalanJilHun extends Model
     public function DalanjilHunByHumrug($humrugID)
     {
         try {
+            $userId = Auth::id();
             $dans = DB::table("db_arhivdans")
-                ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
+                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.hadgalah_hugatsaa", "70 жил хадгалагдах")
                 ->where("db_arhivdans.dans_baidal", "Хүний нөөц")
                 ->where("db_arhivdans.humrugID", $humrugID)
+                ->where("db_arhivdans.user_id", "=", $userId)
                 ->select(
+                    "db_arhivdans.desk_id", // 👈 ADD THIS
                     "db_arhivdans.id",
                     "db_arhivdans.humrugID",
                     "db_arhivdans.dans_ner",
@@ -73,6 +84,7 @@ class DalanJilHun extends Model
                     DB::raw("MAX(db_humrug.humrug_ner) as humrug_ner")
                 )
                 ->groupBy(
+                    "db_arhivdans.desk_id", // 👈 ADD THIS
                     "db_arhivdans.id",
                     "db_arhivdans.humrugID",
                     "db_arhivdans.dans_ner",
@@ -103,15 +115,16 @@ class DalanJilHun extends Model
     {
         try {
             $Archivedalanjilhun = DB::table("db_arhivbaingahad")
+                ->where("db_arhivbaingahad.user_id", Auth::id())
                 ->join(
                     "db_humrug",
-                    "db_humrug.id",
+                    "db_humrug.desk_id",
                     "=",
                     "db_arhivbaingahad.humrug_id"
                 )
                 ->leftJoin(
                     "db_arhivdans",
-                    "db_arhivdans.id",
+                    "db_arhivdans.desk_id",
                     "=",
                     "db_arhivbaingahad.dans_id"
                 )

@@ -160,7 +160,7 @@ export default function AsideMenu() {
             type: "menu",
             title: "Хэрэглэгч",
             icon: "fa fa-user",
-            level: [3],
+            level: [2],
             subMenu: [
                 {
                     name: "Командлал",

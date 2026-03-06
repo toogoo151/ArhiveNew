@@ -41,11 +41,11 @@ const UserNew = ({ refreshUser }) => {
         hereglegch_ner: Yup.string().required("Хэрэглэгчийн нэр оруулна уу."),
         nuuts_ug: Yup.string().required("Нууц үг оруулна уу."),
         comand_id: Yup.string().required("Командлал сонгоно уу."),
-        angi: Yup.string().required("Анги сонгоно уу."),
+        angi: Yup.string(),
         salbar: Yup.string(),
-        barimt_turul: Yup.string().required("Программын төрөл сонгоно уу."),
-        bichig_turul: Yup.string().required("Хэрэглэгчийн түвшин сонгоно уу."),
-        tubshin: Yup.string().required("Нууцын төрөл сонгоно уу."),
+        userType: Yup.string().required("Хэрэглэгчийн төрөл сонгоно уу."),
+        // bichig_turul: Yup.string().required("Хэрэглэгчийн түвшин сонгоно уу."),
+        // tubshin: Yup.string().required("Нууцын төрөл сонгоно уу."),
     });
 
     const {
@@ -96,9 +96,10 @@ const UserNew = ({ refreshUser }) => {
                 angi_id: data.angi,
                 comand_id: data.comand_id,
                 salbar_id: data.salbar || null,
-                barimt_turul: data.barimt_turul,
-                bichig_turul: data.bichig_turul,
-                tubshin: data.tubshin,
+                // barimt_turul: data.barimt_turul,
+                // bichig_turul: data.bichig_turul,
+                // tubshin: data.tubshin,
+                userType: data.userType,
             })
             .then((res) => {
                 Swal.fire(res.data.msg);
@@ -260,9 +261,9 @@ const UserNew = ({ refreshUser }) => {
                                             placeholder="Сонгоно уу"
                                             isSearchable
                                         />
-                                        <p className="alerts">
+                                        {/* <p className="alerts">
                                             {errors.angi?.message}
-                                        </p>
+                                        </p> */}
                                     </div>
                                 </div>
                             )}
@@ -304,9 +305,9 @@ const UserNew = ({ refreshUser }) => {
                                             placeholder="Сонгоно уу"
                                             isSearchable
                                         />
-                                        <p className="alerts">
+                                        {/* <p className="alerts">
                                             {errors.salbar?.message}
-                                        </p>
+                                        </p> */}
                                     </div>
                                 </div>
                             )}
@@ -316,12 +317,12 @@ const UserNew = ({ refreshUser }) => {
                                 <div className="input-group mb-3">
                                     <div className="input-group-prepend">
                                         <span className="input-group-text">
-                                            Программын төрөл:
+                                            Хэрэглэгчийн төрөл:
                                         </span>
                                     </div>
                                     <select
                                         className="form-control"
-                                        {...register("barimt_turul")}
+                                        {...register("userType")}
                                     >
                                         <option value="">Сонгоно уу</option>
                                         {getProgtype.map((el) => (
@@ -331,13 +332,13 @@ const UserNew = ({ refreshUser }) => {
                                         ))}
                                     </select>
                                     <p className="alerts">
-                                        {errors.barimt_turul?.message}
+                                        {errors.userType?.message}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Хэрэглэгчийн түвшин */}
-                            <div className="row">
+                            {/* <div className="row">
                                 <div className="input-group mb-3">
                                     <div className="input-group-prepend">
                                         <span className="input-group-text">
@@ -355,14 +356,12 @@ const UserNew = ({ refreshUser }) => {
                                             </option>
                                         ))}
                                     </select>
-                                    <p className="alerts">
-                                        {errors.bichig_turul?.message}
-                                    </p>
+                                 
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Нууцын төрөл */}
-                            <div className="row">
+                            {/* <div className="row">
                                 <div className="input-group mb-3">
                                     <div className="input-group-prepend">
                                         <span className="input-group-text">
@@ -380,11 +379,9 @@ const UserNew = ({ refreshUser }) => {
                                             </option>
                                         ))}
                                     </select>
-                                    <p className="alerts">
-                                        {errors.tubshin?.message}
-                                    </p>
+                                   
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         {/* Footer */}

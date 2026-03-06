@@ -212,8 +212,8 @@ const ArhivBNuuts = () => {
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
                                         <option
-                                            key={el.id}
-                                            value={el.id}
+                                            key={el.desk_id}
+                                            value={el.desk_id}
                                         >
                                             {el.humrug_ner}
                                         </option>
@@ -244,8 +244,8 @@ const ArhivBNuuts = () => {
 
                                     {getDans.map((el) => (
                                         <option
-                                            key={el.id}
-                                            value={el.id}
+                                            key={el.desk_id}
+                                            value={el.desk_id}
                                         >
                                             {el.dans_ner}
                                         </option>
@@ -288,7 +288,7 @@ const ArhivBNuuts = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getarchivebaingaNuuts}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={false}
                                     onClick={() => {
                                         if (
                                             selectedHumrug === 0 ||

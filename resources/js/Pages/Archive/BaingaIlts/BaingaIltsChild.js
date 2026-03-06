@@ -21,13 +21,15 @@ const BaingaIltsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshbaingaIltsChild(props.changeDataRow.id);
+        refreshbaingaIltsChild(props.changeDataRow.desk_id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+        0;
+    }, [props.changeDataRow]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -96,7 +98,7 @@ const BaingaIltsChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshbaingaIltsChild(props.changeDataRow.id);
+                        refreshbaingaIltsChild(props.changeDataRow.desk_id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -213,6 +215,32 @@ const BaingaIltsChild = (props) => {
                 <div className="info-box">
                     <div className="col-md-12">
                         <h1 className="text-center">БАРИМТ БИЧИГ</h1>
+                        <div
+                            style={{
+                                background: "#f1f5f9",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                marginBottom: "16px",
+                                display: "flex",
+                                gap: "40px",
+                                fontWeight: 600,
+                            }}
+                        >
+                            <div>
+                                📁 Дугаар:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hadgalamj_dugaar || "-"}
+                                </span>
+                            </div>
+
+                            <div>
+                                🏷 Хадгаламжийн гарчиг:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hadgalamj_garchig || "-"}
+                                </span>
+                            </div>
+                        </div>
+
                         <MUIDatatable
                             data={getbaingaIltsChild}
                             setdata={setbaingaIltsChild}
@@ -248,14 +276,14 @@ const BaingaIltsChild = (props) => {
                             showArchive={false}
                         />
                         <BaingaIltsChildNew
-                            _parentID={props.changeDataRow.id}
+                            _parentID={props.changeDataRow.desk_id}
                             refreshbaingaIltsChild={refreshbaingaIltsChild}
                         />
                         <BaingaIltsChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshbaingaIltsChild={refreshbaingaIltsChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.id}
+                            parentID={props.changeDataRow.desk_id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>

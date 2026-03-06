@@ -82,9 +82,9 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
             String(row.salbarIDshuu ?? row.salbar_id ?? row.salbar ?? "")
         );
 
-        setProgtypeID(String(row.progtypeIDshuu ?? row.barimt_turul ?? ""));
-        setUtypeID(String(row.usertypeIDshuu ?? row.bichig_turul ?? ""));
-        setSectypeID(String(row.sectypeIDshuu ?? row.tubshin ?? ""));
+        setProgtypeID(String(row.progtypeIDshuu ?? row.userType ?? ""));
+        // setUtypeID(String(row.usertypeIDshuu ?? row.bichig_turul ?? ""));
+        // setSectypeID(String(row.sectypeIDshuu ?? row.tubshin ?? ""));
 
         // Load units for the comandlal
         const actualCmd = row.comandlalIDshuu ?? row.comand_id ?? null;
@@ -113,7 +113,6 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
     // ---------------- Save ----------------
     const saveUnitSub = () => {
         if (!comand_id) return Swal.fire("Командлалаа сонгоно уу.");
-        if (!angi) return Swal.fire("Анги сонгоно уу.");
         if (!hereglegch_ner) return Swal.fire("Хэрэглэгчийн нэр оруулна уу.");
 
         const payload = {
@@ -122,9 +121,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
             angi_id: angi,
             comand_id,
             salbar_id: salbar || null,
-            barimt_turul: Progtype || null,
-            bichig_turul: Utype || null,
-            tubshin: Sectype || null,
+            userType: Progtype || null,
         };
         if (nuuts_ug && nuuts_ug.trim() !== "") payload.nuuts_ug = nuuts_ug;
 
@@ -267,7 +264,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
                         {/* Програм төрөл */}
                         <div className="input-group mb-3">
                             <span className="input-group-text">
-                                Программын төрөл:
+                                Хэрэглэгчийн түвшин: :
                             </span>
                             <select
                                 className="form-control"
@@ -284,7 +281,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
                         </div>
 
                         {/* Хэрэглэгчийн түвшин */}
-                        <div className="input-group mb-3">
+                        {/* <div className="input-group mb-3">
                             <span className="input-group-text">
                                 Хэрэглэгчийн түвшин:
                             </span>
@@ -300,10 +297,10 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </div> */}
 
                         {/* Системийн түвшин */}
-                        <div className="input-group mb-3">
+                        {/* <div className="input-group mb-3">
                             <span className="input-group-text">
                                 Системийн түвшин:
                             </span>
@@ -319,7 +316,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className="modal-footer">

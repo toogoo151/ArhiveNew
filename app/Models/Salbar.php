@@ -20,6 +20,7 @@ class Salbar extends Model
             $salbar = DB::table("db_salbar")
                 ->join("db_comandlal", "db_comandlal.id", "=", "db_salbar.comand_id")
                 ->join("db_angi", "db_angi.id", "=", "db_salbar.angi")
+                ->orderBy("db_salbar.id", "DESC")
                 ->select("db_salbar.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu")->get();
             return $salbar;
 

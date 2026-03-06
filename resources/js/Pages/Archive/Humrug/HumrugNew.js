@@ -72,7 +72,17 @@ const HumrugNew = (props) => {
                 props.refreshHumrug();
             })
             .catch((err) => {
-                Swal.fire(err.response.data.msg);
+                const res = err?.response?.data;
+
+                // Laravel validation error (422)
+                if (err?.response?.status === 422 && res?.errors) {
+                    const firstKey = Object.keys(res.errors)[0];
+                    const firstMsg = res.errors[firstKey]?.[0] || res.message;
+                    Swal.fire(firstMsg);
+                    return;
+                }
+
+                Swal.fire(res?.msg || res?.message || "Алдаа гарлаа");
             });
     };
 

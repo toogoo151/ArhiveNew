@@ -19,7 +19,7 @@ const ArhivDSanhuuChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshdalansanhuuChild(props.changeDataRow.id);
+        refreshdalansanhuuChild(props.changeDataRow.desk_id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);

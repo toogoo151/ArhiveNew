@@ -21,13 +21,13 @@ const BaingaNuutsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshbaingaNuutsChild(props.changeDataRow.id);
+        refreshbaingaNuutsChild(props.changeDataRow.desk_id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
         setRowsSelected([]);
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+    }, [props.changeDataRow]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -96,7 +96,7 @@ const BaingaNuutsChild = (props) => {
                         setRowsSelected([]);
 
                         //  дахин татна
-                        refreshbaingaNuutsChild(props.changeDataRow.id);
+                        refreshbaingaNuutsChild(props.changeDataRow.desk_id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -187,14 +187,14 @@ const BaingaNuutsChild = (props) => {
                             isHideEdit={true}
                         />
                         <BaingaNuutsChildNew
-                            _parentID={props.changeDataRow.id}
+                            _parentID={props.changeDataRow.desk_id}
                             refreshbaingaNuutsChild={refreshbaingaNuutsChild}
                         />
                         <BaingaNuutsChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshbaingaNuutsChild={refreshbaingaNuutsChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.id}
+                            _parentID={props.changeDataRow.desk_id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>

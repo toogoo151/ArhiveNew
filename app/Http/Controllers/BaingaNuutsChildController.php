@@ -23,6 +23,7 @@ class BaingaNuutsChildController extends Controller
     {
         try {
             $baingaNuutsChild = BaingaNuutsChild::where("hnID", "=", $req->_parentID)
+                ->where("arhivbainga_nuuts.user_id", Auth::id())
                 ->orderBy('id', 'desc')
                 // $BaingaNuutsChild = DB::table("db_arhivbaingilt")
                 // ->where("way_parent", "=", $req->_parentID)

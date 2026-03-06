@@ -10,6 +10,7 @@ import BaingaIltsChild from "./BaingaIltsChild";
 import BaingaIltsEdit from "./BaingaIltsEdit";
 import BaingaIltShiljuuleh from "./BaingaIltShiljuuleh";
 import BaingaIltsNew from "./BaingaIltsNew";
+import "./Index.css";
 
 const Index = () => {
     const today = new Date();
@@ -30,6 +31,7 @@ const Index = () => {
     const [clickedRowData, setclickedRowData] = useState(null); // анх null
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
     const [showArchiveModal, setShowArchiveModal] = useState(false);
+    const [activeTab, setActiveTab] = useState("ilt");
     // const [showShiljuuleh, setShowShiljuuleh] = useState(false);
     // const [comment, setComment] = useState("");
     // const [shiljuulehMode, setShiljuulehMode] = useState(null);
@@ -37,6 +39,10 @@ const Index = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+
+    // useEffect(() => {
+    //     setRowsSelected([]);
+    // }, [activeTab]);
 
     useEffect(() => {
         if (getBaingaIlt.length) {
@@ -451,7 +457,10 @@ const Index = () => {
                                 >
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
-                                        <option key={el.id} value={el.id}>
+                                        <option
+                                            key={el.desk_id}
+                                            value={el.desk_id}
+                                        >
                                             {el.humrug_ner}
                                         </option>
                                     ))}
@@ -480,7 +489,10 @@ const Index = () => {
                                     </option>
 
                                     {getDans.map((el) => (
-                                        <option key={el.id} value={el.id}>
+                                        <option
+                                            key={el.desk_id}
+                                            value={el.desk_id}
+                                        >
                                             {el.dans_ner}
                                         </option>
                                     ))}
@@ -552,6 +564,33 @@ const Index = () => {
                                 </button>
                             </div>
                         </div>
+                        <div className="labelWrapper">
+                            <div className={`tab-indicator ${activeTab}`} />
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "ilt" ? "active" : ""
+                                }`}
+                                onClick={() => setActiveTab("ilt")}
+                            >
+                                📊 Илт
+                            </button>
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "barimt" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    if (!clickedRowData) {
+                                        Swal.fire("Илт мөр сонгоно уу!");
+                                        return;
+                                    }
+                                    setActiveTab("barimt");
+                                }}
+                            >
+                                📂Баримт бичиг
+                            </button>
+                        </div>
                         {expiredCount > 0 && (
                             <div
                                 style={{
@@ -572,64 +611,54 @@ const Index = () => {
                             </div>
                         )}
 
-                        <MUIDatatable
-                            data={getBaingaIlt}
-                            setdata={setBaingaIlt}
-                            columns={columns}
-                            options={{
-                                setRowProps: (row, dataIndex) => {
-                                    const r = getBaingaIlt[dataIndex];
-                                    if (isExpiredRow(r)) {
-                                        return {
-                                            style: {
-                                                backgroundColor: "#fee2e2",
-                                            },
-                                        };
-                                    }
-                                },
-                            }}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName="btn btn-success"
-                                    modelType="modal"
-                                    dataTargetID={
-                                        selectedHumrug !== 0 &&
-                                        selectedDans !== 0
-                                            ? "#BaingaNew"
-                                            : null
-                                    }
-                                    spanIconClassName="fas fa-plus"
-                                    buttonName="Нэмэх"
-                                    excelDownloadData={getBaingaIlt}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={true}
-                                    onClick={() => {
-                                        if (
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                        ) {
-                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхааруулга",
-                                                text: "Хөмрөг болон дансны дугаар сонгоно уу!",
-                                            });
-                                        }
-                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                        {activeTab === "ilt" && (
+                            <>
+                                <MUIDatatable
+                                    data={getBaingaIlt}
+                                    setdata={setBaingaIlt}
+                                    columns={columns}
+                                    options={{
+                                        setRowProps: (row, dataIndex) => {
+                                            const r = getBaingaIlt[dataIndex];
+                                            if (isExpiredRow(r)) {
+                                                return {
+                                                    style: {
+                                                        backgroundColor:
+                                                            "#fee2e2",
+                                                    },
+                                                };
+                                            }
+                                        },
                                     }}
+                                    costumToolbar={
+                                        <CustomToolbar
+                                            btnClassName="btn btn-success"
+                                            modelType="modal"
+                                            dataTargetID={
+                                                selectedHumrug !== 0 &&
+                                                selectedDans !== 0
+                                                    ? "#BaingaNew"
+                                                    : null
+                                            }
+                                            spanIconClassName="fas fa-plus"
+                                            buttonName="Нэмэх"
+                                            excelDownloadData={getBaingaIlt}
+                                            excelHeaders={excelHeaders}
+                                            isHideInsert={true}
+                                        />
+                                    }
+                                    btnEdit={btnEdit}
+                                    modelType={showModal}
+                                    editdataTargetID="#baingaIltedit"
+                                    btnDelete={btnDelete}
+                                    getRowsSelected={getRowsSelected}
+                                    setRowsSelected={setRowsSelected}
+                                    isHideDelete={true}
+                                    isHideEdit={true}
+                                    showArchive={false}
                                 />
-                            }
-                            btnEdit={btnEdit}
-                            modelType={showModal}
-                            editdataTargetID="#baingaIltedit"
-                            btnDelete={btnDelete}
-                            btnArchiveClick={btnArchive}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
-                            showArchive={false}
-                        />
+                            </>
+                        )}
                         <BaingaIltsNew
                             refreshBaingaIlt={refreshBaingaIlt}
                             selectedHumrug={selectedHumrug}
@@ -648,15 +677,23 @@ const Index = () => {
                     </div>
                 </div>
             </div>
-            <div className="row clearfix">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div className="card2">
-                        {clickedRowData && (
-                            <BaingaIltsChild changeDataRow={clickedRowData} />
-                        )}
-                    </div>
-                </div>
-            </div>
+
+            {activeTab === "barimt" && (
+                <>
+                    {clickedRowData ? (
+                        <BaingaIltsChild changeDataRow={clickedRowData} />
+                    ) : (
+                        <div className="text-center p-5">
+                            Илт мөр сонгоно уу
+                        </div>
+                    )}
+                </>
+            )}
+            {/* {clickedRowData ? (
+                <BaingaIltsChild changeDataRow={clickedRowData} />
+            ) : (
+                <div className="text-center p-5">Илт мөр сонгоно уу</div>
+            )} */}
             {showShiljuulehModal && getBaingaIlt.length > 0 && (
                 <BaingaIltShiljuuleh
                     selectedHumrug={selectedHumrug}

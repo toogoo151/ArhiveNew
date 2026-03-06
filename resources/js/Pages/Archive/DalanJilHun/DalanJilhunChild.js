@@ -21,7 +21,7 @@ const DalanJilhunChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshdalanHunChild(props.changeDataRow.id);
+        refreshdalanHunChild(props.changeDataRow.desk_id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
@@ -96,7 +96,7 @@ const DalanJilhunChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshdalanHunChild(props.changeDataRow.id);
+                        refreshdalanHunChild(props.changeDataRow.desk_id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -248,14 +248,14 @@ const DalanJilhunChild = (props) => {
                             showArchive={false}
                         />
                         <DalanJilhunChildNew
-                            _parentID={props.changeDataRow.id}
+                            _parentID={props.changeDataRow.desk_id}
                             refreshdalanHunChild={refreshdalanHunChild}
                         />
                         <DalanJilhunChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshdalanHunChild={refreshdalanHunChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.id}
+                            parentID={props.changeDataRow.desk_id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>
