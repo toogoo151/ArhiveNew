@@ -203,17 +203,17 @@ class DalanJilSanhuuChildController extends Controller
         }
 
         // 1. Давхардсан файл шалгах
-        foreach ($req->data_url as $value) {
-            $setPDFPathID = $value["filename"];
-            $path = $userFolder . "/" . $setPDFPathID;
+        // foreach ($req->data_url as $value) {
+        //     $setPDFPathID = $value["filename"];
+        //     $path = $userFolder . "/" . $setPDFPathID;
 
-            if (Storage::exists($path)) {
-                return response([
-                    "status" => "error",
-                    "msg" => "Файл \"{$setPDFPathID}\" аль хэдийн хадгалагдсан байна!"
-                ], 422);
-            }
-        }
+        //     if (Storage::exists($path)) {
+        //         return response([
+        //             "status" => "error",
+        //             "msg" => "Файл \"{$setPDFPathID}\" аль хэдийн хадгалагдсан байна!"
+        //         ], 422);
+        //     }
+        // }
 
         // 2. DB Transaction эхлэх
         DB::beginTransaction();
@@ -226,7 +226,11 @@ class DalanJilSanhuuChildController extends Controller
                 $pdf_64 = substr($pdf_data, strpos($pdf_data, ',') + 1);
                 $pdfContent = base64_decode($pdf_64);
 
-                $setPDFPathID = $value["filename"];
+                // $setPDFPathID = $value["filename"];
+                // $path = $userFolder . "/" . $setPDFPathID;
+
+                $originalName = $value["filename"];
+                $setPDFPathID = uniqid() . '_' . $originalName;
                 $path = $userFolder . "/" . $setPDFPathID;
 
                 Storage::put($path, $pdfContent, 'public');

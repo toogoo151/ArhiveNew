@@ -13,6 +13,16 @@ class TurIlt extends Model
     protected $table = 'db_arhivbaingahad';
     public $timestamps = false;
 
+    protected static function booted()
+    {
+        static::created(function (TurIlt $turIlt) {
+            if (empty($turIlt->desk_id)) {
+                $turIlt->desk_id = $turIlt->id;
+                $turIlt->saveQuietly();
+            }
+        });
+    }
+
     public function getTurIlt()
     {
         try {

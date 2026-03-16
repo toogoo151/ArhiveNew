@@ -13,6 +13,16 @@ class TurNuuts extends Model
     protected $table = 'db_arhivhnnuuts';
     public $timestamps = false;
 
+    protected static function booted()
+    {
+        static::created(function (TurNuuts $turNuuts) {
+            if (empty($turNuuts->desk_id)) {
+                $turNuuts->desk_id = $turNuuts->id;
+                $turNuuts->saveQuietly();
+            }
+        });
+    }
+
     // public function getBaingaNuuts()
     // {
     //     try {

@@ -153,6 +153,31 @@ const TurNuutsChild = (props) => {
                 <div className="info-box">
                     <div className="col-md-12">
                         <h1 className="text-center">БАРИМТ БИЧИГ</h1>
+                        <div
+                            style={{
+                                background: "#f1f5f9",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                marginBottom: "16px",
+                                display: "flex",
+                                gap: "40px",
+                                fontWeight: 600,
+                            }}
+                        >
+                            <div>
+                                📁 Дугаар:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hn_dd || "-"}
+                                </span>
+                            </div>
+
+                            <div>
+                                🏷 Хадгаламжийн гарчиг:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hn_garchig || "-"}
+                                </span>
+                            </div>
+                        </div>
                         <MUIDatatable
                             data={getTurNuutsChild}
                             setdata={setTurNuutsChild}
@@ -440,7 +465,10 @@ const columns = [
                         }}
                     >
                         {files.map((fileUrl, index) => {
-                            const fileName = fileUrl.split("/").pop();
+                            const fileNameFull = fileUrl.split("/").pop();
+                            const fileName = fileNameFull.includes("_")
+                                ? fileNameFull.split("_").slice(1).join("_")
+                                : fileNameFull;
 
                             return (
                                 <a

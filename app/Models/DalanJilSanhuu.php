@@ -13,6 +13,16 @@ class DalanJilSanhuu extends Model
     protected $table = 'db_arhivbaingahad';
     public $timestamps = false;
 
+    protected static function booted()
+    {
+        static::created(function (DalanJilSanhuu $dalanjilSanhuu) {
+            if (empty($dalanjilSanhuu->desk_id)) {
+                $dalanjilSanhuu->desk_id = $dalanjilSanhuu->id;
+                $dalanjilSanhuu->saveQuietly();
+            }
+        });
+    }
+
     public function getDalanJilSanhuu()
     {
         try {

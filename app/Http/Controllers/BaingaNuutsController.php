@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Redirect, Response, File;
-use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Crypt;
+use App\Imports\BaingaNuutsImport;
+
 
 class BaingaNuutsController extends Controller
 {
@@ -19,7 +22,7 @@ class BaingaNuutsController extends Controller
             foreach ($req->data as $item) {
                 $archive = BaingaNuuts::find($item['id']);
                 if ($archive) {
-                    $archive->ustgasan_temdeglel = $item['ustgasan_temdeglel'];
+                    $archive->ustgasan_temdeglel = Crypt::encryptString($item['ustgasan_temdeglel']);
                     $archive->save();
                 }
             }
@@ -78,17 +81,17 @@ class BaingaNuutsController extends Controller
             $insertBaingaNuuts->dans_id = $req->dans_id;
             $insertBaingaNuuts->hn_dd = $req->hn_dd;
             $insertBaingaNuuts->hn_turul = 0;
-            $insertBaingaNuuts->hn_zbn = $req->hn_zbn;
             $insertBaingaNuuts->hereg_burgtel = $req->hereg_burgtel;
+            $insertBaingaNuuts->hn_zbn = Crypt::encryptString($req->hn_zbn);
+            $insertBaingaNuuts->hn_garchig = Crypt::encryptString($req->hn_garchig);
+            $insertBaingaNuuts->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
+            $insertBaingaNuuts->nuuts_zereglel = Crypt::encryptString($req->nuuts_zereglel);
             $insertBaingaNuuts->harya_on = $req->harya_on;
-            $insertBaingaNuuts->hn_garchig = $req->hn_garchig;
-            $insertBaingaNuuts->nuuts_zereglel = $req->nuuts_zereglel;
             $insertBaingaNuuts->on_ehen = $req->on_ehen;
             $insertBaingaNuuts->on_suul = $req->on_suul;
             $insertBaingaNuuts->huudas_too = $req->huudas_too;
             $insertBaingaNuuts->habsralt_too = $req->habsralt_too;
             $insertBaingaNuuts->jagsaalt_zuildugaar = $req->jagsaalt_zuildugaar;
-            $insertBaingaNuuts->hn_tailbar = $req->hn_tailbar;
             // $insertBainga->dans_tailbar = $req->dans_tailbar;
             $insertBaingaNuuts->user_id = Auth::id();
             $insertBaingaNuuts->save();
@@ -112,17 +115,17 @@ class BaingaNuutsController extends Controller
             $edit->dans_id = $req->dans_id;
             $edit->hn_dd = $req->hn_dd;
             $edit->hn_turul = 0;
-            $edit->hn_zbn = $req->hn_zbn;
+            $edit->hn_zbn = Crypt::encryptString($req->hn_zbn);
+            $edit->hn_garchig = Crypt::encryptString($req->hn_garchig);
+            $edit->nuuts_zereglel = Crypt::encryptString($req->nuuts_zereglel);
+            $edit->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
             $edit->hereg_burgtel = $req->hereg_burgtel;
             $edit->harya_on = $req->harya_on;
-            $edit->hn_garchig = $req->hn_garchig;
-            $edit->nuuts_zereglel = $req->nuuts_zereglel;
             $edit->on_ehen = $req->on_ehen;
             $edit->on_suul = $req->on_suul;
             $edit->huudas_too = $req->huudas_too;
             $edit->habsralt_too = $req->habsralt_too;
             $edit->jagsaalt_zuildugaar = $req->jagsaalt_zuildugaar;
-            $edit->hn_tailbar = $req->hn_tailbar;
             $edit->user_id = Auth::id();
             $edit->save();
 
@@ -136,5 +139,18 @@ class BaingaNuutsController extends Controller
                 "msg" => "Алдаа гарлаа."
             ], 500);
         }
+    }
+
+    public function importBaingaNuuts(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new BaingaNuutsImport, $request->file('file'));
+
+        return response()->json([
+            'msg' => 'Амжилттай импорт хийлээ'
+        ]);
     }
 }

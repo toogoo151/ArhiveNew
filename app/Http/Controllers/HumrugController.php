@@ -9,10 +9,28 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Redirect, Response, File;
 use Illuminate\Support\Str;
+use App\Imports\HumrugImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Crypt;
 
 
 class HumrugController extends Controller
 {
+    public function importHumrug(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new HumrugImport, $request->file('file'));
+
+        return response()->json([
+            'msg' => 'Амжилттай импорт хийлээ'
+        ]);
+    }
+
+
+
 
     public function HumrugType()
     {
@@ -33,36 +51,43 @@ class HumrugController extends Controller
 
     public function NewHumrug(Request $req)
     {
-
-        // $req->validate([
-        //     'humrug_dugaar' => 'required',
-        //     'humrug_ner' => 'required',
-        //     'humrug_zereglel' => 'required',
-        //     'anhnii_ognoo' => 'required',
-
-        // ]);
-
         try {
+
             $insertHumrug = new Humrug();
+
             $insertHumrug->humrug_dugaar = $req->humrug_dugaar;
-            $insertHumrug->humrug_ner = $req->humrug_ner;
+
+            // encrypt
+            $insertHumrug->humrug_ner = $req->humrug_ner
+                ? Crypt::encryptString($req->humrug_ner)
+                : null;
+
             $insertHumrug->humrug_zereglel = $req->humrug_zereglel;
             $insertHumrug->anhnii_ognoo = $req->anhnii_ognoo;
-            // $insertHumrug->humrug_uurchlult = $req->humrug_uurchlult;
-            $insertHumrug->humrug_uurchlult = $req->filled('humrug_uurchlult') &&
-                $req->humrug_uurchlult != 0
-                ? $req->humrug_uurchlult
+
+            // optional encrypted field
+            $insertHumrug->humrug_uurchlult =
+                $req->filled('humrug_uurchlult') && $req->humrug_uurchlult != 0
+                ? Crypt::encryptString($req->humrug_uurchlult)
                 : null;
+
             $insertHumrug->uurchlult_ognoo = $req->uurchlult_ognoo;
-            $insertHumrug->humrug_tailbar = $req->humrug_tailbar;
-            // $insertHumrug->userID = Auth::user()->userID;
+
+            // encrypt tailbar
+            $insertHumrug->humrug_tailbar = $req->humrug_tailbar
+                ? Crypt::encryptString($req->humrug_tailbar)
+                : null;
+
             $insertHumrug->userID = Auth::id();
+
             $insertHumrug->save();
+
             return response([
                 "status" => "success",
                 "msg" => "Амжилттай хадгаллаа."
             ], 200);
         } catch (\Throwable $th) {
+
             return response([
                 "status" => "error",
                 "msg" => $th->getMessage()
@@ -95,15 +120,34 @@ class HumrugController extends Controller
     public function EditHumrug(Request $req)
     {
         try {
+
             $edit = Humrug::find($req->id);
+
             $edit->humrug_dugaar = $req->humrug_dugaar;
-            $edit->humrug_ner = $req->humrug_ner;
+
+            // encrypt
+            $edit->humrug_ner = $req->humrug_ner
+                ? Crypt::encryptString($req->humrug_ner)
+                : null;
+
             $edit->humrug_zereglel = $req->humrug_zereglel;
             $edit->anhnii_ognoo = $req->anhnii_ognoo;
-            $edit->humrug_uurchlult = $req->humrug_uurchlult ?? null;
+
+            // optional encrypted
+            $edit->humrug_uurchlult =
+                $req->filled('humrug_uurchlult') && $req->humrug_uurchlult != 0
+                ? Crypt::encryptString($req->humrug_uurchlult)
+                : null;
+
             $edit->uurchlult_ognoo = $req->uurchlult_ognoo ?? null;
-            $edit->humrug_tailbar = $req->humrug_tailbar ?? null;
+
+            // encrypt tailbar
+            $edit->humrug_tailbar = $req->humrug_tailbar
+                ? Crypt::encryptString($req->humrug_tailbar)
+                : null;
+
             $edit->userID = Auth::id();
+
             $edit->save();
 
             return response([
@@ -111,9 +155,10 @@ class HumrugController extends Controller
                 "msg" => "Амжилттай заслаа."
             ], 200);
         } catch (\Throwable $th) {
+
             return response([
                 "status" => "error",
-                "msg" => "Алдаа гарлаа."
+                "msg" => $th->getMessage()
             ], 500);
         }
     }

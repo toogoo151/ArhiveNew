@@ -18,6 +18,7 @@ const Index = () => {
     const [getDans, setDans] = useState([]);
     const [getHumrug, setHumrug] = useState([]);
     const [getRetention, setRetention] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     //select
     const [allDans, setAllDans] = useState([]); // анхны бүх дата
@@ -34,6 +35,21 @@ const Index = () => {
     useEffect(() => {
         refreshDans();
     }, [selectedHumrug, selectedRetention]);
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/dansburtgel", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshDans(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
 
     const refreshDans = () => {
         axios
@@ -120,6 +136,7 @@ const Index = () => {
     console.log(selectedHumrug);
     console.log(selectedRetention);
 
+    console.log("test" + getDans);
     // useEffect(() => {
     //     if (selectedHumrug === 0 || selectedRetention === 0) {
     //         setDans([]);
@@ -261,6 +278,41 @@ const Index = () => {
                             </div>
                         </div>
                         {/* TABLE */}
+                        <div className="col-md-12 mb-3">
+                            <label htmlFor="danburtgel" className="form-label">
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+                                {/* Файл сонгох input */}
+                                <input
+                                    type="file"
+                                    id="danburtgel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+                                {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile); // Excel импортлох функц дуудна
+                                            setSelectedFile(null); // файлыг цэвэрлэх
+                                            document.getElementById(
+                                                "danburtgel"
+                                            ).value = null; // input-ыг цэвэрлэх
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         <MUIDatatable
                             data={getDans}
                             columns={columns}

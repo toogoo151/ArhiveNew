@@ -12,6 +12,7 @@ const BaingaIltsChild = (props) => {
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState([]);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const [showModal] = useState("modal");
 
@@ -106,6 +107,22 @@ const BaingaIltsChild = (props) => {
             }
         });
     };
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/BaingaIltsChild", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshbaingaIltsChild(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
+
     const refreshbaingaIltsChild = (id) => {
         axios
             .post("get/baingaIltsChild", {
@@ -238,6 +255,44 @@ const BaingaIltsChild = (props) => {
                                 <span style={{ color: "#2563eb" }}>
                                     {changeDataRow?.hadgalamj_garchig || "-"}
                                 </span>
+                            </div>
+                        </div>
+
+                        <div className="col-md-12 mb-3">
+                            <label
+                                htmlFor="bainagiltChildExcel"
+                                className="form-label"
+                            >
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+                                {/* Файл сонгох input */}
+                                <input
+                                    type="file"
+                                    id="bainagiltChildExcel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+                                {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile); // Excel импортлох функц дуудна
+                                            setSelectedFile(null); // файлыг цэвэрлэх
+                                            document.getElementById(
+                                                "bainagiltChildExcel"
+                                            ).value = null; // input-ыг цэвэрлэх
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -529,7 +584,10 @@ const columns = [
                         }}
                     >
                         {files.map((fileUrl, index) => {
-                            const fileName = fileUrl.split("/").pop();
+                            const fileNameFull = fileUrl.split("/").pop();
+                            const fileName = fileNameFull.includes("_")
+                                ? fileNameFull.split("_").slice(1).join("_")
+                                : fileNameFull;
 
                             return (
                                 <a

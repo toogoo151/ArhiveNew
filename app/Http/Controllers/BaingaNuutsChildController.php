@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 // use Redirect, Response, File;
 use Illuminate\Support\Facades\File;
-
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Crypt;
+use App\Imports\BainganuutsChildImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 
 
@@ -27,7 +29,15 @@ class BaingaNuutsChildController extends Controller
                 ->orderBy('id', 'desc')
                 // $BaingaNuutsChild = DB::table("db_arhivbaingilt")
                 // ->where("way_parent", "=", $req->_parentID)
-                ->get();
+                ->get()
+                ->map(function ($item) {
+                    $item->barimt_ner = $item->barimt_ner ? Crypt::decryptString($item->barimt_ner) : null;
+                    $item->uild_gazar = $item->uild_gazar ? Crypt::decryptString($item->uild_gazar) : null;
+                    $item->aguulga = $item->aguulga ? Crypt::decryptString($item->aguulga) : null;
+                    $item->bichsen_ner = $item->bichsen_ner ? Crypt::decryptString($item->bichsen_ner) : null;
+                    $item->file_ner = $item->file_ner ? Crypt::decryptString($item->file_ner) : null;
+                    return $item;
+                });
             return $baingaNuutsChild;
         } catch (\Throwable $th) {
             // throw $th;
@@ -39,6 +49,7 @@ class BaingaNuutsChildController extends Controller
     public function DeleteNuutsChildFile(Request $req)
     {
         try {
+
             $row = BaingaNuutsChild::find($req->id);
 
             if (!$row) {
@@ -50,22 +61,29 @@ class BaingaNuutsChildController extends Controller
 
             $fileUrl = $req->file_url;
 
-            // 🔥 1. URL-ээс зөв relative path гаргаж авна
-            $parsed = parse_url($fileUrl);
-            $relativePath = ltrim($parsed['path'], '/');
-            // одоо: doc/BaingaNuuts/4/abc.pdf
-
-            // 🔥 2. public path дээр бүрэн зам үүсгэнэ
-            $fullPath = public_path($relativePath);
-            // C:/.../public/doc/BaingaNuuts/4/abc.pdf
-
-            // 🔥 3. Файлыг устгана
-            if (File::exists($fullPath)) {
-                File::delete($fullPath);
+            /* 🔐 1. encrypted file_ner → decrypt */
+            try {
+                $decryptedFiles = Crypt::decryptString($row->file_ner);
+            } catch (\Exception $e) {
+                $decryptedFiles = "";
             }
 
-            // 🔥 4. DB дээрх file_ner-ээс арилгана
-            $files = explode(';', $row->file_ner);
+            /* 🔥 2. URL → relative path */
+            $parsed = parse_url($fileUrl);
+
+            if (isset($parsed['path'])) {
+
+                $relativePath = ltrim($parsed['path'], '/');
+
+                $fullPath = public_path($relativePath);
+
+                if (File::exists($fullPath)) {
+                    File::delete($fullPath);
+                }
+            }
+
+            /* 🔥 3. DB дээрх file list update */
+            $files = explode(';', $decryptedFiles);
             $newFiles = [];
 
             foreach ($files as $f) {
@@ -74,10 +92,16 @@ class BaingaNuutsChildController extends Controller
                 }
             }
 
-            $row->file_ner = implode(';', $newFiles);
-            if ($row->file_ner != "") {
-                $row->file_ner .= ';';
+            $newFileString = implode(';', $newFiles);
+
+            if ($newFileString != "") {
+                $newFileString .= ';';
             }
+
+            /* 🔐 4. дахин encrypt */
+            $row->file_ner = $newFileString
+                ? Crypt::encryptString($newFileString)
+                : null;
 
             $row->save();
 
@@ -86,9 +110,10 @@ class BaingaNuutsChildController extends Controller
                 "msg" => "Файл амжилттай устгагдлаа"
             ], 200);
         } catch (\Throwable $th) {
+
             return response([
                 "status" => "error",
-                "msg" => "Файл устгах үед алдаа гарлаа"
+                "msg" => $th->getMessage()
             ], 500);
         }
     }
@@ -97,6 +122,7 @@ class BaingaNuutsChildController extends Controller
     public function DeleteChildBaingaNuuts(Request $req)
     {
         try {
+
             $delete = BaingaNuutsChild::find($req->id);
 
             if (!$delete) {
@@ -108,24 +134,23 @@ class BaingaNuutsChildController extends Controller
 
             if (!empty($delete->file_ner)) {
 
-                $files = explode(';', $delete->file_ner);
+                // 🔐 decrypt хийх
+                $decryptedFiles = Crypt::decryptString($delete->file_ner);
+
+                $files = explode(';', $decryptedFiles);
 
                 foreach ($files as $fileUrl) {
 
                     if (empty($fileUrl)) continue;
 
-                    // 🔥 URL → PATH зөв хөрвүүлэлт
                     $parsedUrl = parse_url($fileUrl);
 
                     if (!isset($parsedUrl['path'])) continue;
 
-                    // /storage/doc/BaingaNuuts/5/123/file1.pdf
                     $relativePath = $parsedUrl['path'];
 
-                    // 🔥 /storage/ гэдгийг тасдана
                     $relativePath = str_replace('/storage/', '', $relativePath);
 
-                    // public/doc/BaingaNuuts/5/123/file1.pdf
                     $storagePath = 'public/' . $relativePath;
 
                     if (Storage::exists($storagePath)) {
@@ -141,6 +166,7 @@ class BaingaNuutsChildController extends Controller
                 "msg" => "Амжилттай устгалаа."
             ], 200);
         } catch (\Throwable $th) {
+
             return response([
                 "status" => "error",
                 "msg" => $th->getMessage()
@@ -159,17 +185,17 @@ class BaingaNuutsChildController extends Controller
         }
 
         // 1. Давхардсан файл шалгах
-        foreach ($req->data_url as $value) {
-            $setPDFPathID = $value["filename"];
-            $path = $userFolder . "/" . $setPDFPathID;
+        // foreach ($req->data_url as $value) {
+        //     $setPDFPathID = $value["filename"];
+        //     $path = $userFolder . "/" . $setPDFPathID;
 
-            if (Storage::exists($path)) {
-                return response([
-                    "status" => "error",
-                    "msg" => "Файл \"{$setPDFPathID}\" аль хэдийн хадгалагдсан байна!"
-                ], 422);
-            }
-        }
+        //     if (Storage::exists($path)) {
+        //         return response([
+        //             "status" => "error",
+        //             "msg" => "Файл \"{$setPDFPathID}\" аль хэдийн хадгалагдсан байна!"
+        //         ], 422);
+        //     }
+        // }
 
         // 2. DB Transaction эхлэх
         DB::beginTransaction();
@@ -182,7 +208,8 @@ class BaingaNuutsChildController extends Controller
                 $pdf_64 = substr($pdf_data, strpos($pdf_data, ',') + 1);
                 $pdfContent = base64_decode($pdf_64);
 
-                $setPDFPathID = $value["filename"];
+                $originalName = $value["filename"];
+                $setPDFPathID = uniqid() . '_' . $originalName;
                 $path = $userFolder . "/" . $setPDFPathID;
 
                 Storage::put($path, $pdfContent, 'public');
@@ -195,19 +222,23 @@ class BaingaNuutsChildController extends Controller
             // 2b. DB-д хадгалах
             $insertBainga = new BaingaNuutsChild();
             $insertBainga->hnID = $req->hnID;
-            $insertBainga->barimt_ner = $req->barimt_ner;
+
+            //encrypte start 
+            $insertBainga->barimt_ner = Crypt::encryptString($req->barimt_ner);
+            $insertBainga->uild_gazar = Crypt::encryptString($req->uild_gazar);
+            $insertBainga->aguulga = Crypt::encryptString($req->aguulga);
+            $insertBainga->bichsen_ner = Crypt::encryptString($req->bichsen_ner);
+            $insertBainga->file_ner = Crypt::encryptString($fullURL);
+            //encrypte end
+
             $insertBainga->barimt_ognoo = $req->barimt_ognoo;
             $insertBainga->barimt_dugaar = $req->barimt_dugaar; // integer эсвэл validation шалгах
             $insertBainga->irsen_dugaar = $req->irsen_dugaar;
             $insertBainga->yabsan_dugaar = $req->yabsan_dugaar;
-            $insertBainga->uild_gazar = $req->uild_gazar;
             $insertBainga->huudas_too = $req->huudas_too;
             $insertBainga->habsralt_too = $req->habsralt_too;
             $insertBainga->huudas_dugaar = $req->huudas_dugaar;
-            $insertBainga->aguulga = $req->aguulga;
-            $insertBainga->bichsen_ner = $req->bichsen_ner;
             $insertBainga->bichsen_ognoo = $req->bichsen_ognoo;
-            $insertBainga->file_ner = $fullURL;
             $insertBainga->user_id = $userId;
             $insertBainga->save();
 
@@ -310,19 +341,19 @@ class BaingaNuutsChildController extends Controller
                 ], 404);
             }
 
-            $edit->barimt_ner = $req->barimt_ner;
+            $edit->barimt_ner = Crypt::encryptString($req->barimt_ner);
+            $edit->uild_gazar = Crypt::encryptString($req->uild_gazar);
+            $edit->aguulga = Crypt::encryptString($req->aguulga);
+            $edit->bichsen_ner = Crypt::encryptString($req->bichsen_ner);
+            $edit->file_ner = Crypt::encryptString($fullURL);
             $edit->barimt_ognoo = $req->barimt_ognoo;
             $edit->barimt_dugaar = $req->barimt_dugaar;
             $edit->irsen_dugaar = $req->irsen_dugaar;
             $edit->yabsan_dugaar = $req->yabsan_dugaar;
-            $edit->uild_gazar = $req->uild_gazar;
             $edit->huudas_too = $req->huudas_too;
             $edit->habsralt_too = $req->habsralt_too;
             $edit->huudas_dugaar = $req->huudas_dugaar;
-            $edit->aguulga = $req->aguulga;
-            $edit->bichsen_ner = $req->bichsen_ner;
             $edit->bichsen_ognoo = $req->bichsen_ognoo;
-            $edit->file_ner = $fullURL;
             $edit->user_id = $userId;
 
             $edit->save();
@@ -423,4 +454,17 @@ class BaingaNuutsChildController extends Controller
     //         ], 500);
     //     }
     // }
+
+    public function importBaingaNuutsChild(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new BainganuutsChildImport, $request->file('file'));
+
+        return response()->json([
+            'msg' => 'Амжилттай импорт хийлээ'
+        ]);
+    }
 }

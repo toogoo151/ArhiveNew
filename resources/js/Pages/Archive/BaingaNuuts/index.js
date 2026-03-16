@@ -31,6 +31,9 @@ const Index = () => {
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState(null); // анх null
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [activeTab, setActiveTab] = useState("ilt");
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
@@ -65,6 +68,20 @@ const Index = () => {
     };
     const expiredCount = getBaingaNuuts.filter(isExpiredRow).length;
 
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/BaingaNuuts", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshBaingaNuuts(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
     const refreshBaingaNuuts = () => {
         axios.get("/get/BaingaNuuts").then((res) => {
             const reversed = [...res.data].reverse();
@@ -640,6 +657,34 @@ const Index = () => {
                                 </select> */}
                             </div>
                         </div>
+
+                        <div className="labelWrapper">
+                            <div className={`tab-indicator ${activeTab}`} />
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "ilt" ? "active" : ""
+                                }`}
+                                onClick={() => setActiveTab("ilt")}
+                            >
+                                📊 Илт
+                            </button>
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "barimt" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    if (!clickedRowData) {
+                                        Swal.fire("Илт мөр сонгоно уу!");
+                                        return;
+                                    }
+                                    setActiveTab("barimt");
+                                }}
+                            >
+                                📂Баримт бичиг
+                            </button>
+                        </div>
                         {expiredCount > 0 && (
                             <div
                                 style={{
@@ -660,62 +705,106 @@ const Index = () => {
                             </div>
                         )}
 
-                        <MUIDatatable
-                            data={getBaingaNuuts}
-                            setdata={setBaingaNuuts}
-                            columns={columns}
-                            options={{
-                                setRowProps: (row, dataIndex) => {
-                                    const r = getBaingaNuuts[dataIndex];
-                                    if (isExpiredRow(r)) {
-                                        return {
-                                            style: {
-                                                backgroundColor: "#fee2e2",
-                                            },
-                                        };
-                                    }
-                                },
-                            }}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName="btn btn-success"
-                                    modelType="modal"
-                                    dataTargetID={
-                                        selectedHumrug !== 0 &&
-                                        selectedDans !== 0
-                                            ? "#BaingaNuutsNew"
-                                            : null
-                                    }
-                                    spanIconClassName="fas fa-plus"
-                                    buttonName="Нэмэх"
-                                    excelDownloadData={getBaingaNuuts}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={true}
-                                    onClick={() => {
-                                        if (
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                        ) {
-                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхааруулга",
-                                                text: "Хөмрөг болон дансны дугаар сонгоно уу!",
-                                            });
-                                        }
-                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                        {activeTab === "ilt" && (
+                            <>
+                                <div className="col-md-12 mb-3">
+                                    <label
+                                        htmlFor="BainNuutsExcel"
+                                        className="form-label"
+                                    >
+                                        Excel Import
+                                    </label>
+                                    <div className="d-flex align-items-center">
+                                        {/* Файл сонгох input */}
+                                        <input
+                                            type="file"
+                                            id="BainNuutsExcel"
+                                            className="form-control form-control-sm me-2"
+                                            accept=".xlsx,.xls,.csv"
+                                            onChange={(e) => {
+                                                if (e.target.files.length)
+                                                    setSelectedFile(
+                                                        e.target.files[0]
+                                                    );
+                                            }}
+                                        />
+
+                                        {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                        {selectedFile && (
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => {
+                                                    importExcel(selectedFile); // Excel импортлох функц дуудна
+                                                    setSelectedFile(null); // файлыг цэвэрлэх
+                                                    document.getElementById(
+                                                        "BainNuutsExcel"
+                                                    ).value = null; // input-ыг цэвэрлэх
+                                                }}
+                                            >
+                                                Import
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                                <MUIDatatable
+                                    data={getBaingaNuuts}
+                                    setdata={setBaingaNuuts}
+                                    columns={columns}
+                                    options={{
+                                        setRowProps: (row, dataIndex) => {
+                                            const r = getBaingaNuuts[dataIndex];
+                                            if (isExpiredRow(r)) {
+                                                return {
+                                                    style: {
+                                                        backgroundColor:
+                                                            "#fee2e2",
+                                                    },
+                                                };
+                                            }
+                                        },
                                     }}
+                                    costumToolbar={
+                                        <CustomToolbar
+                                            btnClassName="btn btn-success"
+                                            modelType="modal"
+                                            dataTargetID={
+                                                selectedHumrug !== 0 &&
+                                                selectedDans !== 0
+                                                    ? "#BaingaNuutsNew"
+                                                    : null
+                                            }
+                                            spanIconClassName="fas fa-plus"
+                                            buttonName="Нэмэх"
+                                            excelDownloadData={getBaingaNuuts}
+                                            excelHeaders={excelHeaders}
+                                            isHideInsert={true}
+                                            onClick={() => {
+                                                if (
+                                                    selectedHumrug === 0 ||
+                                                    selectedDans === 0
+                                                ) {
+                                                    // Сонголт хийгээгүй бол зөвхөн анхааруулах
+                                                    Swal.fire({
+                                                        icon: "warning",
+                                                        title: "Анхааруулга",
+                                                        text: "Хөмрөг болон дансны дугаар сонгоно уу!",
+                                                    });
+                                                }
+                                                // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                                            }}
+                                        />
+                                    }
+                                    btnEdit={btnEdit}
+                                    modelType={showModal}
+                                    editdataTargetID="#baingaNuutsedit"
+                                    btnDelete={btnDelete}
+                                    getRowsSelected={getRowsSelected}
+                                    setRowsSelected={setRowsSelected}
+                                    isHideDelete={true}
+                                    isHideEdit={true}
                                 />
-                            }
-                            btnEdit={btnEdit}
-                            modelType={showModal}
-                            editdataTargetID="#baingaNuutsedit"
-                            btnDelete={btnDelete}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
-                        />
+                            </>
+                        )}
                         <BaingaNuutsNew
                             refreshBaingaNuuts={refreshBaingaNuuts}
                             selectedHumrug={selectedHumrug}
@@ -733,7 +822,19 @@ const Index = () => {
                     </div>
                 </div>
             </div>
-            <div className="row clearfix">
+
+            {activeTab === "barimt" && (
+                <>
+                    {clickedRowData ? (
+                        <BaingaNuutsChild changeDataRow={clickedRowData} />
+                    ) : (
+                        <div className="text-center p-5">
+                            Илт мөр сонгоно уу
+                        </div>
+                    )}
+                </>
+            )}
+            {/* <div className="row clearfix">
                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div className="card2">
                         {clickedRowData && (
@@ -741,7 +842,7 @@ const Index = () => {
                         )}
                     </div>
                 </div>
-            </div>
+            </div> */}
             {showShiljuulehModal && getBaingaNuuts.length > 0 && (
                 <BaingaIltNuutsShiljuuleh
                     selectedHumrug={selectedHumrug}

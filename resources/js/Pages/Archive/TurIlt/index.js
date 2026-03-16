@@ -10,9 +10,7 @@ import TurHadgalahHugatsaa from "./TurHadgalahHugatsaa";
 import TurIltEdit from "./TurIltEdit";
 import TurIltNew from "./TurIltNew";
 import TurIltsChild from "./TurIltsChild";
-// import BaingaIltsEdit from "./BaingaIltsEdit";
 import TurIltShiljuuleh from "./TurIltShiljuuleh";
-// import BaingaIltsNew from "./BaingaIltsNew";
 
 const Index = () => {
     const today = new Date();
@@ -39,6 +37,7 @@ const Index = () => {
     // const [comment, setComment] = useState("");
     // const [shiljuulehMode, setShiljuulehMode] = useState(null);
 
+    const [activeTab, setActiveTab] = useState("ilt");
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
@@ -561,47 +560,33 @@ const Index = () => {
                                 </button>
                             </div>
                         </div>
-                        {/* <div className="px-4 py-3 bg-light border-bottom d-flex flex-wrap gap-3 align-items-center">
-                            <span>
-                                <b>Хөмрөг:</b>{" "}
-                                {getTurIlt.length
-                                    ? getTurIlt[0].humrug_ner
-                                    : selectedHumrug
-                                    ? getHumrug.find(
-                                          (h) =>
-                                              h.humrug_dugaar === selectedHumrug
-                                      )?.humrug_ner
-                                    : "-"}
-                            </span>
-                            <span>|</span>
-                            <span>
-                                <b>Данс:</b>{" "}
-                                {getTurIlt.length
-                                    ? getTurIlt[0].dans_ner
-                                    : selectedDans
-                                    ? getDans.find(
-                                          (d) => d.dans_dugaar === selectedDans
-                                      )?.dans_ner
-                                    : "-"}
-                            </span>
-                            <span>|</span>
-                            <span>
-                                <b>ХН төрөл:</b>{" "}
-                                {getTurIlt.length
-                                    ? getTurIlt[0].dans_baidal || "-"
-                                    : "-"}
-                            </span>
-                            <span>|</span>
-                            <span>
-                                <b>Нууцын зэрэг:</b>{" "}
-                                <span className="badge bg-warning text-dark">
-                                    {getTurIlt.length
-                                        ? getTurIlt[0].hadgalah_hugatsaa ||
-                                          "-"
-                                        : "-"}
-                                </span>
-                            </span>
-                        </div> */}
+                        <div className="labelWrapper">
+                            <div className={`tab-indicator ${activeTab}`} />
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "ilt" ? "active" : ""
+                                }`}
+                                onClick={() => setActiveTab("ilt")}
+                            >
+                                📊 Илт
+                            </button>
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "barimt" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    if (!clickedRowData) {
+                                        Swal.fire("Илт мөр сонгоно уу!");
+                                        return;
+                                    }
+                                    setActiveTab("barimt");
+                                }}
+                            >
+                                📂Баримт бичиг
+                            </button>
+                        </div>
                         {expiredCount > 0 && (
                             <div
                                 style={{
@@ -621,65 +606,69 @@ const Index = () => {
                                 <strong>{expiredCount}</strong>
                             </div>
                         )}
-
-                        <MUIDatatable
-                            data={getTurIlt}
-                            setdata={setTurIlt}
-                            columns={columns}
-                            options={{
-                                setRowProps: (row, dataIndex) => {
-                                    const r = getTurIlt[dataIndex];
-                                    if (isExpiredRow(r)) {
-                                        return {
-                                            style: {
-                                                backgroundColor: "#fee2e2",
-                                            },
-                                        };
-                                    }
-                                },
-                            }}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName="btn btn-success"
-                                    modelType="modal"
-                                    dataTargetID={
-                                        selectedHumrug !== 0 &&
-                                        selectedDans !== 0
-                                            ? "#TurNew"
-                                            : null
-                                    }
-                                    spanIconClassName="fas fa-plus"
-                                    buttonName="Нэмэх"
-                                    excelDownloadData={getTurIlt}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={true}
-                                    onClick={() => {
-                                        if (
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                        ) {
-                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхааруулга",
-                                                text: "Хөмрөг болон дансны дугаар сонгоно уу!",
-                                            });
-                                        }
-                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                        {activeTab === "ilt" && (
+                            <>
+                                <MUIDatatable
+                                    data={getTurIlt}
+                                    setdata={setTurIlt}
+                                    columns={columns}
+                                    options={{
+                                        setRowProps: (row, dataIndex) => {
+                                            const r = getTurIlt[dataIndex];
+                                            if (isExpiredRow(r)) {
+                                                return {
+                                                    style: {
+                                                        backgroundColor:
+                                                            "#fee2e2",
+                                                    },
+                                                };
+                                            }
+                                        },
                                     }}
+                                    costumToolbar={
+                                        <CustomToolbar
+                                            btnClassName="btn btn-success"
+                                            modelType="modal"
+                                            dataTargetID={
+                                                selectedHumrug !== 0 &&
+                                                selectedDans !== 0
+                                                    ? "#TurNew"
+                                                    : null
+                                            }
+                                            spanIconClassName="fas fa-plus"
+                                            buttonName="Нэмэх"
+                                            excelDownloadData={getTurIlt}
+                                            excelHeaders={excelHeaders}
+                                            isHideInsert={true}
+                                            onClick={() => {
+                                                if (
+                                                    selectedHumrug === 0 ||
+                                                    selectedDans === 0
+                                                ) {
+                                                    // Сонголт хийгээгүй бол зөвхөн анхааруулах
+                                                    Swal.fire({
+                                                        icon: "warning",
+                                                        title: "Анхааруулга",
+                                                        text: "Хөмрөг болон дансны дугаар сонгоно уу!",
+                                                    });
+                                                }
+                                                // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                                            }}
+                                        />
+                                    }
+                                    btnEdit={btnEdit}
+                                    modelType={showModal}
+                                    editdataTargetID="#turIltEdit"
+                                    btnDelete={btnDelete}
+                                    btnArchiveClick={btnArchive}
+                                    getRowsSelected={getRowsSelected}
+                                    setRowsSelected={setRowsSelected}
+                                    isHideDelete={true}
+                                    isHideEdit={true}
+                                    showArchive={false}
                                 />
-                            }
-                            btnEdit={btnEdit}
-                            modelType={showModal}
-                            editdataTargetID="#turIltEdit"
-                            btnDelete={btnDelete}
-                            btnArchiveClick={btnArchive}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
-                            showArchive={false}
-                        />
+                            </>
+                        )}
                         <TurIltNew
                             refreshTurIlt={refreshTurIlt}
                             selectedHumrug={selectedHumrug}
@@ -706,7 +695,19 @@ const Index = () => {
                     </div>
                 </div>
             </div>
-            <div className="row clearfix">
+
+            {activeTab === "barimt" && (
+                <>
+                    {clickedRowData ? (
+                        <TurIltsChild changeDataRow={clickedRowData} />
+                    ) : (
+                        <div className="text-center p-5">
+                            Илт мөр сонгоно уу
+                        </div>
+                    )}
+                </>
+            )}
+            {/* <div className="row clearfix">
                 <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div className="card2">
                         {clickedRowData && (
@@ -714,7 +715,7 @@ const Index = () => {
                         )}
                     </div>
                 </div>
-            </div>
+            </div> */}
             {showShiljuulehModal && getTurIlt.length > 0 && (
                 <TurIltShiljuuleh
                     selectedHumrug={selectedHumrug}

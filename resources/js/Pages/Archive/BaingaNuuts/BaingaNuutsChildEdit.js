@@ -524,55 +524,65 @@ const BaingaNuutsChildEdit = (props) => {
 
                             <div className="row">
                                 <div className="col-md-12">
-                                    {oldFiles.map((file) => (
-                                        <div
-                                            key={file.id}
-                                            className="border rounded p-2 mb-2 bg-light"
-                                        >
-                                            <div className="d-flex align-items-center justify-content-between">
-                                                <div className="d-flex align-items-center">
-                                                    <i
-                                                        className={`far ${
-                                                            file.filename.match(
-                                                                /\.pdf$/i
-                                                            )
-                                                                ? "fa-file-pdf text-danger"
-                                                                : "fa-file-alt text-primary"
-                                                        } fa-2x mr-3`}
-                                                    ></i>
+                                    {oldFiles.map((file) => {
+                                        const cleanName =
+                                            file.filename.includes("_")
+                                                ? file.filename
+                                                      .split("_")
+                                                      .slice(1)
+                                                      .join("_")
+                                                : file.filename;
 
-                                                    <div>
-                                                        <div className="font-weight-bold">
-                                                            {file.filename}
+                                        return (
+                                            <div
+                                                key={file.id}
+                                                className="border rounded p-2 mb-2 bg-light"
+                                            >
+                                                <div className="d-flex align-items-center justify-content-between">
+                                                    <div className="d-flex align-items-center">
+                                                        <i
+                                                            className={`far ${
+                                                                cleanName.match(
+                                                                    /\.pdf$/i
+                                                                )
+                                                                    ? "fa-file-pdf text-danger"
+                                                                    : "fa-file-alt text-primary"
+                                                            } fa-2x mr-3`}
+                                                        ></i>
+
+                                                        <div>
+                                                            <div className="font-weight-bold">
+                                                                {cleanName}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div>
-                                                    {/* Нээх */}
-                                                    <a
-                                                        href={file.url}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="btn btn-sm btn-outline-info mr-2"
-                                                    >
-                                                        <i className="fas fa-eye"></i>
-                                                    </a>
+                                                    <div>
+                                                        <a
+                                                            href={file.url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="btn btn-sm btn-outline-info mr-2"
+                                                        >
+                                                            <i className="fas fa-eye"></i>
+                                                        </a>
 
-                                                    {/* 🔥 УСТГАХ */}
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-sm btn-outline-danger"
-                                                        onClick={() =>
-                                                            deleteOldFile(file)
-                                                        }
-                                                    >
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            onClick={() =>
+                                                                deleteOldFile(
+                                                                    file
+                                                                )
+                                                            }
+                                                        >
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                     <label className="btn btn-outline-primary w-100 mb-2">
                                         <i className="fas fa-upload mr-2"></i>{" "}
                                         Хавсралт файл сонгох

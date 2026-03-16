@@ -32,6 +32,8 @@ const Index = () => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
     const [showArchiveModal, setShowArchiveModal] = useState(false);
     const [activeTab, setActiveTab] = useState("ilt");
+    const [selectedFile, setSelectedFile] = useState(null);
+
     // const [showShiljuuleh, setShowShiljuuleh] = useState(false);
     // const [comment, setComment] = useState("");
     // const [shiljuulehMode, setShiljuulehMode] = useState(null);
@@ -54,6 +56,21 @@ const Index = () => {
         refreshBaingaIlt();
         console.log(getDans);
     }, [selectedHumrug, selectedDans]);
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/baingaIlts", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshBaingaIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
 
     const isExpiredRow = (row) => {
         if (!row?.on_suul || !row?.hugatsaa) return false;
@@ -487,7 +504,6 @@ const Index = () => {
                                             ? "Сонгоно уу"
                                             : "Хоосон байна"}
                                     </option>
-
                                     {getDans.map((el) => (
                                         <option
                                             key={el.desk_id}
@@ -613,6 +629,46 @@ const Index = () => {
 
                         {activeTab === "ilt" && (
                             <>
+                                <div className="col-md-12 mb-3">
+                                    <label
+                                        htmlFor="BainIltsExcel"
+                                        className="form-label"
+                                    >
+                                        Excel Import
+                                    </label>
+                                    <div className="d-flex align-items-center">
+                                        {/* Файл сонгох input */}
+                                        <input
+                                            type="file"
+                                            id="BainIltsExcel"
+                                            className="form-control form-control-sm me-2"
+                                            accept=".xlsx,.xls,.csv"
+                                            onChange={(e) => {
+                                                if (e.target.files.length)
+                                                    setSelectedFile(
+                                                        e.target.files[0]
+                                                    );
+                                            }}
+                                        />
+
+                                        {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                        {selectedFile && (
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => {
+                                                    importExcel(selectedFile); // Excel импортлох функц дуудна
+                                                    setSelectedFile(null); // файлыг цэвэрлэх
+                                                    document.getElementById(
+                                                        "BainIltsExcel"
+                                                    ).value = null; // input-ыг цэвэрлэх
+                                                }}
+                                            >
+                                                Import
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
                                 <MUIDatatable
                                     data={getBaingaIlt}
                                     setdata={setBaingaIlt}

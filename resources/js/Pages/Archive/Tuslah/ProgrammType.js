@@ -5,10 +5,8 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import HumrugEdit from "./HumrugEdit";
-import HumrugNew from "./HumrugNew";
 
-const Index = () => {
+const ProgrammType = () => {
     // ================= DATE =================
     const today = new Date();
     const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
@@ -22,7 +20,7 @@ const Index = () => {
 
     // ================= DATA =================
     const [allHumrug, setallHumrug] = useState([]);
-    const [getHumrug, setHumrug] = useState([]);
+    const [getProgrammType, setProgrammType] = useState([]);
 
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState([]);
@@ -33,7 +31,7 @@ const Index = () => {
 
     // FETCH
     useEffect(() => {
-        refreshHumrug();
+        refreshProgrammType();
     }, []);
 
     const importExcel = (file) => {
@@ -41,23 +39,23 @@ const Index = () => {
         formData.append("file", file);
 
         axios
-            .post("/import/humrug", formData)
+            .post("/import/SecretTypeTuslah", formData)
             .then((res) => {
                 Swal.fire(res.data.msg); // Мэдэгдэл
-                refreshHumrug(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+                refreshProgrammType(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
             })
             .catch((err) => {
                 Swal.fire("Import алдаа");
             });
     };
 
-    const refreshHumrug = () => {
+    const refreshProgrammType = () => {
         axios
-            .get("/get/Humrug")
+            .get("/get/SecretTypeTuslah")
             .then((res) => {
                 setRowsSelected([]);
                 setallHumrug(res.data);
-                setHumrug(res.data); // анх бүх өгөгдөл
+                setProgrammType(res.data); // анх бүх өгөгдөл
                 setIsFilterActive(false);
             })
             .catch((err) => {
@@ -69,14 +67,14 @@ const Index = () => {
     useEffect(() => {
         if (getRowsSelected[0] !== undefined) {
             setIsEditBtnClick(false);
-            setclickedRowData(getHumrug[getRowsSelected[0]]);
+            setclickedRowData(getProgrammType[getRowsSelected[0]]);
         }
-    }, [getRowsSelected, getHumrug]);
+    }, [getRowsSelected, getProgrammType]);
 
     //  DATE FILTER
     useEffect(() => {
         if (!isFilterActive) {
-            setHumrug(allHumrug);
+            setProgrammType(allHumrug);
             return;
         }
 
@@ -91,7 +89,7 @@ const Index = () => {
             return itemDate >= start && itemDate <= end;
         });
 
-        setHumrug(filtered);
+        setProgrammType(filtered);
     }, [isFilterActive, getStartDate, getEndDate, allHumrug]);
 
     const btnEdit = () => {
@@ -110,11 +108,11 @@ const Index = () => {
             if (result.isConfirmed) {
                 axios
                     .post("/delete/humrug", {
-                        id: getHumrug[getRowsSelected[0]].id,
+                        id: getProgrammType[getRowsSelected[0]].id,
                     })
                     .then((res) => {
                         Swal.fire(res.data.msg);
-                        refreshHumrug();
+                        refreshProgrammType();
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -129,63 +127,21 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Хөмрөг</h1>
-
-                        {/* DATE FILTER */}
-                        {/* <div className="col-md-8 mb-3">
-                            <h5>
-                                Хамрах хугацаа: {getStartDate} - {getEndDate}
-                            </h5>
-
-                            <div className="input-group">
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    value={getStartDate}
-                                    onChange={(e) =>
-                                        setStartDate(e.target.value)
-                                    }
-                                />
-                                <span className="mx-2">-</span>
-                                <input
-                                    type="date"
-                                    className="form-control"
-                                    value={getEndDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                />
-
-                                <button
-                                    className="btn btn-primary ms-2"
-                                    onClick={() => setIsFilterActive(true)}
-                                >
-                                    Хайх
-                                </button>
-
-
-                                <button
-                                    className="btn btn-secondary ms-2"
-                                    onClick={() => {
-                                        setIsFilterActive(false);
-                                        setStartDate(defaultStart);
-                                        setEndDate(defaultEnd);
-                                        setHumrug(allHumrug);
-                                    }}
-                                >
-                                    Цэвэрлэх
-                                </button>
-                            </div>
-                        </div> */}
+                        <h1 className="text-center mb-4">Programm Type</h1>
 
                         {/* TABLE */}
                         <div className="col-md-12 mb-3">
-                            <label htmlFor="humrugExcel" className="form-label">
+                            <label
+                                htmlFor="humrugExcelProgrammType"
+                                className="form-label"
+                            >
                                 Excel Import
                             </label>
                             <div className="d-flex align-items-center">
                                 {/* Файл сонгох input */}
                                 <input
                                     type="file"
-                                    id="humrugExcel"
+                                    id="humrugExcelProgrammType"
                                     className="form-control form-control-sm me-2"
                                     accept=".xlsx,.xls,.csv"
                                     onChange={(e) => {
@@ -202,7 +158,7 @@ const Index = () => {
                                             importExcel(selectedFile); // Excel импортлох функц дуудна
                                             setSelectedFile(null); // файлыг цэвэрлэх
                                             document.getElementById(
-                                                "humrugExcel"
+                                                "humrugExcelProgrammType"
                                             ).value = null; // input-ыг цэвэрлэх
                                         }}
                                     >
@@ -213,8 +169,8 @@ const Index = () => {
                         </div>
 
                         <MUIDatatable
-                            data={getHumrug}
-                            setdata={setHumrug}
+                            data={getProgrammType}
+                            setdata={setProgrammType}
                             columns={columns}
                             costumToolbar={
                                 <CustomToolbar
@@ -223,7 +179,7 @@ const Index = () => {
                                     dataTargetID="#humrugNew"
                                     spanIconClassName="fas fa-plus"
                                     buttonName="Нэмэх"
-                                    excelDownloadData={getHumrug}
+                                    excelDownloadData={getProgrammType}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={true}
                                 />
@@ -237,14 +193,6 @@ const Index = () => {
                             isHideDelete={true}
                             isHideEdit={true}
                         />
-
-                        <HumrugNew refreshHumrug={refreshHumrug} />
-                        <HumrugEdit
-                            setRowsSelected={setRowsSelected}
-                            refreshHumrug={refreshHumrug}
-                            changeDataRow={clickedRowData}
-                            isEditBtnClick={isEditBtnClick}
-                        />
                     </div>
                 </div>
             </div>
@@ -252,7 +200,7 @@ const Index = () => {
     );
 };
 
-export default Index;
+export default ProgrammType;
 
 const columns = [
     {
@@ -284,9 +232,10 @@ const columns = [
             },
         },
     },
+
     {
-        name: "humrug_dugaar",
-        label: "Хөмрөгийн дугаар",
+        name: "Sname",
+        label: "S нэр",
         options: {
             filter: true,
             sort: false,
@@ -297,150 +246,6 @@ const columns = [
                         color: "white",
                     },
                 };
-            },
-        },
-    },
-    {
-        name: "humrug_ner",
-        label: "Хөмрөг нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "humrug_zereglel",
-        label: "Хөмрөгийн зэрэглэл",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "anhnii_ognoo",
-        label: "Архивт анх баримт шилжүүлсэн огноо",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
-            },
-        },
-    },
-
-    {
-        name: "humrug_uurchlult",
-        label: "Хөмрөгийн өөрчлөлт",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
-            },
-        },
-    },
-
-    {
-        name: "uurchlult_ognoo",
-        label: "Хөмрөгийн өөрчлөлтийн огноо",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
-            },
-        },
-    },
-
-    {
-        name: "humrug_tailbar",
-        label: "Тайлбар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
             },
         },
     },
