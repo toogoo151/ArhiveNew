@@ -604,6 +604,7 @@ const MUIDatatable = (props) => {
                     options={
                         props.isServerSide ? optionsWithServerSide : options
                     }
+
                 />
             </ThemeProvider>
         </>

@@ -10,6 +10,7 @@ use App\Imports\DalanJilHunImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 
+
 class DalanJilHunController extends Controller
 {
     public function ArchiveDalanJilHun(Request $req)
@@ -135,12 +136,9 @@ class DalanJilHunController extends Controller
             $edit->dans_id = $req->dans_id;
             $edit->hadgalamj_turul = 1;
             $edit->hadgalamj_dugaar = $req->hadgalamj_dugaar;
-
-
             $edit->hadgalamj_garchig = Crypt::encryptString($req->hadgalamj_garchig);
             $edit->hadgalamj_zbn = Crypt::encryptString($req->hadgalamj_zbn);
             $edit->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
-
             $edit->hergiin_indeks = $req->hergiin_indeks;
             $edit->harya_on = $req->harya_on;
             $edit->on_ehen = $req->on_ehen;
