@@ -58,6 +58,7 @@ class Humrug extends Model
                 });
             return $angi;
         } catch (\Throwable $th) {
+            return $th;
 
             return response(
                 array(

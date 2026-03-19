@@ -1,119 +1,163 @@
 import ExcelIcon from "@mui/icons-material/CloudDownload";
-import { Typography } from "@mui/material";
-import Tooltip from "@mui/material/Tooltip";
+import { Typography, Tooltip } from "@mui/material";
 import React from "react";
-import { CSVLink } from "react-csv";
 import { withStyles } from "tss-react/mui";
+import * as XLSX from "xlsx-js-style";
 import MUIButtonShowModel from "../ButtonShowModel/MUIButtonShowModel";
+
 const defaultToolbarStyles = {
     iconButton: {},
 };
 
 class CustomToolbar extends React.Component {
-    constructor(props, ref) {
+    constructor(props) {
         super(props);
     }
 
-    renderCsvDataDriver() {
-        if (this.props.isOfficerDriverExcelHeaders) {
-            return this.props.excelDownloadDriverData.map((item) => ({
-                unitShortName: item.unitShortName,
-                lastName: item.lastName,
-                firstName: item.firstName,
-                score: item.score,
-                scoreApprove:
-                    item.scoreApprove === 0
-                        ? "Хоосон"
-                        : item.scoreApprove === 1
-                        ? "Тэнцсэн"
-                        : "Тэнцээгүй",
-                practice:
-                    item.practice === 0
-                        ? "Хоосон"
-                        : item.practice === 1
-                        ? "Тэнцсэн"
-                        : "Тэнцээгүй",
-                Finally:
-                    item.Finally === 0
-                        ? "Хоосон"
-                        : item.Finally === 1
-                        ? "Тэнцсэн"
-                        : "Тэнцээгүй",
-            }));
-        }
-    }
-    renderCsvData() {
+    // Convert your props data into a format suitable for XLSX
+    getExcelData() {
         if (this.props.isOfficerMainExcelHeaders) {
-            return this.props.excelDownloadData.map((item) => ({
-                missionName: item.missionName,
-                eeljName: item.eeljName,
-                comandlalShortName: item.comandlalShortName,
-
-                unitShortName: item.unitShortName,
-                shortRank: item.shortRank,
-                rd: item.rd,
-                lastName: item.lastName,
-                firstName: item.firstName,
-                age: item.age,
-                genderName: item.genderName,
-                documentsMainApprove:
-                    item.documentsMainApprove === 0
-                        ? "Шийдвэрлээгүй"
-                        : item.documentsMainApprove === 1
-                        ? "Зөвшөөрөгдсөн"
-                        : "Татгалзсан",
-                healthApprove:
-                    item.healthApprove === 0
-                        ? "Ороогүй"
-                        : item.healthApprove === 1
-                        ? "Тэнцсэн"
-                        : "Тэнцээгүй",
-                alcpt_score:
-                    item.alcpt_score === 0 ? "Өгөөгүй" : item.alcpt_score,
-                sportScore:
-                    item.languageScore === 0.0 ? "Өгөөгүй" : item.languageScore,
-                sportScore: item.sportScore === 0 ? "Өгөөгүй" : item.sportScore,
-
-                driverApprove:
-                    item.driverApprove === 0
-                        ? "Өгөөгүй"
-                        : item.driverApprove === 1
-                        ? "Тэнцсэн"
-                        : "Тэнцээгүй",
-
-                skillScore: item.skillScore === 0 ? "Өгөөгүй" : item.skillScore,
-            }));
+            return this.props.excelDownloadData.map(() => ({}));
+        } else if (this.props.isOfficerDriverExcelHeaders) {
+            return this.props.excelDownloadDriverData.map(() => ({}));
+        } else {
+            return this.props.excelDownloadData;
         }
     }
+
+    //   exportToExcel = () => {
+    //     const data = this.getExcelData();
+    //     const ws = XLSX.utils.json_to_sheet(data);
+
+    //     // Customize header row style
+    //     const headerRange = XLSX.utils.decode_range(ws['!ref']);
+    //     for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+    //       const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
+    //       if (!ws[cellAddress]) continue;
+    //       ws[cellAddress].s = {
+    //         font: { bold: true, color: { rgb: "FFFFFF" }, sz: 14 },
+    //         fill: { fgColor: { rgb: "3498DB" } }, // header background color
+    //         alignment: { horizontal: "center" },
+    //       };
+    //     }
+
+    //     // Optional: customize column widths
+    //     ws['!cols'] = Object.keys(data[0] || {}).map(() => ({ wch: 20 }));
+
+    //     const wb = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    //     XLSX.writeFile(wb, "table_data.xlsx");
+    //   };
+
+    exportToExcel = () => {
+        const rawData = this.getExcelData();
+        const headerLabels = this.props.excelHeaders.map((h) => h.label);
+        const today = new Date().toISOString().split("T")[0];
+        const mappedData = rawData.map((row) => {
+            const obj = {};
+            this.props.excelHeaders.forEach((h) => {
+                obj[h.label] = row[h.key];
+            });
+            return obj;
+        });
+
+        const autoWidth = (data, headers) => {
+            const cols = headers.map((header, i) => {
+                const maxLength = Math.max(
+                    header.length,
+                    ...data.map((row) =>
+                        row[header] ? row[header].toString().length : 0
+                    )
+                );
+
+                return { wch: maxLength + 4 }; // padding
+            });
+
+            return cols;
+        };
+
+        const ws = XLSX.utils.json_to_sheet(mappedData, {
+            origin: 2,
+            skipHeader: true,
+        });
+
+        // Freeze title + header
+        ws["!freeze"] = { xSplit: 0, ySplit: 2 };
+
+        // Title
+        XLSX.utils.sheet_add_aoa(ws, [[`Архив ${today}`]], { origin: "A1" });
+
+        ws["!merges"] = [
+            {
+                s: { r: 0, c: 0 },
+                e: { r: 0, c: headerLabels.length - 1 },
+            },
+        ];
+
+        // Header row
+        XLSX.utils.sheet_add_aoa(ws, [headerLabels], { origin: "A2" });
+
+        // Title style
+        if (ws["A1"]) {
+            ws["A1"].s = {
+                font: { bold: true, sz: 18 },
+                alignment: {
+                    horizontal: "center",
+                    vertical: "center",
+                    wrapText: true,
+                },
+            };
+        }
+
+        // Header styles
+        const headerRange = XLSX.utils.decode_range(ws["!ref"]);
+        for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 1, c: C });
+            if (!ws[cellAddress]) continue;
+
+            ws[cellAddress].s = {
+                font: { bold: true, color: { rgb: "33333" }, sz: 12 },
+                fill: { fgColor: { rgb: "D9D9D9" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin", color: { rgb: "999999" } },
+                    bottom: { style: "thin", color: { rgb: "999999" } },
+                    left: { style: "thin", color: { rgb: "999999" } },
+                    right: { style: "thin", color: { rgb: "999999" } },
+                },
+            };
+        }
+
+        ws["!cols"] = autoWidth(mappedData, headerLabels);
+        ws["!rows"] = [
+            { hpt: 30 }, // Row 1 (title)
+            { hpt: 25 }, // Row 2 (header)
+        ];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Report");
+        XLSX.writeFile(wb, "archive-report.xlsx");
+    };
 
     render() {
-        const csvData = this.renderCsvData();
-        const csvData2 = this.renderCsvDataDriver();
-
         return (
             <div className="row">
                 {this.props.isHideInsert && (
                     <div className="col-md-2 col-ms-6">
-                        <React.Fragment>
-                            <Tooltip title={"custom icon"}>
-                                <>
-                                    <MUIButtonShowModel
-                                        btnClassName={this.props.btnClassName}
-                                        modelType={this.props.modelType}
-                                        dataTargetID={this.props.dataTargetID}
-                                        spanIconClassName={
-                                            this.props.spanIconClassName
-                                        }
-                                        buttonName={this.props.buttonName}
-                                        clickHeaderOpenModal={
-                                            this.props.btnInsert
-                                        }
-                                    />
-                                </>
-                            </Tooltip>
-                        </React.Fragment>
+                        <Tooltip title="custom icon">
+                            <MUIButtonShowModel
+                                btnClassName={this.props.btnClassName}
+                                modelType={this.props.modelType}
+                                dataTargetID={this.props.dataTargetID}
+                                spanIconClassName={this.props.spanIconClassName}
+                                buttonName={this.props.buttonName}
+                                clickHeaderOpenModal={this.props.btnInsert}
+                            />
+                        </Tooltip>
                     </div>
                 )}
+
+                {/* Excel Export Button */}
                 <div
                     className="col-md-1 col-ms-6 text-left"
                     style={{
@@ -122,27 +166,20 @@ class CustomToolbar extends React.Component {
                         alignItems: "center",
                     }}
                 >
-                    <CSVLink
-                        data={
-                            this.props.isOfficerMainExcelHeaders
-                                ? csvData
-                                : this.props.isOfficerDriverExcelHeaders
-                                ? csvData2
-                                : this.props.excelDownloadData
-                        }
-                        headers={this.props.excelHeaders}
-                        title="Excel файл татах"
-                    >
+                    <Tooltip title="Export to Excel">
                         <ExcelIcon
                             style={{
                                 color: "#3498db",
                                 width: 40,
                                 height: 40,
+                                cursor: "pointer",
                             }}
-                        ></ExcelIcon>
-                    </CSVLink>
+                            onClick={this.exportToExcel}
+                        />
+                    </Tooltip>
                 </div>
-                {/* Header title shuuu */}
+
+                {/* Header title */}
                 <div
                     className="col-md-9 col-ms-7 text-left"
                     style={{
