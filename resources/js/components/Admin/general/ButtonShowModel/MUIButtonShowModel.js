@@ -1,4 +1,5 @@
-const MUIButtonShowModel = (props) => {
+import React from "react";
+const MUIButtonShowModel = React.forwardRef((props, ref) => {
     return (
         <button
             style={props.style}
@@ -12,6 +13,6 @@ const MUIButtonShowModel = (props) => {
             &nbsp; {props.buttonName}
         </button>
     );
-};
+});
 
 export default MUIButtonShowModel;

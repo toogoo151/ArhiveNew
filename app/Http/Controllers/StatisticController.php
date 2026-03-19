@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -283,44 +284,137 @@ class StatisticController extends Controller
         ]);
     }
 
+    public function graphic70YearCounts(Request $request)
+    {
+        $startYear = $request->startYear ? (int) $request->startYear : null;
+        $endYear = $request->endYear ? (int) $request->endYear : null;
+
+        $q = DB::table('db_arhivbaingahad')
+            ->join('db_arhivdans', 'db_arhivdans.desk_id', '=', 'db_arhivbaingahad.dans_id')
+            ->where('db_arhivbaingahad.user_id', $this->userId())
+            ->where('db_arhivbaingahad.hadgalamj_turul', 1)
+            ->select(
+                'db_arhivdans.hadgalah_hugatsaa',
+                'db_arhivdans.dans_baidal'
+            );
+
+        if ($startYear !== null && $endYear !== null && $startYear >= 1900 && $endYear <= 2100) {
+
+            if ($startYear > $endYear) {
+                [$startYear, $endYear] = [$endYear, $startYear];
+            }
+
+            $years = range($startYear, $endYear);
+            $haryaOnValues = [];
+
+            foreach ($years as $y) {
+                $haryaOnValues[] = 'year/' . $y;
+                $haryaOnValues[] = (string) $y;
+            }
+
+            $q->whereIn('db_arhivbaingahad.harya_on', $haryaOnValues);
+        }
+
+        $rows = $q->get();
+
+        $hunCount = 0;
+        $sanhuuCount = 0;
+
+        foreach ($rows as $row) {
+            try {
+                // $hadgalah = trim(Crypt::decryptString($row->hadgalah_hugatsaa));
+                // $baidal = trim(Crypt::decryptString($row->dans_baidal));
+                $hadgalah = Crypt::decryptString($row->hadgalah_hugatsaa);
+                $baidal = Crypt::decryptString($row->dans_baidal);
+
+                if ($hadgalah === '70 жил хадгалагдах') {
+
+                    if ($baidal === 'Хүний нөөц') {
+                        $hunCount++;
+                    }
+
+                    if ($baidal === 'Санхүү') {
+                        $sanhuuCount++;
+                    }
+                }
+
+            } catch (\Exception $e) {
+                \Log::error($e->getMessage());
+            }
+        }
+        // return $hunCount;
+
+        return response()->json([
+            'hun' => $hunCount,
+            'sanhuu' => $sanhuuCount,
+        ]);
+    }
+
+
     /**
      * Counts for 70 жил хадгалах: Хүний нөөц (DalanJilHun) and Санхүү (DalanJilSanhuu).
      * Both use db_arhivbaingahad (hadgalamj_turul=1) joined with db_arhivdans.
      * Filter by dans: hadgalah_hugatsaa = '70 жил хадгалагдах' and dans_baidal = 'Хүний нөөц' or 'Санхүү'.
      * Optional: startYear/endYear to filter by harya_on.
      */
-    public function graphic70YearCounts(Request $request)
-    {
-        $startYear = $request->startYear ? (int) $request->startYear : null;
-        $endYear = $request->endYear ? (int) $request->endYear : null;
+    // public function graphic70YearCounts(Request $request)
+    // {
+    //     $startYear = $request->startYear ? (int) $request->startYear : null;
+    //     $endYear = $request->endYear ? (int) $request->endYear : null;
+    //     $category = $request->category; // 'hun' or 'sanhuu'
 
-        $baseQuery = function ($dansBaidal) use ($startYear, $endYear) {
-            $q = DB::table('db_arhivbaingahad')
-                ->join('db_arhivdans', 'db_arhivdans.id', '=', 'db_arhivbaingahad.dans_id')
-                ->where('db_arhivbaingahad.user_id', $this->userId())
-                ->where('db_arhivbaingahad.hadgalamj_turul', 1)
-                ->where('db_arhivdans.hadgalah_hugatsaa', '70 жил хадгалагдах')
-                ->where('db_arhivdans.dans_baidal', $dansBaidal);
+    //     $dansBaidal = $category === 'hun' ? 'Хүний нөөц' : 'Санхүү';
 
-            if ($startYear !== null && $endYear !== null && $startYear >= 1900 && $endYear <= 2100) {
-                if ($startYear > $endYear) {
-                    [$startYear, $endYear] = [$endYear, $startYear];
-                }
-                $years = range($startYear, $endYear);
-                $haryaOnValues = [];
-                foreach ($years as $y) {
-                    $haryaOnValues[] = 'year/' . $y;
-                    $haryaOnValues[] = (string) $y;
-                }
-                $q->whereIn('db_arhivbaingahad.harya_on', $haryaOnValues);
-            }
+    //     $q = DB::table('db_arhivbaingahad')
+    //         ->join('db_arhivdans', 'db_arhivdans.id', '=', 'db_arhivbaingahad.dans_id')
+    //         ->where('db_arhivbaingahad.user_id', $this->userId())
+    //         ->where('db_arhivbaingahad.hadgalamj_turul', 1)
+    //         ->select(
+    //             'db_arhivdans.hadgalah_hugatsaa',
+    //             'db_arhivdans.dans_baidal'
+    //         );
 
-            return $q->count();
-        };
+    //     if ($startYear !== null && $endYear !== null && $startYear >= 1900 && $endYear <= 2100) {
 
-        return response()->json([
-            'dalanJilHun' => $baseQuery('Хүний нөөц'),
-            'dalanJilSanhuu' => $baseQuery('Санхүү'),
-        ]);
-    }
+    //         if ($startYear > $endYear) {
+    //             [$startYear, $endYear] = [$endYear, $startYear];
+    //         }
+
+    //         $years = range($startYear, $endYear);
+    //         $haryaOnValues = [];
+
+    //         foreach ($years as $y) {
+    //             $haryaOnValues[] = 'year/' . $y;
+    //             $haryaOnValues[] = (string) $y;
+    //         }
+
+    //         $q->whereIn('db_arhivbaingahad.harya_on', $haryaOnValues);
+    //     }
+
+    //     $rows = $q->get();
+
+    //     $hunCount = 0;
+    //     $sanhuuCount = 0;
+
+    //     foreach ($rows as $row) {
+    //         try {
+    //             $hadgalah = trim(Crypt::decryptString($row->hadgalah_hugatsaa));
+    //             $baidal = trim(Crypt::decryptString($row->dans_baidal));
+
+    //             if ($hadgalah === '70 жил хадгалагдах') {
+
+    //                 if ($baidal === 'Хүний нөөц') {
+    //                     $hunCount++;
+    //                 }
+
+    //                 if ($baidal === 'Санхүү') {
+    //                     $sanhuuCount++;
+    //                 }
+    //             }
+
+    //         } catch (\Exception $e) {
+    //             \Log::error($e->getMessage());
+    //         }
+    //     }
+    // }
 }

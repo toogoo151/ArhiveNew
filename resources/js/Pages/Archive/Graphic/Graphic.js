@@ -1,9 +1,4 @@
-import {
-    ArcElement,
-    Chart as ChartJS,
-    Tooltip,
-    Legend,
-} from "chart.js";
+import { ArcElement, Chart as ChartJS, Tooltip, Legend } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { useEffect, useMemo, useState } from "react";
 import { Doughnut, Pie } from "react-chartjs-2";
@@ -45,12 +40,25 @@ const Graphic = () => {
     const [baingaTo, setBaingaTo] = useState(null);
     const [turFrom, setTurFrom] = useState(null);
     const [turTo, setTurTo] = useState(null);
-    const [dalan70From, setDalan70From] = useState(null);
-    const [dalan70To, setDalan70To] = useState(null);
+    // const [dalan70From, setDalan70From] = useState(null);
+    // const [dalan70To, setDalan70To] = useState(null);
 
-    const [baingaCounts, setBaingaCounts] = useState({ baingaIlt: 0, baingaNuuts: 0 });
+    const [dalanHunFrom, setDalanHunFrom] = useState(null);
+    const [dalanHunTo, setDalanHunTo] = useState(null);
+
+    const [dalanSanhuuFrom, setDalanSanhuuFrom] = useState(null);
+    const [dalanSanhuuTo, setDalanSanhuuTo] = useState(null);
+    // test end
+
+    const [baingaCounts, setBaingaCounts] = useState({
+        baingaIlt: 0,
+        baingaNuuts: 0,
+    });
     const [turCounts, setTurCounts] = useState({ turIlt: 0, turNuuts: 0 });
-    const [dalan70Counts, setDalan70Counts] = useState({ dalanJilHun: 0, dalanJilSanhuu: 0 });
+    const [dalan70Counts, setDalan70Counts] = useState({
+        dalanJilHun: 0,
+        dalanJilSanhuu: 0,
+    });
 
     const [baingaLoading, setBaingaLoading] = useState(true);
     const [turLoading, setTurLoading] = useState(true);
@@ -77,8 +85,10 @@ const Graphic = () => {
                     setBaingaTo(max);
                     setTurFrom(min);
                     setTurTo(max);
-                    setDalan70From(min);
-                    setDalan70To(max);
+                    setDalanHunFrom(min);
+                    setDalanHunTo(max);
+                    setDalanSanhuuFrom(min);
+                    setDalanSanhuuTo(max);
                 }
             })
             .catch((e) => {
@@ -93,39 +103,110 @@ const Graphic = () => {
                 setBaingaTo(currentYear);
                 setTurFrom(currentYear);
                 setTurTo(currentYear);
-                setDalan70From(currentYear);
-                setDalan70To(currentYear);
+                setDalanHunFrom(currentYear);
+                setDalanHunTo(currentYear);
+                setDalanSanhuuFrom(currentYear);
+                setDalanSanhuuTo(currentYear);
             })
             .finally(() => setYearsLoading(false));
     }, []);
 
-    const fetchDalan70 = () => {
+    // const fetchDalan70 = () => {
+    //     setDalan70Loading(true);
+    //     setDalan70Error(null);
+    //     return axios
+    //         .post("/get/graphic-70year-counts", {
+    //             startYear: dalan70From,
+    //             endYear: dalan70To,
+    //         })
+    //         .then((res) => {
+    //             setDalan70Counts({
+    //                 dalanJilHun: res.data?.dalanJilHun ?? 0,
+    //                 dalanJilSanhuu: res.data?.dalanJilSanhuu ?? 0,
+    //             });
+    //         })
+    //         .catch((e) => {
+    //             console.error(e);
+    //             setDalan70Error("Өгөгдөл ачааллахад алдаа гарлаа.");
+    //             setDalan70Counts({ dalanJilHun: 0, dalanJilSanhuu: 0 });
+    //         })
+    //         .finally(() => setDalan70Loading(false));
+    // };
+    // test
+    // Hunii noots
+    useEffect(() => {
+        if (dalanHunFrom && dalanHunTo) {
+            fetchDalanHun();
+        }
+    }, [dalanHunFrom, dalanHunTo]);
+    // Sanhuu
+    useEffect(() => {
+        if (dalanSanhuuFrom && dalanSanhuuTo) {
+            fetchDalanSanhuu();
+        }
+    }, [dalanSanhuuFrom, dalanSanhuuTo]);
+
+    const fetchDalanHun = () => {
         setDalan70Loading(true);
         setDalan70Error(null);
-        return axios
+        axios
             .post("/get/graphic-70year-counts", {
-                startYear: dalan70From,
-                endYear: dalan70To,
+                startYear: dalanHunFrom,
+                endYear: dalanHunTo,
+                category: "hun",
             })
             .then((res) => {
-                setDalan70Counts({
-                    dalanJilHun: res.data?.dalanJilHun ?? 0,
-                    dalanJilSanhuu: res.data?.dalanJilSanhuu ?? 0,
-                });
+                setDalan70Counts((prev) => ({
+                    ...prev,
+                    dalanJilHun: res.data?.hun ?? 0,
+                }));
             })
             .catch((e) => {
                 console.error(e);
                 setDalan70Error("Өгөгдөл ачааллахад алдаа гарлаа.");
-                setDalan70Counts({ dalanJilHun: 0, dalanJilSanhuu: 0 });
+                setDalan70Counts((prev) => ({
+                    ...prev,
+                    dalanJilHun: 0,
+                }));
             })
             .finally(() => setDalan70Loading(false));
     };
+    console.log(setDalan70Counts);
+    const fetchDalanSanhuu = () => {
+        setDalan70Loading(true);
+        setDalan70Error(null);
+        axios
+            .post("/get/graphic-70year-counts", {
+                startYear: dalanSanhuuFrom,
+                endYear: dalanSanhuuTo,
+                category: "sanhuu",
+            })
+            .then((res) => {
+                setDalan70Counts((prev) => ({
+                    ...prev,
+                    dalanJilSanhuu: res.data?.sanhuu ?? 0,
+                }));
+            })
+            .catch((e) => {
+                console.error(e);
+                setDalan70Error("Өгөгдөл ачааллахад алдаа гарлаа.");
+                setDalan70Counts((prev) => ({
+                    ...prev,
+                    dalanJilSanhuu: 0,
+                }));
+            })
+            .finally(() => setDalan70Loading(false));
+    };
+    // test end
 
     const fetchBainga = () => {
         setBaingaLoading(true);
         setBaingaError(null);
         return axios
-            .post("/get/graphic-year-range-counts", { startYear: baingaFrom, endYear: baingaTo })
+            .post("/get/graphic-year-range-counts", {
+                startYear: baingaFrom,
+                endYear: baingaTo,
+            })
             .then((res) => {
                 setBaingaCounts({
                     baingaIlt: res.data?.baingaIlt ?? 0,
@@ -144,7 +225,10 @@ const Graphic = () => {
         setTurLoading(true);
         setTurError(null);
         return axios
-            .post("/get/graphic-year-range-counts", { startYear: turFrom, endYear: turTo })
+            .post("/get/graphic-year-range-counts", {
+                startYear: turFrom,
+                endYear: turTo,
+            })
             .then((res) => {
                 setTurCounts({
                     turIlt: res.data?.turIlt ?? 0,
@@ -173,17 +257,20 @@ const Graphic = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [turFrom, turTo]);
 
-    useEffect(() => {
-        if (dalan70From !== null && dalan70To !== null) {
-            fetchDalan70();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dalan70From, dalan70To]);
+    // useEffect(() => {
+    //     if (dalan70From !== null && dalan70To !== null) {
+    //         fetchDalan70();
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [dalan70From, dalan70To]);
 
     /* ================= PIE: Bainga (Bainga Ilt + Bainga Nuuts) ================= */
     const baingaChartData = useMemo(
         () => ({
-            labels: ["Байна хадгалах хадгаламжийн нэгж - Илт", "Байнга хадгалах хадгаламжийн нэгж - Нууц"],
+            labels: [
+                "Байна хадгалах хадгаламжийн нэгж - Илт",
+                "Байнга хадгалах хадгаламжийн нэгж - Нууц",
+            ],
             datasets: [
                 {
                     data: [baingaCounts.baingaIlt, baingaCounts.baingaNuuts],
@@ -198,7 +285,10 @@ const Graphic = () => {
     /* ================= DONUT: Tur (Tur Ilt + Tur Nuuts) ================= */
     const turChartData = useMemo(
         () => ({
-            labels: ["Түр хадгалагдах хадгаламжийн нэгж - Илт", "Түр хадгалагдах хадгаламжийн нэгж - Нууц"],
+            labels: [
+                "Түр хадгалагдах хадгаламжийн нэгж - Илт",
+                "Түр хадгалагдах хадгаламжийн нэгж - Нууц",
+            ],
             datasets: [
                 {
                     data: [turCounts.turIlt, turCounts.turNuuts],
@@ -259,7 +349,9 @@ const Graphic = () => {
             </div>
 
             {yearsLoading && (
-                <div className="loading-box">Жилийн мэдээлэл ачааллаж байна...</div>
+                <div className="loading-box">
+                    Жилийн мэдээлэл ачааллаж байна...
+                </div>
             )}
 
             {!yearsLoading && availableYears.length === 0 && (
@@ -269,291 +361,353 @@ const Graphic = () => {
             )}
 
             {!yearsLoading && availableYears.length > 0 && (
-            <div className="row">
-                <div className="card">
-                    <div className="card-head">
-                        <h4>📁 Байнга</h4>
-                        <div className="filters">
-                            <select
-                                value={baingaFrom ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setBaingaFrom(v);
-                                    if (v > baingaTo) setBaingaTo(v);
-                                }}
-                                disabled={baingaLoading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`b-from-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                            <span className="to">→</span>
-                            <select
-                                value={baingaTo ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setBaingaTo(v);
-                                    if (v < baingaFrom) setBaingaFrom(v);
-                                }}
-                                disabled={baingaLoading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`b-to-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
+                <div className="row">
+                    <div className="card">
+                        <div className="card-head">
+                            <h4>📁 Байнга</h4>
+                            <div className="filters">
+                                <select
+                                    value={baingaFrom ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setBaingaFrom(v);
+                                        if (v > baingaTo) setBaingaTo(v);
+                                    }}
+                                    disabled={
+                                        baingaLoading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option
+                                                key={`b-from-${y}`}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                                <span className="to">→</span>
+                                <select
+                                    value={baingaTo ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setBaingaTo(v);
+                                        if (v < baingaFrom) setBaingaFrom(v);
+                                    }}
+                                    disabled={
+                                        baingaLoading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option key={`b-to-${y}`} value={y}>
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
                         </div>
+
+                        {baingaError && (
+                            <div className="error-msg">
+                                {baingaError}
+                                <button type="button" onClick={fetchBainga}>
+                                    Дахин оролдох
+                                </button>
+                            </div>
+                        )}
+
+                        {baingaLoading ? (
+                            <div className="loading-box">
+                                Өгөгдөл ачааллаж байна...
+                            </div>
+                        ) : (
+                            <div className="chart-box">
+                                <Pie data={baingaChartData} options={options} />
+                            </div>
+                        )}
                     </div>
 
-                    {baingaError && (
-                        <div className="error-msg">
-                            {baingaError}
-                            <button type="button" onClick={fetchBainga}>
-                                Дахин оролдох
-                            </button>
+                    <div className="card">
+                        <div className="card-head">
+                            <h4>📁 Түр</h4>
+                            <div className="filters">
+                                <select
+                                    value={turFrom ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setTurFrom(v);
+                                        if (v > turTo) setTurTo(v);
+                                    }}
+                                    disabled={
+                                        turLoading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option
+                                                key={`t-from-${y}`}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                                <span className="to">→</span>
+                                <select
+                                    value={turTo ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setTurTo(v);
+                                        if (v < turFrom) setTurFrom(v);
+                                    }}
+                                    disabled={
+                                        turLoading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option key={`t-to-${y}`} value={y}>
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
                         </div>
-                    )}
 
-                    {baingaLoading ? (
-                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
-                    ) : (
-                        <div className="chart-box">
-                            <Pie data={baingaChartData} options={options} />
-                        </div>
-                    )}
-                </div>
+                        {turError && (
+                            <div className="error-msg">
+                                {turError}
+                                <button type="button" onClick={fetchTur}>
+                                    Дахин оролдох
+                                </button>
+                            </div>
+                        )}
 
-                <div className="card">
-                    <div className="card-head">
-                        <h4>📁 Түр</h4>
-                        <div className="filters">
-                            <select
-                                value={turFrom ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setTurFrom(v);
-                                    if (v > turTo) setTurTo(v);
-                                }}
-                                disabled={turLoading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`t-from-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                            <span className="to">→</span>
-                            <select
-                                value={turTo ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setTurTo(v);
-                                    if (v < turFrom) setTurFrom(v);
-                                }}
-                                disabled={turLoading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`t-to-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                        </div>
+                        {turLoading ? (
+                            <div className="loading-box">
+                                Өгөгдөл ачааллаж байна...
+                            </div>
+                        ) : (
+                            <div className="chart-box">
+                                <Doughnut
+                                    data={turChartData}
+                                    options={{
+                                        ...options,
+                                        cutout: "70%",
+                                        plugins: {
+                                            ...options.plugins,
+                                            centerText: true,
+                                        },
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
 
-                    {turError && (
-                        <div className="error-msg">
-                            {turError}
-                            <button type="button" onClick={fetchTur}>
-                                Дахин оролдох
-                            </button>
+                    {/* 70 жил хадгалах хүний нөөц (DalanJilHun) */}
+                    <div className="card">
+                        <div className="card-head">
+                            <h4>📋 70 жил хадгалах - Хүний нөөц</h4>
+                            <div className="filters">
+                                <select
+                                    value={dalanHunFrom}
+                                    onChange={(e) =>
+                                        setDalanHunFrom(Number(e.target.value))
+                                    }
+                                    disabled={
+                                        dalan70Loading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option
+                                                key={`d70-from-${y}`}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                                <span className="to">→</span>
+                                <select
+                                    value={dalanHunTo ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setDalanHunTo(v);
+                                        if (v < dalanHunFrom)
+                                            setDalanHunFrom(v);
+                                    }}
+                                    disabled={
+                                        dalan70Loading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option
+                                                key={`d70h-to-${y}`}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
                         </div>
-                    )}
-
-                    {turLoading ? (
-                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
-                    ) : (
-                        <div className="chart-box">
-                            <Doughnut
-                                data={turChartData}
-                                options={{
-                                    ...options,
-                                    cutout: "70%",
-                                    plugins: {
-                                        ...options.plugins,
-                                        centerText: true,
-                                    },
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
-
-                {/* 70 жил хадгалах хүний нөөц (DalanJilHun) */}
-                <div className="card">
-                    <div className="card-head">
-                        <h4>📋 70 жил хадгалах - Хүний нөөц</h4>
-                        <div className="filters">
-                            <select
-                                value={dalan70From ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setDalan70From(v);
-                                    if (v > dalan70To) setDalan70To(v);
-                                }}
-                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`d70-from-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                            <span className="to">→</span>
-                            <select
-                                value={dalan70To ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setDalan70To(v);
-                                    if (v < dalan70From) setDalan70From(v);
-                                }}
-                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`d70-to-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                        </div>
+                        {dalan70Error && (
+                            <div className="error-msg">
+                                {dalan70Error}
+                                <button type="button" onClick={fetchDalanHun}>
+                                    Дахин оролдох
+                                </button>
+                            </div>
+                        )}
+                        {dalan70Loading ? (
+                            <div className="loading-box">
+                                Өгөгдөл ачааллаж байна...
+                            </div>
+                        ) : (
+                            <div className="chart-box">
+                                <Doughnut
+                                    data={dalan70HunChartData}
+                                    options={{
+                                        ...options,
+                                        cutout: "70%",
+                                        plugins: {
+                                            ...options.plugins,
+                                            centerText: true,
+                                        },
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
-                    {dalan70Error && (
-                        <div className="error-msg">
-                            {dalan70Error}
-                            <button type="button" onClick={fetchDalan70}>
-                                Дахин оролдох
-                            </button>
-                        </div>
-                    )}
-                    {dalan70Loading ? (
-                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
-                    ) : (
-                        <div className="chart-box">
-                            <Doughnut
-                                data={dalan70HunChartData}
-                                options={{
-                                    ...options,
-                                    cutout: "70%",
-                                    plugins: {
-                                        ...options.plugins,
-                                        centerText: true,
-                                    },
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
 
-                {/* 70 жил хадгалах санхүү (DalanJilSanhuu) */}
-                <div className="card">
-                    <div className="card-head">
-                        <h4>📋 70 жил хадгалах - Санхүү</h4>
-                        <div className="filters">
-                            <select
-                                value={dalan70From ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setDalan70From(v);
-                                    if (v > dalan70To) setDalan70To(v);
-                                }}
-                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`d70s-from-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
-                            <span className="to">→</span>
-                            <select
-                                value={dalan70To ?? ""}
-                                onChange={(e) => {
-                                    const v = Number(e.target.value);
-                                    setDalan70To(v);
-                                    if (v < dalan70From) setDalan70From(v);
-                                }}
-                                disabled={dalan70Loading || yearsLoading || !availableYears.length}
-                            >
-                                {availableYears.length === 0 ? (
-                                    <option value="">...</option>
-                                ) : (
-                                    availableYears.map((y) => (
-                                        <option key={`d70s-to-${y}`} value={y}>
-                                            {y}
-                                        </option>
-                                    ))
-                                )}
-                            </select>
+                    {/* 70 жил хадгалах санхүү (DalanJilSanhuu) */}
+                    <div className="card">
+                        <div className="card-head">
+                            <h4>📋 70 жил хадгалах - Санхүү</h4>
+                            <div className="filters">
+                                <select
+                                    value={dalanSanhuuFrom ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setDalanSanhuuFrom(v);
+                                        if (v > dalanSanhuuTo)
+                                            setDalanSanhuuTo(v);
+                                    }}
+                                    disabled={
+                                        dalan70Loading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option
+                                                key={`d70s-from-${y}`}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                                <span className="to">→</span>
+                                <select
+                                    value={dalanSanhuuTo ?? ""}
+                                    onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        setDalanSanhuuTo(v);
+                                        if (v < dalanSanhuuFrom)
+                                            setDalanSanhuuFrom(v);
+                                    }}
+                                    disabled={
+                                        dalan70Loading ||
+                                        yearsLoading ||
+                                        !availableYears.length
+                                    }
+                                >
+                                    {availableYears.length === 0 ? (
+                                        <option value="">...</option>
+                                    ) : (
+                                        availableYears.map((y) => (
+                                            <option
+                                                key={`d70s-to-${y}`}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))
+                                    )}
+                                </select>
+                            </div>
                         </div>
+                        {dalan70Error && (
+                            <div className="error-msg">
+                                {dalan70Error}
+                                <button
+                                    type="button"
+                                    onClick={fetchDalanSanhuu}
+                                >
+                                    Дахин оролдох
+                                </button>
+                            </div>
+                        )}
+                        {dalan70Loading ? (
+                            <div className="loading-box">
+                                Өгөгдөл ачааллаж байна...
+                            </div>
+                        ) : (
+                            <div className="chart-box">
+                                <Doughnut
+                                    data={dalan70SanhuuChartData}
+                                    options={{
+                                        ...options,
+                                        cutout: "70%",
+                                        plugins: {
+                                            ...options.plugins,
+                                            centerText: true,
+                                        },
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
-                    {dalan70Error && (
-                        <div className="error-msg">
-                            {dalan70Error}
-                            <button type="button" onClick={fetchDalan70}>
-                                Дахин оролдох
-                            </button>
-                        </div>
-                    )}
-                    {dalan70Loading ? (
-                        <div className="loading-box">Өгөгдөл ачааллаж байна...</div>
-                    ) : (
-                        <div className="chart-box">
-                            <Doughnut
-                                data={dalan70SanhuuChartData}
-                                options={{
-                                    ...options,
-                                    cutout: "70%",
-                                    plugins: {
-                                        ...options.plugins,
-                                        centerText: true,
-                                    },
-                                }}
-                            />
-                        </div>
-                    )}
                 </div>
-            </div>
             )}
 
             <style>{`
