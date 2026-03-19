@@ -185,20 +185,6 @@ class DalanJilhunChildController extends Controller
             Storage::makeDirectory($userFolder);
         }
 
-        // 1. Давхардсан файл шалгах
-        // foreach ($req->data_url as $value) {
-        //     $setPDFPathID = $value["filename"];
-        //     $path = $userFolder . "/" . $setPDFPathID;
-
-        //     if (Storage::exists($path)) {
-        //         return response([
-        //             "status" => "error",
-        //             "msg" => "Файл \"{$setPDFPathID}\" аль хэдийн хадгалагдсан байна!"
-        //         ], 422);
-        //     }
-        // }
-
-        // 2. DB Transaction эхлэх
         DB::beginTransaction();
 
         try {

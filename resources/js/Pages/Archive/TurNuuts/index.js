@@ -31,6 +31,7 @@ const Index = () => {
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState(null); // анх null
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const [activeTab, setActiveTab] = useState("ilt");
 
@@ -41,6 +42,21 @@ const Index = () => {
     useEffect(() => {
         refreshTurNuuts();
     }, [selectedHumrug, selectedDans]);
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/TurNuuts", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshTurNuuts(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
 
     const refreshTurNuuts = () => {
         axios.get("/get/TurNuuts").then((res) => {
@@ -677,6 +693,45 @@ const Index = () => {
                         {/* TABLE */}
                         {activeTab === "ilt" && (
                             <>
+                                <div className="col-md-12 mb-3">
+                                    <label
+                                        htmlFor="turNuutsExcel"
+                                        className="form-label"
+                                    >
+                                        Excel Import
+                                    </label>
+                                    <div className="d-flex align-items-center">
+                                        {/* Файл сонгох input */}
+                                        <input
+                                            type="file"
+                                            id="turNuutsExcel"
+                                            className="form-control form-control-sm me-2"
+                                            accept=".xlsx,.xls,.csv"
+                                            onChange={(e) => {
+                                                if (e.target.files.length)
+                                                    setSelectedFile(
+                                                        e.target.files[0]
+                                                    );
+                                            }}
+                                        />
+
+                                        {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                        {selectedFile && (
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => {
+                                                    importExcel(selectedFile); // Excel импортлох функц дуудна
+                                                    setSelectedFile(null); // файлыг цэвэрлэх
+                                                    document.getElementById(
+                                                        "turNuutsExcel"
+                                                    ).value = null; // input-ыг цэвэрлэх
+                                                }}
+                                            >
+                                                Import
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                                 <MUIDatatable
                                     data={getTurNuuts}
                                     setdata={setTurNuuts}

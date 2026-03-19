@@ -5,7 +5,7 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-// import ArhivTrNuutsChild from "./ArhivTrNuutsChild";
+import ArhivTrNuutsChild from "./ArhivTrNuutsChild";
 
 const ArhivTrNuuts = () => {
     const today = new Date();
@@ -99,7 +99,7 @@ const ArhivTrNuuts = () => {
         }
 
         axios
-            .get(`/get/DansburtgelNuuts/${selectedHumrug}`)
+            .get(`/get/DansburtgelTurNuuts/${selectedHumrug}`)
             .then((res) => {
                 setDans(res.data);
             })

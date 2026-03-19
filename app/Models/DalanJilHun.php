@@ -14,6 +14,26 @@ class DalanJilHun extends Model
     protected $table = 'db_arhivbaingahad';
     public $timestamps = false;
 
+    protected $fillable = [
+        'desk_id',
+        'humrug_id',
+        'dans_id',
+        'hadgalamj_turul',
+        'hadgalamj_dugaar',
+        'hadgalamj_zbn',
+        'hergiin_indeks',
+        'hadgalamj_garchig',
+        'harya_on',
+        'on_ehen',
+        'on_suul',
+        'huudas_too',
+        'habsralt_too',
+        'jagsaalt_zuildugaar',
+        'ustgasan_temdeglel',
+        'hn_tailbar',
+        'user_id',
+    ];
+
     protected static function booted()
     {
         static::created(function (DalanJilHun $dalanjilHun) {
@@ -28,9 +48,10 @@ class DalanJilHun extends Model
     public function getDalanJilHun()
     {
         try {
-            $baingaIlt = DB::table("db_arhivbaingahad")
+            $dalanjilHun = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
                 ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -39,7 +60,6 @@ class DalanJilHun extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -47,6 +67,7 @@ class DalanJilHun extends Model
                     "db_arhivdans.dans_baidal",
                     "db_arhivdans.hadgalah_hugatsaa",
                     "jagsaaltzuildugaar.hugatsaa as hugatsaa"
+
                 )
                 ->where("hadgalamj_turul", "=", "1")
                 ->where(function ($query) {
@@ -55,9 +76,7 @@ class DalanJilHun extends Model
                 })
                 ->orderByDesc("db_arhivbaingahad.id")
                 ->get();
-
-
-            foreach ($baingaIlt as $row) {
+            foreach ($dalanjilHun as $row) {
                 try {
                     if ($row->hadgalamj_garchig) {
                         $row->hadgalamj_garchig = Crypt::decryptString($row->hadgalamj_garchig);
@@ -91,57 +110,18 @@ class DalanJilHun extends Model
                 }
             }
 
-            return $baingaIlt;
+
+            return $dalanjilHun;
         } catch (\Throwable $th) {
-            return response([
-                "status" => "error",
-                "msg" => "Татаж чадсангүй."
-            ], 500);
+            return response(
+                array(
+                    "status" => "error",
+                    "msg" => "татаж чадсангүй."
+                ),
+                500
+            );
         }
     }
-    // {
-    //     try {
-    //         $dalanjilHun = DB::table("db_arhivbaingahad")
-    //             ->where("db_arhivbaingahad.user_id", Auth::id())
-    //             ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
-    //             ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
-    //             ->leftJoin("jagsaaltzuildugaar", function ($join) {
-    //                 $join->on(
-    //                     "jagsaaltzuildugaar.barimt_dd",
-    //                     "=",
-    //                     "db_arhivbaingahad.jagsaalt_zuildugaar"
-    //                 )
-    //                     ->where("jagsaaltzuildugaar.userID", Auth::id());
-    //             })
-    //             ->select(
-    //                 "db_arhivbaingahad.*",
-    //                 "db_humrug.humrug_ner",
-    //                 "db_arhivdans.dans_ner",
-    //                 "db_arhivdans.dans_baidal",
-    //                 "db_arhivdans.hadgalah_hugatsaa",
-    //                 "jagsaaltzuildugaar.hugatsaa as hugatsaa"
-
-    //             )
-    //             ->where("hadgalamj_turul", "=", "1")
-    //             ->where(function ($query) {
-    //                 $query->whereNull("ustgasan_temdeglel")
-    //                     ->orWhere("ustgasan_temdeglel", "");
-    //             })
-    //             ->orderByDesc("db_arhivbaingahad.id")
-
-    //             ->get();
-
-    //         return $dalanjilHun;
-    //     } catch (\Throwable $th) {
-    //         return response(
-    //             array(
-    //                 "status" => "error",
-    //                 "msg" => "татаж чадсангүй."
-    //             ),
-    //             500
-    //         );
-    //     }
-    // }
 
     public function DalanjilHunByHumrug($humrugID)
     {
@@ -183,57 +163,6 @@ class DalanJilHun extends Model
             ], 500);
         }
     }
-    // {
-    //     try {
-    //         $userId = Auth::id();
-    //         $dans = DB::table("db_arhivdans")
-    //             ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
-    //             ->where("db_arhivdans.hadgalah_hugatsaa", "70 жил хадгалагдах")
-    //             ->where("db_arhivdans.dans_baidal", "Хүний нөөц")
-    //             ->where("db_arhivdans.humrugID", $humrugID)
-    //             ->where("db_arhivdans.user_id", "=", $userId)
-    //             ->select(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
-    //                 "db_arhivdans.id",
-    //                 "db_arhivdans.humrugID",
-    //                 "db_arhivdans.dans_ner",
-    //                 "db_arhivdans.humrug_niit",
-    //                 "db_arhivdans.dans_niit",
-    //                 "db_arhivdans.on_ehen",
-    //                 "db_arhivdans.on_suul",
-    //                 "db_arhivdans.hubi_dans",
-    //                 "db_arhivdans.dans_tailbar",
-    //                 "db_arhivdans.dans_baidal",
-    //                 "db_arhivdans.hadgalah_hugatsaa",
-    //                 DB::raw("MAX(db_humrug.humrug_ner) as humrug_ner")
-    //             )
-    //             ->groupBy(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
-    //                 "db_arhivdans.id",
-    //                 "db_arhivdans.humrugID",
-    //                 "db_arhivdans.dans_ner",
-    //                 "db_arhivdans.humrug_niit",
-    //                 "db_arhivdans.dans_niit",
-    //                 "db_arhivdans.on_ehen",
-    //                 "db_arhivdans.on_suul",
-    //                 "db_arhivdans.hubi_dans",
-    //                 "db_arhivdans.dans_tailbar",
-    //                 "db_arhivdans.dans_baidal",
-    //                 "db_arhivdans.hadgalah_hugatsaa",
-
-    //             )
-    //             ->get();
-
-    //         return $dans;
-    //     } catch (\Throwable $th) {
-    //         return response([
-    //             "status" => "error",
-    //             "message" => $th->getMessage(),
-    //             "file" => $th->getFile(),
-    //             "line" => $th->getLine(),
-    //         ], 500);
-    //     }
-    // }
 
     public function getArchiveDalanJilhun()
     {

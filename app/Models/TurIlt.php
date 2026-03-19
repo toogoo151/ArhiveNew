@@ -6,12 +6,33 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 
 class TurIlt extends Model
 {
     use HasFactory;
     protected $table = 'db_arhivbaingahad';
     public $timestamps = false;
+
+    protected $fillable = [
+        'desk_id',
+        'humrug_id',
+        'dans_id',
+        'hadgalamj_turul',
+        'hadgalamj_dugaar',
+        'hadgalamj_zbn',
+        'hergiin_indeks',
+        'hadgalamj_garchig',
+        'harya_on',
+        'on_ehen',
+        'on_suul',
+        'huudas_too',
+        'habsralt_too',
+        'jagsaalt_zuildugaar',
+        'ustgasan_temdeglel',
+        'hn_tailbar',
+        'user_id',
+    ];
 
     protected static function booted()
     {
@@ -26,10 +47,9 @@ class TurIlt extends Model
     public function getTurIlt()
     {
         try {
-            $turIlt = DB::table("db_arhivbaingahad")
+            $baingaIlt = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
                 ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -38,6 +58,7 @@ class TurIlt extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
+                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -46,23 +67,55 @@ class TurIlt extends Model
                     "db_arhivdans.hadgalah_hugatsaa",
                     "jagsaaltzuildugaar.hugatsaa as hugatsaa"
                 )
+                ->where("hadgalamj_turul", "=", "2")
                 ->where(function ($query) {
                     $query->whereNull("ustgasan_temdeglel")
                         ->orWhere("ustgasan_temdeglel", "");
                 })
                 ->orderByDesc("db_arhivbaingahad.id")
-
                 ->get();
 
-            return $turIlt;
+
+            foreach ($baingaIlt as $row) {
+                try {
+                    if ($row->hadgalamj_garchig) {
+                        $row->hadgalamj_garchig = Crypt::decryptString($row->hadgalamj_garchig);
+                    }
+
+                    if ($row->hadgalamj_zbn) {
+                        $row->hadgalamj_zbn = Crypt::decryptString($row->hadgalamj_zbn);
+                    }
+
+                    if ($row->hn_tailbar) {
+                        $row->hn_tailbar = Crypt::decryptString($row->hn_tailbar);
+                    }
+
+                    if ($row->humrug_ner) {
+                        $row->humrug_ner = Crypt::decryptString($row->humrug_ner);
+                    }
+
+                    if ($row->dans_ner) {
+                        $row->dans_ner = Crypt::decryptString($row->dans_ner);
+                    }
+
+                    if ($row->dans_baidal) {
+                        $row->dans_baidal = Crypt::decryptString($row->dans_baidal);
+                    }
+
+                    if ($row->hadgalah_hugatsaa) {
+                        $row->hadgalah_hugatsaa = Crypt::decryptString($row->hadgalah_hugatsaa);
+                    }
+                } catch (\Exception $e) {
+                    // decrypt алдаа гарвал original утгыг үлдээнэ
+                }
+            }
+
+            return $baingaIlt;
         } catch (\Throwable $th) {
-            return response(
-                array(
-                    "status" => "error",
-                    "msg" => "татаж чадсангүй."
-                ),
-                500
-            );
+            return response([
+                "status" => "error",
+                "msg" => "Татаж чадсангүй."
+            ], 500);
         }
     }
 

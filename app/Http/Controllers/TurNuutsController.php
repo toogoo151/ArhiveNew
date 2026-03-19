@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Redirect, Response, File;
-use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Crypt;
+use App\Imports\TurNuutsImport;
 
 class TurNuutsController extends Controller
 {
@@ -19,7 +21,7 @@ class TurNuutsController extends Controller
             foreach ($req->data as $item) {
                 $archive = TurNuuts::find($item['id']);
                 if ($archive) {
-                    $archive->ustgasan_temdeglel = $item['ustgasan_temdeglel'];
+                    $archive->ustgasan_temdeglel = Crypt::encryptString($item['ustgasan_temdeglel']);
                     $archive->save();
                 }
             }
@@ -78,17 +80,17 @@ class TurNuutsController extends Controller
             $insertTurNuuts->dans_id = $req->dans_id;
             $insertTurNuuts->hn_dd = $req->hn_dd;
             $insertTurNuuts->hn_turul = 2;
-            $insertTurNuuts->hn_zbn = $req->hn_zbn;
             $insertTurNuuts->hereg_burgtel = $req->hereg_burgtel;
+            $insertTurNuuts->hn_zbn = Crypt::encryptString($req->hn_zbn);
+            $insertTurNuuts->hn_garchig = Crypt::encryptString($req->hn_garchig);
+            $insertTurNuuts->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
+            $insertTurNuuts->nuuts_zereglel = Crypt::encryptString($req->nuuts_zereglel);
             $insertTurNuuts->harya_on = $req->harya_on;
-            $insertTurNuuts->hn_garchig = $req->hn_garchig;
-            $insertTurNuuts->nuuts_zereglel = $req->nuuts_zereglel;
             $insertTurNuuts->on_ehen = $req->on_ehen;
             $insertTurNuuts->on_suul = $req->on_suul;
             $insertTurNuuts->huudas_too = $req->huudas_too;
             $insertTurNuuts->habsralt_too = $req->habsralt_too;
             $insertTurNuuts->jagsaalt_zuildugaar = $req->jagsaalt_zuildugaar;
-            $insertTurNuuts->hn_tailbar = $req->hn_tailbar;
             // $insertBainga->dans_tailbar = $req->dans_tailbar;
             $insertTurNuuts->user_id = Auth::id();
             $insertTurNuuts->save();
@@ -112,17 +114,17 @@ class TurNuutsController extends Controller
             $edit->dans_id = $req->dans_id;
             $edit->hn_dd = $req->hn_dd;
             $edit->hn_turul = 2;
-            $edit->hn_zbn = $req->hn_zbn;
+            $edit->hn_zbn = Crypt::encryptString($req->hn_zbn);
+            $edit->hn_garchig = Crypt::encryptString($req->hn_garchig);
+            $edit->nuuts_zereglel = Crypt::encryptString($req->nuuts_zereglel);
+            $edit->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
             $edit->hereg_burgtel = $req->hereg_burgtel;
             $edit->harya_on = $req->harya_on;
-            $edit->hn_garchig = $req->hn_garchig;
-            $edit->nuuts_zereglel = $req->nuuts_zereglel;
             $edit->on_ehen = $req->on_ehen;
             $edit->on_suul = $req->on_suul;
             $edit->huudas_too = $req->huudas_too;
             $edit->habsralt_too = $req->habsralt_too;
             $edit->jagsaalt_zuildugaar = $req->jagsaalt_zuildugaar;
-            $edit->hn_tailbar = $req->hn_tailbar;
             $edit->user_id = Auth::id();
             $edit->save();
 
@@ -136,5 +138,18 @@ class TurNuutsController extends Controller
                 "msg" => "Алдаа гарлаа."
             ], 500);
         }
+    }
+
+    public function importTurNuuts(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new TurNuutsImport, $request->file('file'));
+
+        return response()->json([
+            'msg' => 'Амжилттай импорт хийлээ'
+        ]);
     }
 }

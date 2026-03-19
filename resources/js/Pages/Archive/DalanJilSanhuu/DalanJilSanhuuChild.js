@@ -12,6 +12,7 @@ const DalanJilSanhuuChild = (props) => {
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState([]);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const [showModal] = useState("modal");
 
@@ -103,6 +104,21 @@ const DalanJilSanhuuChild = (props) => {
                     });
             }
         });
+    };
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/DalanSanhuuChild", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshdalanSanhuuChild(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
     };
     const refreshdalanSanhuuChild = (id) => {
         axios
@@ -236,6 +252,44 @@ const DalanJilSanhuuChild = (props) => {
                                 <span style={{ color: "#2563eb" }}>
                                     {changeDataRow?.hadgalamj_garchig || "-"}
                                 </span>
+                            </div>
+                        </div>
+
+                        <div className="col-md-12 mb-3">
+                            <label
+                                htmlFor="DalanjilSanhuuChildExcel"
+                                className="form-label"
+                            >
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+                                {/* Файл сонгох input */}
+                                <input
+                                    type="file"
+                                    id="DalanjilSanhuuChildExcel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+                                {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile); // Excel импортлох функц дуудна
+                                            setSelectedFile(null); // файлыг цэвэрлэх
+                                            document.getElementById(
+                                                "DalanjilSanhuuChildExcel"
+                                            ).value = null; // input-ыг цэвэрлэх
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
                             </div>
                         </div>
                         <MUIDatatable
