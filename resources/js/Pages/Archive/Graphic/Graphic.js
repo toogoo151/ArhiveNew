@@ -268,8 +268,8 @@ const Graphic = () => {
     const baingaChartData = useMemo(
         () => ({
             labels: [
-                "Байна хадгалах хадгаламжийн нэгж - Илт",
-                "Байнга хадгалах хадгаламжийн нэгж - Нууц",
+                "Байнга хадгалагдах хадгаламжийн нэгж - Илт",
+                "Байнга хадгалагдах хадгаламжийн нэгж - Нууц",
             ],
             datasets: [
                 {
@@ -303,7 +303,7 @@ const Graphic = () => {
     /* ================= 70 жил: Хүний нөөц (DalanJilHun) ================= */
     const dalan70HunChartData = useMemo(
         () => ({
-            labels: ["70 жил хадгалах - Хүний нөөц"],
+            labels: ["70 жил хадгалагдах - Хүний нөөц"],
             datasets: [
                 {
                     data: [dalan70Counts.dalanJilHun],
@@ -318,7 +318,7 @@ const Graphic = () => {
     /* ================= 70 жил: Санхүү (DalanJilSanhuu) ================= */
     const dalan70SanhuuChartData = useMemo(
         () => ({
-            labels: ["70 жил хадгалах - Санхүү"],
+            labels: ["70 жил хадгалагдах - Санхүү"],
             datasets: [
                 {
                     data: [dalan70Counts.dalanJilSanhuu],
@@ -529,7 +529,7 @@ const Graphic = () => {
                     {/* 70 жил хадгалах хүний нөөц (DalanJilHun) */}
                     <div className="card">
                         <div className="card-head">
-                            <h4>📋 70 жил хадгалах - Хүний нөөц</h4>
+                            <h4>📋 70 жил хадгалагдах - Хүний нөөц</h4>
                             <div className="filters">
                                 <select
                                     value={dalanHunFrom}
@@ -617,7 +617,7 @@ const Graphic = () => {
                     {/* 70 жил хадгалах санхүү (DalanJilSanhuu) */}
                     <div className="card">
                         <div className="card-head">
-                            <h4>📋 70 жил хадгалах - Санхүү</h4>
+                            <h4>📋 70 жил хадгалагдах - Санхүү</h4>
                             <div className="filters">
                                 <select
                                     value={dalanSanhuuFrom ?? ""}

@@ -107,6 +107,8 @@ Route::get("/get/auth", function () {
     $user = new User;
     return $user->getUser();
 });
+
+
 Route::get("/get/auth/name", function () {
     $user = Auth::user();
     return $user ? $user->getUserName() : "Нэвтрээгүй байна";
@@ -134,6 +136,7 @@ Route::get("/get/auth/image", function () {
     $user = new all_users;
     return $user->getUserImage();
 });
+
 // get admin about end
 
 
@@ -176,11 +179,9 @@ Route::post("/delete/user", [UserController::class, "DeleteUser"]);
 //Командлал start
 
 
-Route::get("/get/comandlal", function () {
-    $comandlal = new Comandlal();
-    return $comandlal->getComandlal();
-});
-// Route::get("/get/comandlal", [ComandController::class, "getComandlal"]);
+
+
+Route::get("/get/comandlal", [ComandController::class, "getComandlal"]);
 Route::post("/new/comandlal", [ComandController::class, "NewComandlal"]);
 Route::post("/delete/comandlal", [ComandController::class, "DeleteComandlal"]);
 Route::post("/edit/comandlal", [ComandController::class, "EditComandlal"]);

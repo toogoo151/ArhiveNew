@@ -69,7 +69,6 @@ class ErhzuiController extends Controller
                 "status" => "success",
                 "msg" => "Амжилттай хадгаллаа."
             ], 200);
-
         } catch (\Throwable $th) {
             return response([
                 "status" => "error",
@@ -106,7 +105,6 @@ class ErhzuiController extends Controller
             'erhzui_akt_ner' => 'required',
             'file' => 'nullable|file'
         ]);
-
         try {
 
             $updateErhzui = ErhzuiModel::where('id', $req->id)
@@ -145,7 +143,6 @@ class ErhzuiController extends Controller
                 "status" => "success",
                 "msg" => "Амжилттай заслаа."
             ], 200);
-
         } catch (\Throwable $th) {
             return response([
                 "status" => "error",
@@ -171,7 +168,6 @@ class ErhzuiController extends Controller
             if ($storedPath) {
                 Storage::disk('public')->delete($storedPath);
             }
-
             $delete->delete();
             return response(
                 array(

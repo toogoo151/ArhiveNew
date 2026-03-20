@@ -17,6 +17,7 @@ class Comandlal extends Model
     {
         try {
             $missions = DB::table("db_comandlal")
+
                 ->get();
             return $missions;
         } catch (\Throwable $th) {
