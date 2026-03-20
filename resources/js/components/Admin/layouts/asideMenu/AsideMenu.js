@@ -151,6 +151,11 @@ export default function AsideMenu() {
                     url: "/get/jagsaaltZuils",
                     icon: "fa fa-boxes",
                 },
+                {
+                    name: "Хууль, эрх зүй",
+                    url: "/get/erhzui-info",
+                    icon: "fa fa-gavel",
+                },
                 // GANBAT NEMSEN END
             ],
         },

@@ -39,7 +39,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
     const salbarOptions = Array.isArray(getSalbar)
         ? getSalbar.map((u) => ({
               value: String(u.id),
-              label: u.salbar ?? u.name ?? u.title ?? "",
+              label: u.t_ner ?? u.salbar ?? u.name ?? u.title ?? "",
           }))
         : [];
 
@@ -61,10 +61,6 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
             .get("/get/SecType")
             .then((res) => setSectype(normalizeArray(res)))
             .catch(() => setSectype([]));
-        axios
-            .get("/get/Salbar")
-            .then((res) => setSalbar(normalizeArray(res)))
-            .catch(() => setSalbar([]));
     }, []);
 
     // ---------------- When a row is selected (populate inputs) ----------------
@@ -96,6 +92,16 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
         } else {
             setUnits([]);
         }
+
+        const actualAngi = row.unitIDshuu ?? row.angi_id ?? null;
+        if (actualAngi) {
+            axios
+                .post("/get/byAngiID", { id: actualAngi })
+                .then((res) => setSalbar(normalizeArray(res)))
+                .catch(() => setSalbar([]));
+        } else {
+            setSalbar([]);
+        }
     }, [changeDataRow]);
 
     // ---------------- When comand changes, load units ----------------
@@ -109,6 +115,19 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
             .then((res) => setUnits(normalizeArray(res)))
             .catch(() => setUnits([]));
     }, [comand_id]);
+
+    // ---------------- When angi changes, load salbar ----------------
+    useEffect(() => {
+        if (!angi) {
+            setSalbar([]);
+            setSalbarID("");
+            return;
+        }
+        axios
+            .post("/get/byAngiID", { id: angi })
+            .then((res) => setSalbar(normalizeArray(res)))
+            .catch(() => setSalbar([]));
+    }, [angi]);
 
     // ---------------- Save ----------------
     const saveUnitSub = () => {

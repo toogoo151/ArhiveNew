@@ -29,6 +29,7 @@ use App\Http\Controllers\DalanJilSanhuuChildController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SecretTypeController;
+use App\Http\Controllers\ErhzuiController;
 
 
 
@@ -172,7 +173,7 @@ Route::post("/delete/user", [UserController::class, "DeleteUser"]);
 
 //Хэрэглэгч end
 
-//Командлал start   
+//Командлал start
 
 
 Route::get("/get/comandlal", function () {
@@ -234,7 +235,8 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');;
+    ->middleware('auth');
+;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -518,6 +520,17 @@ Route::get("/get/ArchiveDalanJilSanhuu", function () {
 //Dalan jil Sanhuu archive end
 
 
+
+// Erh zui start
+Route::get("/get/erhzui", [ErhzuiController::class, "getErhzui"]);
+Route::post("create/erhzui", [ErhzuiController::class, "CreateErhzui"])
+    ->middleware('auth');
+Route::post("edit/erhzui", [ErhzuiController::class, "UpdateErhzui"])
+    ->middleware('auth');
+Route::post("delete/erhzui", [ErhzuiController::class, "DeleteErhzui"])
+    ->middleware('auth');
+
+// Erh zui end
 
 
 // GANBAT NEMSEN START

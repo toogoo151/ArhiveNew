@@ -33,6 +33,9 @@ import JagsaaltZuil from "../../../../Pages/Archive/JagsaaltZuil/index";
 import SedevZui from "../../../../Pages/Archive/SedevZui/index";
 import Tovchlol from "../../../../Pages/Archive/TovchilsonUg/index";
 
+// erhzui
+import Erhzui from "../../../../Pages/Archive/ErhZui/index";
+
 //Nuugdah
 import ProgrammType from "../../../../Pages/Archive/Tuslah/ProgrammType";
 import Retention from "../../../../Pages/Archive/Tuslah/Retention";
@@ -86,6 +89,7 @@ const MyRoutes = (props) => {
             <Route path="/get/sedevZuilzaagch" element={<SedevZui />} />
             <Route path="/get/dictonaries" element={<AshigNom />} />
             <Route path="/get/tovchilsonug" element={<Tovchlol />} />
+            <Route path="/get/erhzui-info" element={<Erhzui />} />
             {/* Туслах сан дуусах*/}
             {/* Нуугдмал санд нэмэх */}
             <Route path="/get/retentions" element={<Retention />} />
