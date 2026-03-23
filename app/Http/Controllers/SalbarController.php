@@ -7,6 +7,7 @@ use App\Models\Salbar;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Redirect, Response, File;
 use Illuminate\Support\Str;
 
@@ -45,9 +46,9 @@ class SalbarController extends Controller
             $insertAngi = new Salbar();
             $insertAngi->comand_id = $req->comand_id;
             $insertAngi->angi = $req->angi;
-            $insertAngi->salbar = $req->salbar;
+            $insertAngi->salbar = Crypt::encryptString($req->salbar);
             $insertAngi->t_ner = $req->t_ner;
-            $insertAngi->b_ner = $req->b_ner;
+            $insertAngi->b_ner = Crypt::encryptString($req->b_ner);
             $insertAngi->save();
             return response(
                 array(
@@ -95,9 +96,9 @@ class SalbarController extends Controller
             $edit = Salbar::find($req->id);
             $edit->comand_id = $req->comand_id;
             $edit->angi = $req->angi;
-            $edit->salbar = $req->salbar;
+            $edit->salbar = Crypt::encryptString($req->salbar);
             $edit->t_ner = $req->t_ner;
-            $edit->b_ner = $req->b_ner;
+            $edit->b_ner = Crypt::encryptString($req->b_ner);
             $edit->save();
             return response(
                 array(

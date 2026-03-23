@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Redirect, Response, File;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Crypt;
 
 class ComandController extends Controller
 {
@@ -18,8 +18,23 @@ class ComandController extends Controller
 
         $comandlal = DB::table("db_comandlal")
             ->get();
+        $comandlal->transform(function ($row) {
+            if (!empty($row->name)) {
+                $row->name = $this->decryptIfNeeded($row->name);
+            }
+            return $row;
+        });
 
         return response()->json($comandlal);
+    }
+
+    private function decryptIfNeeded($value)
+    {
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Exception $e) {
+            return $value; // fallback if already plain or invalid
+        }
     }
 
 
@@ -27,7 +42,7 @@ class ComandController extends Controller
     {
         try {
             $insertComandlal = new Comandlal();
-            $insertComandlal->name = $req->name;
+            $insertComandlal->name = Crypt::encryptString($req->name);
             $insertComandlal->ShortName = $req->ShortName;
             $insertComandlal->save();
             return response(
@@ -47,6 +62,7 @@ class ComandController extends Controller
             );
         }
     }
+
     public function DeleteComandlal(Request $req)
     {
         try {
@@ -74,7 +90,7 @@ class ComandController extends Controller
     {
         try {
             $edit = Comandlal::find($req->id);
-            $edit->name = $req->name;
+            $edit->name = Crypt::encryptString($req->name);
             $edit->ShortName = $req->ShortName;
             $edit->save();
             return response(

@@ -259,6 +259,7 @@ const Index = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getTovchlol}
                                     excelHeaders={excelHeaders}
+                                    excelTitle="Товчилсон үгийн жагсаалт"
                                     isHideInsert={true}
                                 />
                             }

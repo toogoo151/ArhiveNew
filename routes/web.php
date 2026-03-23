@@ -29,6 +29,7 @@ use App\Http\Controllers\DalanJilSanhuuChildController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SecretTypeController;
+use App\Http\Controllers\ErhzuiController;
 
 
 
@@ -106,6 +107,8 @@ Route::get("/get/auth", function () {
     $user = new User;
     return $user->getUser();
 });
+
+
 Route::get("/get/auth/name", function () {
     $user = Auth::user();
     return $user ? $user->getUserName() : "Нэвтрээгүй байна";
@@ -133,6 +136,7 @@ Route::get("/get/auth/image", function () {
     $user = new all_users;
     return $user->getUserImage();
 });
+
 // get admin about end
 
 
@@ -172,14 +176,12 @@ Route::post("/delete/user", [UserController::class, "DeleteUser"]);
 
 //Хэрэглэгч end
 
-//Командлал start   
+//Командлал start
 
 
-Route::get("/get/comandlal", function () {
-    $comandlal = new Comandlal();
-    return $comandlal->getComandlal();
-});
-// Route::get("/get/comandlal", [ComandController::class, "getComandlal"]);
+
+
+Route::get("/get/comandlal", [ComandController::class, "getComandlal"]);
 Route::post("/new/comandlal", [ComandController::class, "NewComandlal"]);
 Route::post("/delete/comandlal", [ComandController::class, "DeleteComandlal"]);
 Route::post("/edit/comandlal", [ComandController::class, "EditComandlal"]);
@@ -234,7 +236,8 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');;
+    ->middleware('auth');
+;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -530,6 +533,17 @@ Route::get("/get/ArchiveDalanJilSanhuu", function () {
 //Dalan jil Sanhuu archive end
 
 
+
+// Erh zui start
+Route::get("/get/erhzui", [ErhzuiController::class, "getErhzui"]);
+Route::post("create/erhzui", [ErhzuiController::class, "CreateErhzui"])
+    ->middleware('auth');
+Route::post("edit/erhzui", [ErhzuiController::class, "UpdateErhzui"])
+    ->middleware('auth');
+Route::post("delete/erhzui", [ErhzuiController::class, "DeleteErhzui"])
+    ->middleware('auth');
+
+// Erh zui end
 
 
 // GANBAT NEMSEN START

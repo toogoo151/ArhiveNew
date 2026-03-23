@@ -78,7 +78,6 @@ class UserController extends Controller
     {
         try {
             $edit = User::find($req->id);
-
             $edit->hereglegch_ner = $req->hereglegch_ner;
             $edit->comand_id = $req->comand_id;
             $edit->angi_id = $req->angi_id;

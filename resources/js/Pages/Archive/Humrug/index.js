@@ -225,6 +225,7 @@ const Index = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getHumrug}
                                     excelHeaders={excelHeaders}
+                                    excelTitle="Хөмрөг"
                                     isHideInsert={true}
                                 />
                             }

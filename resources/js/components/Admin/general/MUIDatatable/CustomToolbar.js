@@ -54,6 +54,10 @@ class CustomToolbar extends React.Component {
         const rawData = this.getExcelData();
         const headerLabels = this.props.excelHeaders.map((h) => h.label);
         const today = new Date().toISOString().split("T")[0];
+        const sheetTitle =
+            (this.props.excelTitle && String(this.props.excelTitle).trim()) ||
+            (this.props.title && String(this.props.title).trim()) ||
+            `Архив ${today}`;
         const mappedData = rawData.map((row) => {
             const obj = {};
             this.props.excelHeaders.forEach((h) => {
@@ -85,8 +89,8 @@ class CustomToolbar extends React.Component {
         // Freeze title + header
         ws["!freeze"] = { xSplit: 0, ySplit: 2 };
 
-        // Title
-        XLSX.utils.sheet_add_aoa(ws, [[`Архив ${today}`]], { origin: "A1" });
+        // Sheet row 1: `excelTitle` (optional), else `title`, else "Архив {date}"
+        XLSX.utils.sheet_add_aoa(ws, [[sheetTitle]], { origin: "A1" });
 
         ws["!merges"] = [
             {

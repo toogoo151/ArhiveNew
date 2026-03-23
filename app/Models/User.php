@@ -11,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 
 
@@ -65,6 +66,24 @@ class User extends Authenticatable
     {
         return $this->hereglegch_ner ?? 'Нэр олдсонгүй';
     }
+
+    public static function decryptIfNeeded($value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable $th) {
+            return $value;
+        }
+    }
+
+    public function getHereglegchNerAttribute($value)
+    {
+        return self::decryptIfNeeded($value);
+    }
     public function getTuvshin()
     {
         return $this->barimt_turul ?? 'Түвшин олдсонгүй';
@@ -81,7 +100,18 @@ class User extends Authenticatable
                 // ->leftJoin("user_type", "user_type.id", "=", "db_user.bichig_turul")
                 // ->leftJoin("nuuts_turul", "nuuts_turul.id", "=", "db_user.tubshin")
                 ->orderBy("db_user.id", "DESC")
-                ->select("db_user.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu", "db_salbar.salbar", "db_salbar.id as salbarIDshuu", "programm_type.Pname")->get();
+                ->select("db_user.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu", "db_salbar.salbar", "db_salbar.id as salbarIDshuu", "programm_type.Pname")
+                ->get();
+
+            $user->transform(function ($u) {
+                if (isset($u->hereglegch_ner)) {
+                    $u->hereglegch_ner = self::decryptIfNeeded($u->hereglegch_ner);
+                }
+                if (isset($u->salbar)) {
+                    $u->salbar = self::decryptIfNeeded($u->salbar);
+                }
+                return $u;
+            });
             return $user;
         } catch (\Throwable $th) {
             return $th;

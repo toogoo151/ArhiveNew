@@ -90,6 +90,7 @@ const index = () => {
                                         buttonName={"Нэмэх"}
                                         excelDownloadData={getUser}
                                         excelHeaders={excelHeaders}
+                                        excelTitle="Хэрэглэгчид"
                                         isHideInsert={true}
                                     />
                                 </>
