@@ -717,6 +717,7 @@ const Index = () => {
                                             buttonName="Нэмэх"
                                             excelDownloadData={getBaingaIlt}
                                             excelHeaders={excelHeaders}
+                                            excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /илт/"
                                             isHideInsert={true}
                                         />
                                     }

@@ -763,6 +763,7 @@ const Index = () => {
                                             buttonName="Нэмэх"
                                             excelDownloadData={getTurNuuts}
                                             excelHeaders={excelHeaders}
+                                            excelTitle="Түр хадгалагдах хадгаламжийн нэгж /нууц/"
                                             isHideInsert={true}
                                             onClick={() => {
                                                 if (

@@ -694,6 +694,7 @@ const Index = () => {
                                             buttonName="Нэмэх"
                                             excelDownloadData={getTurIlt}
                                             excelHeaders={excelHeaders}
+                                            excelTitle="Түр хадгалагдах хадгаламжийн нэгж /илт/"
                                             isHideInsert={true}
                                             onClick={() => {
                                                 if (

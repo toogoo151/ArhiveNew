@@ -683,6 +683,7 @@ const Index = () => {
                                             buttonName="Нэмэх"
                                             excelDownloadData={getDalHun}
                                             excelHeaders={excelHeaders}
+                                            excelTitle="70 жил хадгалагдах хадгаламжийн нэгж /Хүний нөөц/"
                                             isHideInsert={true}
                                             onClick={() => {
                                                 if (

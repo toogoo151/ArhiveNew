@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import CountUp from "react-countup";
-import { MdBook, MdFolder, MdLock, MdPeople, MdSchool, MdSearch, MdTimer, MdWidgets } from "react-icons/md";
+import {
+    MdBook,
+    MdFolder,
+    MdLock,
+    MdPeople,
+    MdSchool,
+    MdSearch,
+    MdTimer,
+    MdWidgets,
+} from "react-icons/md";
 import axios from "../../../AxiosUser";
 
 const Statistic = () => {
-
     // GANBAT
     const [baingaIltCount, setBaingaIltCount] = useState(0);
     const [baingaNuutsCount, setBaingaNuutsCount] = useState(0);
@@ -30,8 +38,12 @@ const Statistic = () => {
         axios
             .post("/get/graphic-70year-counts")
             .then((res) => {
-                setDalanJilHunCount(res.data?.dalanJilHun ?? 0);
-                setDalanJilSanhuuCount(res.data?.dalanJilSanhuu ?? 0);
+                setDalanJilHunCount(
+                    res.data?.hun ?? res.data?.dalanJilHun ?? 0
+                );
+                setDalanJilSanhuuCount(
+                    res.data?.sanhuu ?? res.data?.dalanJilSanhuu ?? 0
+                );
             })
             .catch(() => {
                 setDalanJilHunCount(0);
@@ -44,9 +56,7 @@ const Statistic = () => {
         axios
             .post("/get/BaingaNuutsCount")
             .then((res) => setBaingaNuutsCount(res.data));
-        axios
-            .post("/get/TurIltCount")
-            .then((res) => setTurIltCount(res.data));
+        axios.post("/get/TurIltCount").then((res) => setTurIltCount(res.data));
         axios
             .post("/get/TurNuutsCount")
             .then((res) => setTurNuutsCount(res.data));
@@ -57,16 +67,21 @@ const Statistic = () => {
         axios
             .post("/get/SedevZuiCount")
             .then((res) => setSedevzuiCount(res.data));
-        axios
-            .post("/get/NomCount")
-            .then((res) => setNomCount(res.data));
-        axios
-            .post("/get/TovchCount")
-            .then((res) => setTovchlolCount(res.data));
+        axios.post("/get/NomCount").then((res) => setNomCount(res.data));
+        axios.post("/get/TovchCount").then((res) => setTovchlolCount(res.data));
     };
 
     // Card-ийн background өнгө
-    const cardBackgrounds = ["#f0f8ff", "#ffe4e1", "#e6ffe6", "#fff5e6", "#e6f7ff", "#f3e8ff","#fffbe6","#e8fff8",];
+    const cardBackgrounds = [
+        "#f0f8ff",
+        "#ffe4e1",
+        "#e6ffe6",
+        "#fff5e6",
+        "#e6f7ff",
+        "#f3e8ff",
+        "#fffbe6",
+        "#e8fff8",
+    ];
     const iconGradients = [
         "linear-gradient(270deg, #ff416c, #ff4b2b, #ffcc33, #ff416c)",
         "linear-gradient(270deg, #4776E6, #8E54E9, #6a11cb, #4776E6)",
@@ -76,7 +91,6 @@ const Statistic = () => {
         "linear-gradient(270deg, #fc466b, #3f5efb, #6a11cb, #fc466b)",
         "linear-gradient(270deg, #ee0979, #ff6a00, #ffd200, #ee0979)",
         "linear-gradient(270deg, #56ab2f, #a8e063, #56ab2f, #a8e063)",
-
     ];
 
     const StatCard = ({ title, value, icon: Icon, cardBg, iconGradient }) => (
@@ -206,9 +220,8 @@ const Statistic = () => {
                     iconGradient={iconGradients[7]}
                 />
 
-
                 {/* Ganbat nemsen start */}
-                 <StatCard
+                <StatCard
                     title="Нийт хадгалах хугацааны зүйл"
                     value={jagsaaltCount}
                     icon={MdTimer}
@@ -237,7 +250,6 @@ const Statistic = () => {
                     iconGradient={iconGradients[7]}
                 />
                 {/* Ganbat nemsen end */}
-
             </div>
 
             {/* Hover and gradient animation CSS */}

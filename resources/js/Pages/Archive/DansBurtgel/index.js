@@ -330,6 +330,7 @@ const Index = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getDans}
                                     excelHeaders={excelHeaders}
+                                    excelTitle="Данс бүртгэл"
                                     isHideInsert={true}
                                     onClick={() => {
                                         if (

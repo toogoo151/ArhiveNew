@@ -779,6 +779,7 @@ const Index = () => {
                                             buttonName="Нэмэх"
                                             excelDownloadData={getBaingaNuuts}
                                             excelHeaders={excelHeaders}
+                                            excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /нууц/"
                                             isHideInsert={true}
                                             onClick={() => {
                                                 if (

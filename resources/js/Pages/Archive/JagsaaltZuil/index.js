@@ -607,6 +607,7 @@ const Index = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getJagsaalt}
                                     excelHeaders={excelHeaders}
+                                    excelTitle="Хадгалах хугацааны зүйлийн жагсаалт"
                                     isHideInsert={true}
                                     onClick={() => {
                                         if (

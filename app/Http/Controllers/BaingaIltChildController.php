@@ -7,7 +7,7 @@ use App\Models\BaingaIltChild;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-// use Redirect, Response, File; 
+// use Redirect, Response, File;
 use Illuminate\Support\Facades\File;
 
 use Illuminate\Support\Facades\Storage;
@@ -43,113 +43,6 @@ class BaingaIltChildController extends Controller
         }
     }
 
-    // public function DeleteChildFile(Request $req)
-    // {
-    //     try {
-    //         $row = BaingaIltChild::find($req->id);
-
-    //         if (!$row) {
-    //             return response([
-    //                 "status" => "error",
-    //                 "msg" => "Мэдээлэл олдсонгүй"
-    //             ], 404);
-    //         }
-
-    //         $fileUrl = $req->file_url;   // устгах файл
-
-    //         // 1. Storage path гаргаж авна
-    //         $path = str_replace(asset(''), '', $fileUrl); // url → storage/...
-
-    //         // 2. Файлыг серверээс устгана
-    //         if (Storage::exists($path)) {
-    //             Storage::delete($path);
-    //         }
-
-    //         // 3. DB дээрх file_ner-ээс уг файлыг арилгана
-    //         $files = explode(';', $row->file_ner);
-    //         $newFiles = [];
-
-    //         foreach ($files as $f) {
-    //             if ($f != "" && $f != $fileUrl) {
-    //                 $newFiles[] = $f;
-    //             }
-    //         }
-
-    //         $row->file_ner = implode(';', $newFiles);
-    //         if ($row->file_ner != "") {
-    //             $row->file_ner .= ';';
-    //         }
-
-    //         $row->save();
-
-    //         return response([
-    //             "status" => "success",
-    //             "msg" => "Файл амжилттай устгагдлаа"
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         return response([
-    //             "status" => "error",
-    //             "msg" => "Файл устгах үед алдаа гарлаа"
-    //         ], 500);
-    //     }
-    // }
-
-    // public function DeleteChildFile(Request $req)
-    // {
-    //     try {
-    //         $row = BaingaIltChild::find($req->id);
-
-    //         if (!$row) {
-    //             return response([
-    //                 "status" => "error",
-    //                 "msg" => "Мэдээлэл олдсонгүй"
-    //             ], 404);
-    //         }
-
-    //         $fileUrl = $req->file_url;
-
-    //         // 🔥 1. URL-ээс зөв relative path гаргаж авна
-    //         $parsed = parse_url($fileUrl);
-    //         $relativePath = ltrim($parsed['path'], '/');
-    //         // одоо: doc/BaingaIlt/4/abc.pdf
-
-    //         // 🔥 2. public path дээр бүрэн зам үүсгэнэ
-    //         $fullPath = public_path($relativePath);
-    //         // C:/.../public/doc/BaingaIlt/4/abc.pdf
-
-    //         // 🔥 3. Файлыг устгана
-    //         if (File::exists($fullPath)) {
-    //             File::delete($fullPath);
-    //         }
-
-    //         // 🔥 4. DB дээрх file_ner-ээс арилгана
-    //         $files = explode(';', $row->file_ner);
-    //         $newFiles = [];
-
-    //         foreach ($files as $f) {
-    //             if ($f != "" && $f != $fileUrl) {
-    //                 $newFiles[] = $f;
-    //             }
-    //         }
-
-    //         $row->file_ner = implode(';', $newFiles);
-    //         if ($row->file_ner != "") {
-    //             $row->file_ner .= ';';
-    //         }
-
-    //         $row->save();
-
-    //         return response([
-    //             "status" => "success",
-    //             "msg" => "Файл амжилттай устгагдлаа"
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         return response([
-    //             "status" => "error",
-    //             "msg" => "Файл устгах үед алдаа гарлаа"
-    //         ], 500);
-    //     }
-    // }
     public function DeleteChildFile(Request $req)
     {
         try {
@@ -234,11 +127,13 @@ class BaingaIltChildController extends Controller
 
                 foreach ($files as $fileUrl) {
 
-                    if (empty($fileUrl)) continue;
+                    if (empty($fileUrl))
+                        continue;
 
                     $parsedUrl = parse_url($fileUrl);
 
-                    if (!isset($parsedUrl['path'])) continue;
+                    if (!isset($parsedUrl['path']))
+                        continue;
 
                     // /storage/doc/BaingaIlt/5/file.pdf
                     $relativePath = $parsedUrl['path'];
@@ -305,7 +200,6 @@ class BaingaIltChildController extends Controller
 
             $insertBainga = new BaingaIltChild();
             $insertBainga->hnID = $req->hnID;
-
             $insertBainga->barimt_ner = Crypt::encryptString($req->barimt_ner);
             $insertBainga->uild_gazar = Crypt::encryptString($req->uild_gazar);
             $insertBainga->aguulga = Crypt::encryptString($req->aguulga);
