@@ -88,6 +88,7 @@ const index = () => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getAngi}
                                     excelHeaders={excelHeaders}
+                                    excelTitle="Анги"
                                     isHideInsert={true}
                                 />
                             }

@@ -304,6 +304,7 @@ const Index = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getSedevzui}
                                     excelHeaders={excelHeaders}
+                                     excelTitle="Сэдэв зүйн заагчийн жагсаалт"
                                     isHideInsert={true}
                                 />
                             }

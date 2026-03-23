@@ -257,6 +257,7 @@ const Index = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getNom}
                                     excelHeaders={excelHeaders}
+                                    excelTitle="Ашигласан номын жагсаалт"
                                     isHideInsert={true}
                                 />
                             }

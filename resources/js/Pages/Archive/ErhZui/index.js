@@ -272,6 +272,7 @@ const Index = () => {
                                     dataTargetID="#ErhzuiNew"
                                     spanIconClassName="fas fa-plus"
                                     buttonName="Нэмэх"
+                                    excelTitle="Эрх зүйн жагсаалт"
                                     excelDownloadData={getErhzui}
                                     excelHeaders={excelHeaders}
                                     isHideInsert={true}
