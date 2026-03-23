@@ -571,7 +571,7 @@ const Index = () => {
                                 }`}
                                 onClick={() => setActiveTab("ilt")}
                             >
-                                📊 Илт
+                                📊 Санхүү
                             </button>
 
                             <button

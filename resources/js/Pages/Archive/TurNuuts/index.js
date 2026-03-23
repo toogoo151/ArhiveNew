@@ -653,7 +653,7 @@ const Index = () => {
                                 }`}
                                 onClick={() => setActiveTab("ilt")}
                             >
-                                📊 Илт
+                                📊 Нууц
                             </button>
 
                             <button

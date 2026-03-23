@@ -37,6 +37,7 @@ const Index = () => {
     // const [comment, setComment] = useState("");
     // const [shiljuulehMode, setShiljuulehMode] = useState(null);
 
+    const [selectedFile, setSelectedFile] = useState(null);
     const [activeTab, setActiveTab] = useState("ilt");
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
@@ -72,6 +73,21 @@ const Index = () => {
         return end < new Date();
     };
     const expiredCount = getTurIlt.filter(isExpiredRow).length;
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/turIlt", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshTurIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
 
     const refreshTurIlt = () => {
         axios.get("/get/TurIlt").then((res) => {
@@ -608,6 +624,45 @@ const Index = () => {
                         )}
                         {activeTab === "ilt" && (
                             <>
+                                <div className="col-md-12 mb-3">
+                                    <label
+                                        htmlFor="TurIltsExcel"
+                                        className="form-label"
+                                    >
+                                        Excel Import
+                                    </label>
+                                    <div className="d-flex align-items-center">
+                                        {/* Файл сонгох input */}
+                                        <input
+                                            type="file"
+                                            id="TurIltsExcel"
+                                            className="form-control form-control-sm me-2"
+                                            accept=".xlsx,.xls,.csv"
+                                            onChange={(e) => {
+                                                if (e.target.files.length)
+                                                    setSelectedFile(
+                                                        e.target.files[0]
+                                                    );
+                                            }}
+                                        />
+
+                                        {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                        {selectedFile && (
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => {
+                                                    importExcel(selectedFile); // Excel импортлох функц дуудна
+                                                    setSelectedFile(null); // файлыг цэвэрлэх
+                                                    document.getElementById(
+                                                        "TurIltsExcel"
+                                                    ).value = null; // input-ыг цэвэрлэх
+                                                }}
+                                            >
+                                                Import
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                                 <MUIDatatable
                                     data={getTurIlt}
                                     setdata={setTurIlt}
@@ -683,14 +738,6 @@ const Index = () => {
                             isEditBtnClick={isEditBtnClick}
                         />
 
-                        {/* <TurIltShiljuuleh
-                            setRowsSelected={setRowsSelected}
-                            refreshTurIlt={refreshTurIlt}
-                            selectedHumrug={selectedHumrug}
-                            selectedDans={selectedDans}
-                            changeDataRow={clickedRowData}
-                            isEditBtnClick={isEditBtnClick}
-                        /> */}
                         <TurHadgalahHugatsaa />
                     </div>
                 </div>
@@ -707,15 +754,7 @@ const Index = () => {
                     )}
                 </>
             )}
-            {/* <div className="row clearfix">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div className="card2">
-                        {clickedRowData && (
-                            <TurIltsChild changeDataRow={clickedRowData} />
-                        )}
-                    </div>
-                </div>
-            </div> */}
+
             {showShiljuulehModal && getTurIlt.length > 0 && (
                 <TurIltShiljuuleh
                     selectedHumrug={selectedHumrug}
@@ -728,263 +767,6 @@ const Index = () => {
                     refreshTurIlt={refreshTurIlt}
                 />
             )}
-            {/* {showArchiveModal && clickedRowData && (
-                <div
-                    className="modal fade show"
-                    style={{
-                        display: "block",
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        backdropFilter: "blur(3px)",
-                    }}
-                >
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content rounded shadow-lg border-0">
-                            <div className="modal-header bg-gradient-primary text-white">
-                                <h5 className="modal-title fw-bold">
-                                    📂 Архивт шилжүүлэх
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close btn-close-white"
-                                    onClick={() => setShowArchiveModal(false)}
-                                />
-                            </div>
-
-                            <div className="px-4 py-3 bg-light border-bottom d-flex flex-wrap gap-3 align-items-center">
-                                <span>
-                                    <b>Хөмрөг:</b> {clickedRowData.humrug_ner}
-                                </span>
-                                <span>|</span>
-                                <span>
-                                    <b>Данс:</b> {clickedRowData.dans_ner}
-                                </span>
-                                <span>|</span>
-                                <span>
-                                    <b>ХН төрөл:</b>{" "}
-                                    {clickedRowData.dans_baidal || "-"}
-                                </span>
-                                <span>|</span>
-                                <span>
-                                    <b>Нууцын зэрэг:</b>{" "}
-                                    <span className="badge bg-warning text-dark">
-                                        {clickedRowData.hadgalah_hugatsaa ||
-                                            "-"}
-                                    </span>
-                                </span>
-                            </div>
-
-                            <div
-                                className="px-4 py-3"
-                                style={{
-                                    maxHeight: "300px",
-                                    overflowY: "auto",
-                                }}
-                            >
-                                <div className="table-responsive">
-                                    <table className="table table-striped table-hover table-sm align-middle mb-0">
-                                        <thead className="table-dark">
-                                            <tr>
-                                                <th style={{ width: "35%" }}>
-                                                    Талбар
-                                                </th>
-                                                <th>Утга</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Хадгаламжийн дугаар</td>
-                                                <td>
-                                                    {clickedRowData.hadgalamj_dugaar ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Хадгаламжийн гарчиг</td>
-                                                <td>
-                                                    {clickedRowData.hadgalamj_garchig ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    Зохион байгуулалтын нэгжийн
-                                                    нэр
-                                                </td>
-                                                <td>
-                                                    {clickedRowData.hadgalamj_zbn ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Хэргийн индекс</td>
-                                                <td>
-                                                    {clickedRowData.hergiin_indeks ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Харьяа он</td>
-                                                <td>
-                                                    {clickedRowData.harya_on ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Хуудасны тоо</td>
-                                                <td>
-                                                    {clickedRowData.huudas_too ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div className="px-4 pb-4 d-flex flex-wrap gap-2 justify-content-end">
-                                {!showShiljuuleh ? (
-                                    <>
-                                        <button
-                                            className="btn btn-outline-danger d-flex align-items-center gap-2"
-                                            onClick={() => {
-                                                setShiljuulehMode("delete");
-                                                setShowShiljuuleh(true);
-                                            }}
-                                        >
-                                            <i className="fas fa-trash-alt"></i>
-                                            Устгах жагсаалт болон акт үүсгэх
-                                        </button>
-
-                                        <button
-                                            className="btn btn-success d-flex align-items-center gap-2"
-                                            onClick={() =>
-                                                setShowShiljuuleh(true)
-                                            }
-                                        >
-                                            <i className="fas fa-file-export"></i>{" "}
-                                            Архивт шилжүүлэх болон устгах
-                                        </button>
-
-                                        <button
-                                            className="btn btn-outline-secondary d-flex align-items-center gap-2"
-                                            onClick={() =>
-                                                setShowArchiveModal(false)
-                                            }
-                                        >
-                                            <i className="fas fa-times"></i>{" "}
-                                            Болих
-                                        </button>
-                                    </>
-                                ) : null}
-                            </div>
-
-                            {showShiljuuleh && (
-                                <div className="px-4 pb-4">
-                                    <div className="mb-3">
-                                        <label
-                                            htmlFor="commentInput"
-                                            className="form-label"
-                                        >
-                                            Устгасан буюу архивт шилжүүлсэн
-                                            тухай тэмдэглэл оруулах:
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="commentInput"
-                                            className="form-control"
-                                            placeholder="Тэмдэглэл оруулна уу"
-                                            value={comment}
-                                            onChange={(e) =>
-                                                setComment(e.target.value)
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="d-flex gap-2 justify-content-end">
-                                        <button
-                                            className="btn btn-success"
-                                            onClick={() => {
-                                                if (!comment.trim()) {
-                                                    Swal.fire({
-                                                        icon: "error",
-                                                        title: "Анхаар!",
-                                                        text: "Тэмдэглэл хоосон байна",
-                                                    });
-                                                    return;
-                                                }
-
-                                                if (!clickedRowData?.id) return;
-
-                                                axios
-                                                    .post(
-                                                        "/archive/BaingaIlt",
-                                                        {
-                                                            id: clickedRowData.id,
-                                                            ustgasan_temdeglel:
-                                                                comment.trim(),
-                                                        }
-                                                    )
-                                                    .then((res) => {
-                                                        Swal.fire({
-                                                            icon: "success",
-                                                            title:
-                                                                res.data.msg ||
-                                                                "Амжилттай хадгалагдлаа",
-                                                        });
-                                                        setShowShiljuuleh(
-                                                            false
-                                                        );
-                                                        setComment("");
-                                                        setShowArchiveModal(
-                                                            false
-                                                        ); // modal хаах
-                                                        refreshTurIlt();
-                                                    })
-                                                    .catch((err) => {
-                                                        Swal.fire({
-                                                            icon: "error",
-                                                            title: "Алдаа гарлаа",
-                                                            text:
-                                                                err.response
-                                                                    ?.data
-                                                                    ?.msg || "",
-                                                        });
-                                                    });
-                                            }}
-                                        >
-                                            Хадгалах
-                                        </button>
-
-                                        <button
-                                            className="btn btn-outline-secondary"
-                                            onClick={() =>
-                                                setShowShiljuuleh(false)
-                                            }
-                                        >
-                                            <i className="fas fa-times"></i>{" "}
-                                            Болих
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="modal-body">
-                                {showShiljuuleh && (
-                                    <BaingaIltShiljuuleh
-                                        setRowsSelected={setRowsSelected}
-                                        refreshTurIlt={refreshTurIlt}
-                                        selectedHumrug={selectedHumrug}
-                                        selectedDans={selectedDans}
-                                        changeDataRow={clickedRowData}
-                                        isEditBtnClick={true}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            )} */}
         </>
     );
 };

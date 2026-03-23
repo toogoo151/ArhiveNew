@@ -428,6 +428,9 @@ Route::get("/get/ArchiveTurIlt", function () {
     $ArchiveTurIlt = new TurIlt();
     return $ArchiveTurIlt->getArchiveTurIlt();
 });
+Route::post("/import/turIlt", [TurIltController::class, "importTurIlt"]);
+
+
 // arhive shiljuuleh end
 
 //Childtable Түр хадгалах баримт бичиг start Илт
@@ -438,6 +441,8 @@ Route::post("/new/TurIltChild", [TurIltChildController::class, "NewChildTurIlt"]
 Route::post("/edit/TurIltChild", [TurIltChildController::class, "EditChildTurIlt"])
     ->middleware('auth');
 Route::post("/delete/TurIltChildFile", [TurIltChildController::class, "DeleteChildFile"]);
+Route::post("/import/TurIltChild", [TurIltChildController::class, "importTurIltChild"]);
+
 //Childtable Түр хадгалах баримт бичиг end Илт
 
 

@@ -573,7 +573,7 @@ const Index = () => {
                                 }`}
                                 onClick={() => setActiveTab("ilt")}
                             >
-                                📊 Илт
+                                📊 Хүний нөөц
                             </button>
 
                             <button

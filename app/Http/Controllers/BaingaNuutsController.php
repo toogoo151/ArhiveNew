@@ -147,7 +147,13 @@ class BaingaNuutsController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
-        Excel::import(new BaingaNuutsImport, $request->file('file'));
+        Excel::import(
+            new BaingaNuutsImport(
+                $request->humrug_id,
+                $request->dans_id
+            ),
+            $request->file('file')
+        );
 
         return response()->json([
             'msg' => 'Амжилттай импорт хийлээ'

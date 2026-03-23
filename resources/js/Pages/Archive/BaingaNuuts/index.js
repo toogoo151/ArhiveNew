@@ -71,6 +71,8 @@ const Index = () => {
     const importExcel = (file) => {
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("humrug_id", selectedHumrug);
+        formData.append("dans_id", selectedDans);
 
         axios
             .post("/import/BaingaNuuts", formData)
@@ -667,7 +669,7 @@ const Index = () => {
                                 }`}
                                 onClick={() => setActiveTab("ilt")}
                             >
-                                📊 Илт
+                                📊 Нууц
                             </button>
 
                             <button

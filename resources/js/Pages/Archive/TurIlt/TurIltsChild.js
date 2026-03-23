@@ -10,8 +10,9 @@ import TurIltsChildNew from "./TurIltsChildNew";
 const TurIltsChild = (props) => {
     const [getTurtIltsChild, setTurIltsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
-    const [clickedRowData, setclickedRowData] = useState([]);
+    const [clickedRowData, setclickedRowData] = useState(null);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const [showModal] = useState("modal");
 
@@ -20,14 +21,14 @@ const TurIltsChild = (props) => {
     // }, []);
 
     useEffect(() => {
-        // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurIltsChild(props.changeDataRow.desk_id);
+        if (props.changeDataRow?.desk_id) {
+            refreshTurIltsChild(props.changeDataRow.desk_id);
+        }
 
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
-        setclickedRowData([]);
+        setclickedRowData(null);
         setRowsSelected([]);
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+    }, [props.changeDataRow?.desk_id]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -41,7 +42,7 @@ const TurIltsChild = (props) => {
         setclickedRowData(rowData); // 🔥 ЭНД өгөгдөл дамжуулна
         setIsEditBtnClick(true);
     };
-    const { changeDataRow } = props;
+    const { changeDataRow = {} } = props;
 
     // const deleteOldFile = (file) => {
     //     Swal.fire({
@@ -104,6 +105,20 @@ const TurIltsChild = (props) => {
             }
         });
     };
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/TurIltChild", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshTurIltsChild(props.changeDataRow.desk_id);
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
     const refreshTurIltsChild = (id) => {
         axios
             .post("get/TurIltsChild", {
@@ -111,7 +126,7 @@ const TurIltsChild = (props) => {
             })
             .then((res) => {
                 // console.log(res.data);
-                setTurIltsChild(res.data);
+                setTurIltsChild(Array.isArray(res.data) ? res.data : []);
             })
             .catch((err) => {
                 console.log(err);
@@ -142,10 +157,10 @@ const TurIltsChild = (props) => {
             },
         },
     };
-    const handleChangeNew = (event, data, rowIndex) => {
-        setChangeDataRow(data);
-        setGetDataRowLenght(rowIndex);
-    };
+    // const handleChangeNew = (event, data, rowIndex) => {
+    //     setChangeDataRow(data);
+    //     setGetDataRowLenght(rowIndex);
+    // };
 
     //     {
     //         text: "№",
@@ -236,6 +251,43 @@ const TurIltsChild = (props) => {
                                 <span style={{ color: "#2563eb" }}>
                                     {changeDataRow?.hadgalamj_garchig || "-"}
                                 </span>
+                            </div>
+                        </div>
+                        <div className="col-md-12 mb-3">
+                            <label
+                                htmlFor="turIltsChildExcel"
+                                className="form-label"
+                            >
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+                                {/* Файл сонгох input */}
+                                <input
+                                    type="file"
+                                    id="turIltsChildExcel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+                                {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile); // Excel импортлох функц дуудна
+                                            setSelectedFile(null); // файлыг цэвэрлэх
+                                            document.getElementById(
+                                                "turIltsChildExcel"
+                                            ).value = null; // input-ыг цэвэрлэх
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
                             </div>
                         </div>
                         <MUIDatatable

@@ -57,21 +57,38 @@ const Index = () => {
         console.log(getDans);
     }, [selectedHumrug, selectedDans]);
 
+    // const importExcel = (file) => {
+    //     const formData = new FormData();
+    //     formData.append("file", file);
+
+    //     axios
+    //         .post("/import/baingaIlts", formData)
+    //         .then((res) => {
+    //             Swal.fire(res.data.msg); // Мэдэгдэл
+    //             refreshBaingaIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+    //         })
+    //         .catch((err) => {
+    //             Swal.fire("Import алдаа");
+    //         });
+    // };
+
     const importExcel = (file) => {
         const formData = new FormData();
         formData.append("file", file);
 
+        formData.append("humrug_id", selectedHumrug);
+        formData.append("dans_id", selectedDans);
+
         axios
             .post("/import/baingaIlts", formData)
             .then((res) => {
-                Swal.fire(res.data.msg); // Мэдэгдэл
-                refreshBaingaIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+                Swal.fire(res.data.msg);
+                refreshBaingaIlt();
             })
-            .catch((err) => {
+            .catch(() => {
                 Swal.fire("Import алдаа");
             });
     };
-
     const isExpiredRow = (row) => {
         if (!row?.on_suul || !row?.hugatsaa) return false;
 
