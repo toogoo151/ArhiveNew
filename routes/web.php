@@ -599,7 +599,8 @@ Route::get('/get/jagsaaltTurul', function () {
     return DB::table('jagsaalt_turul')->get();
 });
 Route::get('/get/hugatsaaTurul', function () {
-    return DB::table('retention_period')->get();
+    $RetentionPeriod = new Retention();
+    return $RetentionPeriod->getRetentionTuslah();
 });
 
 

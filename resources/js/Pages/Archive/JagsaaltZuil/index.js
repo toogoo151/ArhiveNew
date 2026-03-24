@@ -214,6 +214,7 @@ const Index = () => {
                         },
                     };
                 },
+
                 customBodyRender: (value) => {
                     if (
                         value === null ||

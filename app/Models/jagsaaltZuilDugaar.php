@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 
 class jagsaaltZuilDugaar extends Model
 {
@@ -45,8 +46,18 @@ class jagsaaltZuilDugaar extends Model
                 ->join("retention_period", "retention_period.id", "=", "jagsaaltzuildugaar.hugatsaa_turul")
                 ->select("jagsaaltzuildugaar.*", "jagsaalt_turul.jName", "retention_period.RetName")
                 ->orderByDesc("jagsaaltzuildugaar.id")
-                ->get();
+                ->get()
+                ->map(function ($item) {
+                    try {
+                        $item->RetName = Crypt::decryptString($item->RetName);
+                    } catch (\Exception $e) {
+                        $item->RetName = null; // эсвэл хуучнаар нь үлдээж болно
+                    }
+                    return $item;
+                });
+
             return $jagsaalt;
+
         } catch (\Throwable $th) {
             return response(
                 array(

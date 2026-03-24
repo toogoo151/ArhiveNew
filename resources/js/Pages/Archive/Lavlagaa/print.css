@@ -1,0 +1,176 @@
+.bainga-print .top-table {
+    width: 100%;
+}
+
+/* 1-р мөр */
+.bainga-print .top-row {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.bainga-print .top-row > div {
+    display: table-cell;
+    vertical-align: top;
+}
+
+.bainga-print .left-box {
+    width: 48%; /* зай гаргах, нийт 100% хүрэхгүй */
+}
+.bainga-print .right-box {
+    display: flex !important;
+    justify-content: flex-end !important; /* баруун буланд */
+    align-items: flex-start !important;
+    text-align: right !important;
+}
+
+.bainga-print .right-box * {
+    text-align: right !important; /* textarea → div болсон ч ажиллана */
+    width: 100%;
+}
+.bainga-print .right-box textarea {
+    text-align: right; /* текст баруун талдаа */
+    white-space: pre-line;
+}
+.bainga-print .spacer {
+    width: auto;
+}
+.no-border {
+    border: none;
+    resize: none;
+}
+
+/* 2-р мөр – CENTER ROW */
+/* .bainga-print .center-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 6mm;
+} */
+.bainga-print .center-row {
+    display: flex;
+    width: 100%; /* ← ЧУХАЛ */
+}
+.bainga-print .center-box {
+    flex: 1; /* ← ЭНЭ БАЙХГҮЙ БОЛ АГШИНА */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.bainga-print .center-box input {
+    width: 100%;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+}
+/* .bainga-print .center-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-weight: bold;
+    line-height: 1.6;
+    width: 100%;
+} */
+/* .bainga-print .center-box input {
+    width: 100%;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    outline: none;
+    line-height: 1.4;
+}
+.bainga-print .center-box input:nth-child(2) {
+    font-size: 18px;
+    font-weight: normal;
+} */
+
+/* ===== PRINT MODE ===== */
+@media print {
+    * {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 12pt !important;
+        color: #000 !important;
+        box-sizing: border-box;
+    }
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    @page {
+        size: A4 portrait !important;
+        margin-left: 3cm !important;
+        margin-top: 2cm !important;
+        margin-right: 1.5cm !important;
+        margin-bottom: 2cm !important;
+    }
+
+    .modal,
+    .modal-header,
+    .modal-footer,
+    button {
+        display: none !important;
+    }
+
+    #printable-content {
+        padding: 0;
+        margin: 0;
+    }
+
+    input,
+    textarea {
+        border: none !important;
+        background: transparent !important;
+        outline: none !important;
+        resize: none !important;
+        white-space: pre-wrap;
+        text-align: center; /* input/textarea текст төвлөрүүлэх */
+    }
+
+    /* TOP-ROW PRINT LOCK */
+    .bainga-print .top-row {
+        display: flex; /* flex ашиглаж зэрэгцүүлнэ */
+        justify-content: space-between; /* left & right хооронд зай гаргах */
+        margin-bottom: 6mm;
+    }
+
+    .bainga-print .top-row > div {
+        display: table-cell;
+        vertical-align: top;
+    }
+
+    .bainga-print .top-row > div:first-child {
+        width: 40mm;
+    }
+
+    .bainga-print .top-row > div:last-child {
+        width: 60mm;
+    }
+
+    .bainga-print .center-row {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin-top: 6mm;
+    }
+
+    .bainga-print .center-box {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        font-weight: bold !important;
+    }
+    .bainga-print .right-box {
+        display: flex !important;
+        justify-content: flex-end !important; /* ✅ баруун буланд */
+        align-items: flex-start !important;
+    }
+
+    .bainga-print .right-box textarea {
+        text-align: right !important;
+    }
+}
