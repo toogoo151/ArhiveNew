@@ -428,8 +428,9 @@ class BaingaIltChildController extends Controller
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
+        $hnID = $request->hnID; // 🔥
 
-        Excel::import(new BaingaIltChildImport, $request->file('file'));
+        Excel::import(new BaingaIltChildImport($hnID), $request->file('file'));
 
         return response()->json([
             'msg' => 'Амжилттай импорт хийлээ'

@@ -149,7 +149,13 @@ class DalanJilSanhuuController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
-        Excel::import(new DalanJilSanhuuImport, $request->file('file'));
+        Excel::import(
+            new DalanJilSanhuuImport(
+                $request->humrug_id,
+                $request->dans_id
+            ),
+            $request->file('file')
+        );
 
         return response()->json([
             'msg' => 'Амжилттай импорт хийлээ'

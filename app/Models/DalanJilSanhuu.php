@@ -35,23 +35,23 @@ class DalanJilSanhuu extends Model
         'user_id',
     ];
 
-    protected static function booted()
-    {
-        static::created(function (DalanJilSanhuu $dalanjilSanhuu) {
-            if (empty($dalanjilSanhuu->desk_id)) {
-                $dalanjilSanhuu->desk_id = $dalanjilSanhuu->id;
-                $dalanjilSanhuu->saveQuietly();
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::created(function (DalanJilSanhuu $dalanjilSanhuu) {
+    //         if (empty($dalanjilSanhuu->id)) {
+    //             $dalanjilSanhuu->id = $dalanjilSanhuu->id;
+    //             $dalanjilSanhuu->saveQuietly();
+    //         }
+    //     });
+    // }
 
     public function getDalanJilSanhuu()
     {
         try {
             $dalanjilSanhuu = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -127,11 +127,11 @@ class DalanJilSanhuu extends Model
     {
         try {
             $dans = DB::table("db_arhivdans")
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
                 ->where("db_arhivdans.user_id", Auth::id())
                 ->select(
-                    "db_arhivdans.desk_id as desk_id",
+                    "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.hadgalah_hugatsaa",
@@ -167,12 +167,12 @@ class DalanJilSanhuu extends Model
     //     try {
     //         $dans = DB::table("db_arhivdans")
     //             ->where("db_arhivdans.user_id", Auth::id())
-    //             ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+    //             ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
     //             ->where("db_arhivdans.hadgalah_hugatsaa", "70 жил хадгалагдах")
     //             ->where("db_arhivdans.dans_baidal", "Санхүү")
     //             ->where("db_arhivdans.humrugID", $humrugID)
     //             ->select(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
+    //                 "db_arhivdans.id", // 👈 ADD THIS
     //                 "db_arhivdans.id",
     //                 "db_arhivdans.humrugID",
     //                 "db_arhivdans.dans_ner",
@@ -187,7 +187,7 @@ class DalanJilSanhuu extends Model
     //                 DB::raw("MAX(db_humrug.humrug_ner) as humrug_ner")
     //             )
     //             ->groupBy(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
+    //                 "db_arhivdans.id", // 👈 ADD THIS
     //                 "db_arhivdans.id",
     //                 "db_arhivdans.humrugID",
     //                 "db_arhivdans.dans_ner",
@@ -218,7 +218,7 @@ class DalanJilSanhuu extends Model
         try {
             $baingaIlt = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -227,7 +227,7 @@ class DalanJilSanhuu extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -290,13 +290,13 @@ class DalanJilSanhuu extends Model
     //         $Archivedalanjilhun = DB::table("db_arhivbaingahad")
     //             ->join(
     //                 "db_humrug",
-    //                 "db_humrug.desk_id",
+    //                 "db_humrug.id",
     //                 "=",
     //                 "db_arhivbaingahad.humrug_id"
     //             )
     //             ->leftJoin(
     //                 "db_arhivdans",
-    //                 "db_arhivdans.desk_id",
+    //                 "db_arhivdans.id",
     //                 "=",
     //                 "db_arhivbaingahad.dans_id"
     //             )

@@ -62,6 +62,7 @@ use App\Models\ArhivTovchlolModel;
 use App\Models\Retention;
 
 
+use Illuminate\Http\Request;
 
 
 
@@ -236,8 +237,7 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');
-;
+    ->middleware('auth');;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -273,9 +273,9 @@ Route::post('/import/dansburtgel', [DansController::class, 'importDansburtgel'])
 //Данс бүртгэл end
 
 // Байнга хадгалах Илт start
-Route::get("/get/BaingaIlt", function () {
+Route::get("/get/BaingaIlt", function (Request $request) {
     $baingaIlt = new BaingaIlt();
-    return $baingaIlt->getBaingaIlt();
+    return $baingaIlt->getBaingaIlt($request);
 });
 
 Route::get("/get/Dansburtgel/{humrugID}", function ($humrugID) {
@@ -310,7 +310,6 @@ Route::post("/new/baingaIltChild", [BaingaIltChildController::class, "NewChildBa
 Route::post("/edit/baingaIltChild", [BaingaIltChildController::class, "EditChildBaingIlt"])
     ->middleware('auth');
 Route::post("/delete/baingaIltChildFile", [BaingaIltChildController::class, "DeleteChildFile"]);
-
 Route::post('/import/BaingaIltsChild', [BaingaIltChildController::class, 'importBaingaIltsChild']);
 
 //Childtable Байнга хадгалах барим бичиг end
@@ -615,9 +614,13 @@ Route::get('/get/jagsaaltturuldugaar', function () {
 Route::get('/get/jagsaaltTurul', function () {
     return DB::table('jagsaalt_turul')->get();
 });
+
 Route::get('/get/hugatsaaTurul', function () {
-    return DB::table('retention_period')->get();
+    $RetentionPeriod = new Retention();
+    return $RetentionPeriod->getRetentionTuslah();
 });
+
+
 
 
 // Jagsaalt TURUL END

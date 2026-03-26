@@ -36,6 +36,7 @@ const TurIltsChildNew = ({ _parentID, refreshTurIltsChild }) => {
     const fileInputRef = useRef(null);
     const [selectedfile, SetSelectedFile] = useState([]);
     const [previewFile, setPreviewFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         refreshTurIltsChild(_parentID);
@@ -99,6 +100,16 @@ const TurIltsChildNew = ({ _parentID, refreshTurIltsChild }) => {
     };
 
     const onSubmit = (data) => {
+        setLoading(true);
+
+        Swal.fire({
+            title: "Уншиж байна...",
+            text: "Түр хүлээнэ үү",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
         axios
             .post("/new/TurIltChild", {
                 hnID: _parentID,
@@ -149,6 +160,9 @@ const TurIltsChildNew = ({ _parentID, refreshTurIltsChild }) => {
             })
             .catch((err) => {
                 Swal.fire(err.response.data.msg);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 

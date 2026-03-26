@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\BaingaIlt;
+use App\Models\Dansburtgel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -35,7 +36,7 @@ class BaingaIltImport implements ToModel
         if (!$isFull) {
 
             return new BaingaIlt([
-                'desk_id' => null,
+                // 'desk_id' => null,
                 'humrug_id' => $this->humrug_id,
                 'dans_id' => $this->dans_id,
                 'hadgalamj_turul' => 0,
@@ -55,13 +56,23 @@ class BaingaIltImport implements ToModel
             ]);
         }
 
+
         // (>12 column) buten
+
+        $dansId = $row[2] ?? null;
+
+        $dans = Dansburtgel::where('desk_id', $dansId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$dans) {
+            return null;
+        }
         return new BaingaIlt([
             'desk_id' => $row[0] ?? null,
-            'humrug_id' => $row[1] ?? null,
-            'dans_id' => $row[2] ?? null,
+            'humrug_id' => $dans->humrugID,
+            'dans_id' => $dans->id,
             'hadgalamj_turul' => $row[3] ?? null,
-
             'hadgalamj_dugaar' => $row[4] ?? null,
             'hadgalamj_zbn' => isset($row[5]) ? Crypt::encryptString($row[5]) : null,
             'hergiin_indeks' => $row[6] ?? null,

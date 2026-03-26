@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import axios from "../../../AxiosUser";
 
 const BaingaIltsEdit = ({
-    refreshBaingaIlt,
+    fetchBaingaIlt,
     selectedHumrug,
     selectedDans,
     changeDataRow,
@@ -92,7 +92,7 @@ const BaingaIltsEdit = ({
                     window.$("#baingaIltedit").modal("hide");
                 }
 
-                refreshBaingaIlt();
+                fetchBaingaIlt();
             })
             .catch((err) => {
                 Swal.fire(err.response.data.msg);

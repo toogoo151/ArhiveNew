@@ -15,6 +15,18 @@ class Angi extends Model
     protected $table = 'db_angi';
     public $timestamps = false;
 
+
+
+    public function safeDecrypt($value)
+    {
+        if (!$value) return null;
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable $e) {
+            return $value; // decrypt хийгдээгүй original утгыг буцаана
+        }
+    }
     public function getAngi()
     {
         try {
@@ -22,23 +34,16 @@ class Angi extends Model
                 ->join("db_comandlal", "db_comandlal.id", "=", "db_angi.comand_id")
                 ->select("db_angi.*", "db_comandlal.name")
                 ->orderBy("db_angi.id", "DESC")
-                ->get();
-
-            // db_comandlal.name is stored encrypted; decrypt it for the datatable UI.
-            $angi->transform(function ($row) {
-                if (!empty($row->name)) {
-                    try {
-                        $row->name = Crypt::decryptString($row->name);
-                    } catch (\Throwable $e) {
-                        // If it's already plain (or decryption fails), return as-is.
-                        $row->name = $row->name;
-                    }
-                }
-                return $row;
-            });
+                ->get()
+                ->map(function ($item) {
+                    $item->name = $this->safeDecrypt($item->name);
+                    $item->ner = $this->safeDecrypt($item->ner);
+                    return $item;
+                });
 
             return $angi;
         } catch (\Throwable $th) {
+            // return $th;
             return response([
                 "status" => "error",
                 "msg" => "Анги татаж чадсангүй."

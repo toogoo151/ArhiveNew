@@ -280,7 +280,8 @@ const UserNew = ({ refreshUser }) => {
                                         <Select
                                             options={getSalbar.map((unit) => ({
                                                 value: unit.id,
-                                                label: unit.t_ner || unit.salbar,
+                                                label:
+                                                    unit.t_ner || unit.salbar,
                                             }))}
                                             value={
                                                 getSalbar
@@ -291,7 +292,8 @@ const UserNew = ({ refreshUser }) => {
                                                     )
                                                     .map((u) => ({
                                                         value: u.id,
-                                                        label: u.t_ner || u.salbar,
+                                                        label:
+                                                            u.t_ner || u.salbar,
                                                     }))[0] || null
                                             }
                                             onChange={(selected) =>
@@ -299,7 +301,11 @@ const UserNew = ({ refreshUser }) => {
                                                     "salbar",
                                                     selected
                                                         ? selected.value
-                                                        : ""
+                                                        : null,
+                                                    {
+                                                        shouldValidate: true,
+                                                        shouldDirty: true,
+                                                    }
                                                 )
                                             }
                                             placeholder="Сонгоно уу"

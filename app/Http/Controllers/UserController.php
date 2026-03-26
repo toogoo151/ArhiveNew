@@ -10,14 +10,33 @@ use Illuminate\Http\Request;
 use Redirect, Response, File;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
+
 
 class UserController extends Controller
 {
+    public function safeDecrypt($value)
+    {
+        if (!$value) return null;
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable $e) {
+            return $value; // decrypt хийгдээгүй original утгыг буцаана
+        }
+    }
 
     public function getAngiID(Request $req)
     {
         try {
-            $getSalbar = DB::table("db_salbar")->where("angi", "=", $req->id)->get();
+            $getSalbar = DB::table("db_salbar")
+                ->where("angi", "=", $req->id)
+                ->get()
+                ->map(function ($item) {
+                    $item->salbar = $this->safeDecrypt($item->salbar);
+                    $item->t_ner = $this->safeDecrypt($item->t_ner);
+                    return $item;
+                });
             return $getSalbar;
         } catch (\Throwable $th) {
             return response(
@@ -47,6 +66,10 @@ class UserController extends Controller
         try {
             $insertUser = new User();
             $insertUser->hereglegch_ner = $req->hereglegch_ner;
+
+            // $insertUser->hereglegch_ner = $req->hereglegch_ner
+            //     ? Crypt::encryptString($req->hereglegch_ner)
+            //     : null;
             $insertUser->nuuts_ug = Hash::make(123456789);
             // $insertUser->nuuts_ug = $req->nuuts_ug;
             $insertUser->comand_id = $req->comand_id;
@@ -64,6 +87,7 @@ class UserController extends Controller
                 200
             );
         } catch (\Throwable $th) {
+            return $th;
             return response(
                 array(
                     "status" => "error",

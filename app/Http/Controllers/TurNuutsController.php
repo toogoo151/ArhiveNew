@@ -146,7 +146,10 @@ class TurNuutsController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
-        Excel::import(new TurNuutsImport, $request->file('file'));
+        Excel::import(new TurNuutsImport(
+            $request->humrug_id,
+            $request->dans_id
+        ), $request->file('file'));
 
         return response()->json([
             'msg' => 'Амжилттай импорт хийлээ'

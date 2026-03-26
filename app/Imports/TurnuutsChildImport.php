@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\TurNuuts;
 use App\Models\TurNuutsChild;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -12,8 +13,15 @@ class TurnuutsChildImport implements ToModel
 {
     public function model(array $row)
     {
+        $deskId = $row[0] ?? null;
+        $baingaNuuts = TurNuuts::where('desk_id', $deskId)
+            ->where('user_id', Auth::id())
+            ->first();
+        if (!$baingaNuuts) {
+            return null;
+        }
         return new TurNuutsChild([
-            'hnID' => $row[0] ?? null,
+            'hnID' => $baingaNuuts->id,
             'barimt_ner' =>  isset($row[1]) ? Crypt::encryptString($row[1]) : null,
             'barimt_ognoo' => $row[2] ?? null,
             'barimt_dugaar' => $row[3] ?? null,

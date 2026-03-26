@@ -35,54 +35,16 @@ class Dansburtgel extends Model
 
 
 
-    protected static function booted()
-    {
-        static::created(function (Dansburtgel $dans) {
-            if (empty($dans->desk_id)) {
-                $dans->desk_id = $dans->id;
-                $dans->saveQuietly();
-            }
-        });
-    }
-
-    // public function getDans()
+    // protected static function booted()
     // {
-    //     try {
-    //         $userId = Auth::id();
-    //         $dans = DB::table('db_arhivdans as d')
-    //             ->join('db_humrug as h', 'h.id', '=', 'd.humrugID')
-    //             ->join('retention_period as r', 'r.RetName', '=', 'd.hadgalah_hugatsaa')
-    //             ->join('secret_type as s', 's.Sname', '=', 'd.dans_baidal')
-    //             ->where("d.user_id", "=", $userId)
-    //             ->select(
-    //                 'd.*',
-    //                 'h.humrug_ner',
-    //                 's.Sname',
-    //                 'r.RetName'
-    //             )
-    //             ->whereRaw('d.id IN (SELECT MIN(id) FROM db_arhivdans GROUP BY id)') // <--- Давхар мөр арилгах
-    //             ->orderByDesc("d.id")
-    //             ->get()
-    //             ->map(function ($item) {
-    //                 // decrypt хийх
-    //                 $item->dans_ner = $item->dans_ner ? Crypt::decryptString($item->dans_ner) : null;
-    //                 $item->hubi_dans = $item->hubi_dans ? Crypt::decryptString($item->hubi_dans) : null;
-    //                 $item->dans_tailbar = $item->dans_tailbar ? Crypt::decryptString($item->dans_tailbar) : null;
-    //                 $item->dans_baidal = $item->dans_baidal ? Crypt::decryptString($item->dans_baidal) : null;
-    //                 $item->hadgalah_hugatsaa = $item->hadgalah_hugatsaa ? Crypt::decryptString($item->hadgalah_hugatsaa) : null;
-    //                 return $item;
-    //             });
-    //         return $dans;
-    //     } catch (\Throwable $th) {
-    //         return response(
-    //             array(
-    //                 "status" => "error",
-    //                 "msg" => "татаж чадсангүй."
-    //             ),
-    //             500
-    //         );
-    //     }
+    //     static::created(function (Dansburtgel $dans) {
+    //         if (empty($dans->desk_id)) {
+    //             $dans->desk_id = $dans->id;
+    //             $dans->saveQuietly();
+    //         }
+    //     });
     // }
+
 
     public function safeDecrypt($value)
     {
@@ -101,7 +63,7 @@ class Dansburtgel extends Model
             $userId = Auth::id();
 
             $dans = DB::table('db_arhivdans as d')
-                ->join('db_humrug as h', 'h.desk_id', '=', 'd.humrugID')
+                ->join('db_humrug as h', 'h.id', '=', 'd.humrugID')
                 ->where("d.user_id", $userId)
                 ->select('d.*', 'h.humrug_ner')
                 ->orderByDesc("d.id")

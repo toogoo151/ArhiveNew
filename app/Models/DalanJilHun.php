@@ -34,15 +34,15 @@ class DalanJilHun extends Model
         'user_id',
     ];
 
-    protected static function booted()
-    {
-        static::created(function (DalanJilHun $dalanjilHun) {
-            if (empty($dalanjilHun->desk_id)) {
-                $dalanjilHun->desk_id = $dalanjilHun->id;
-                $dalanjilHun->saveQuietly();
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::created(function (DalanJilHun $dalanjilHun) {
+    //         if (empty($dalanjilHun->id)) {
+    //             $dalanjilHun->id = $dalanjilHun->id;
+    //             $dalanjilHun->saveQuietly();
+    //         }
+    //     });
+    // }
 
 
     public function getDalanJilHun()
@@ -50,8 +50,8 @@ class DalanJilHun extends Model
         try {
             $dalanjilHun = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -127,11 +127,11 @@ class DalanJilHun extends Model
     {
         try {
             $dans = DB::table("db_arhivdans")
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
                 ->where("db_arhivdans.user_id", Auth::id())
                 ->select(
-                    "db_arhivdans.desk_id as desk_id",
+                    "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.hadgalah_hugatsaa",
@@ -169,7 +169,7 @@ class DalanJilHun extends Model
         try {
             $baingaIlt = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -178,7 +178,7 @@ class DalanJilHun extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -242,13 +242,13 @@ class DalanJilHun extends Model
     //             ->where("db_arhivbaingahad.user_id", Auth::id())
     //             ->join(
     //                 "db_humrug",
-    //                 "db_humrug.desk_id",
+    //                 "db_humrug.id",
     //                 "=",
     //                 "db_arhivbaingahad.humrug_id"
     //             )
     //             ->leftJoin(
     //                 "db_arhivdans",
-    //                 "db_arhivdans.desk_id",
+    //                 "db_arhivdans.id",
     //                 "=",
     //                 "db_arhivbaingahad.dans_id"
     //             )

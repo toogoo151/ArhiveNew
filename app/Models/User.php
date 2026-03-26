@@ -104,9 +104,9 @@ class User extends Authenticatable
                 ->get();
 
             $user->transform(function ($u) {
-                if (isset($u->hereglegch_ner)) {
-                    $u->hereglegch_ner = self::decryptIfNeeded($u->hereglegch_ner);
-                }
+                // if (isset($u->hereglegch_ner)) {
+                //     $u->hereglegch_ner = self::decryptIfNeeded($u->hereglegch_ner);
+                // }
                 if (isset($u->salbar)) {
                     $u->salbar = self::decryptIfNeeded($u->salbar);
                 }

@@ -35,15 +35,15 @@ class BaingaNuuts extends Model
         'user_id',
     ];
 
-    protected static function booted()
-    {
-        static::created(function (BaingaNuuts $baingaNuuts) {
-            if (empty($baingaNuuts->desk_id)) {
-                $baingaNuuts->desk_id = $baingaNuuts->id;
-                $baingaNuuts->saveQuietly();
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::created(function (BaingaNuuts $baingaNuuts) {
+    //         if (empty($baingaNuuts->id)) {
+    //             $baingaNuuts->id = $baingaNuuts->id;
+    //             $baingaNuuts->saveQuietly();
+    //         }
+    //     });
+    // }
 
     // public function getBaingaNuuts()
     // {
@@ -77,13 +77,13 @@ class BaingaNuuts extends Model
                     // humrug нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT humrug_ner
               FROM db_humrug
-              WHERE db_humrug.desk_id = db_arhivhnnuuts.humrug_id
+              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
               LIMIT 1) as humrug_ner"),
 
                     // dans нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT dans_ner
               FROM db_arhivdans
-              WHERE db_arhivdans.desk_id = db_arhivhnnuuts.dans_id
+              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
               LIMIT 1) as dans_ner"),
 
                     // db_arhivdans доторх dans_baidal утгыг нэмэх
@@ -93,7 +93,7 @@ class BaingaNuuts extends Model
                     "db_arhivdans.hadgalah_hugatsaa",
                     "jagsaaltzuildugaar.hugatsaa as hugatsaa"
                 )
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivhnnuuts.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -163,13 +163,13 @@ class BaingaNuuts extends Model
 
     //                 DB::raw("(SELECT humrug_ner
     //           FROM db_humrug
-    //           WHERE db_humrug.desk_id = db_arhivhnnuuts.humrug_id
+    //           WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
     //           LIMIT 1) as humrug_ner"),
 
 
     //                 DB::raw("(SELECT dans_ner
     //           FROM db_arhivdans
-    //           WHERE db_arhivdans.desk_id = db_arhivhnnuuts.dans_id
+    //           WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
     //           LIMIT 1) as dans_ner"),
 
 
@@ -178,7 +178,7 @@ class BaingaNuuts extends Model
 
     //                 "db_arhivdans.hadgalah_hugatsaa"
     //             )
-    //             ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivhnnuuts.dans_id")
+    //             ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
     //             ->whereNotNull("db_arhivhnnuuts.ustgasan_temdeglel")
     //             ->where("db_arhivhnnuuts.ustgasan_temdeglel", "!=", "")
     //             ->where("db_arhivhnnuuts.user_id", Auth::id())
@@ -206,13 +206,13 @@ class BaingaNuuts extends Model
                     // humrug нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT humrug_ner
               FROM db_humrug
-              WHERE db_humrug.desk_id = db_arhivhnnuuts.humrug_id
+              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
               LIMIT 1) as humrug_ner"),
 
                     // dans нэрийг 1 ширхэгээр авах
                     DB::raw("(SELECT dans_ner
               FROM db_arhivdans
-              WHERE db_arhivdans.desk_id = db_arhivhnnuuts.dans_id
+              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
               LIMIT 1) as dans_ner"),
 
                     // db_arhivdans доторх dans_baidal утгыг нэмэх
@@ -222,7 +222,7 @@ class BaingaNuuts extends Model
                     "db_arhivdans.hadgalah_hugatsaa",
                     "jagsaaltzuildugaar.hugatsaa as hugatsaa"
                 )
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivhnnuuts.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -290,11 +290,11 @@ class BaingaNuuts extends Model
     {
         try {
             $dans = DB::table("db_arhivdans")
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
                 ->where("db_arhivdans.user_id", Auth::id())
                 ->select(
-                    "db_arhivdans.desk_id as desk_id",
+                    "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.hadgalah_hugatsaa",
@@ -329,13 +329,13 @@ class BaingaNuuts extends Model
     // {
     //     try {
     //         $dans = DB::table("db_arhivdans")
-    //             ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+    //             ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
     //             ->where("db_arhivdans.hadgalah_hugatsaa", "Байнга хадгалагдах")
     //             ->where("db_arhivdans.dans_baidal", "Нууц")
     //             ->where("db_arhivdans.humrugID", $humrugID)
     //             ->where("db_arhivdans.user_id", Auth::id())
     //             ->select(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
+    //                 "db_arhivdans.id", // 👈 ADD THIS
     //                 "db_arhivdans.id",
     //                 "db_arhivdans.humrugID",
     //                 "db_arhivdans.dans_ner",
@@ -350,7 +350,7 @@ class BaingaNuuts extends Model
     //                 DB::raw("MAX(db_humrug.humrug_ner) as humrug_ner")
     //             )
     //             ->groupBy(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
+    //                 "db_arhivdans.id", // 👈 ADD THIS
     //                 "db_arhivdans.id",
     //                 "db_arhivdans.humrugID",
     //                 "db_arhivdans.dans_ner",

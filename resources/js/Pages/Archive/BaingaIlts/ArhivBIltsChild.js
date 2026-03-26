@@ -19,7 +19,7 @@ const ArhivBIltsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshbaingaIltsChild(props.changeDataRow.desk_id);
+        refreshbaingaIltsChild(props.changeDataRow.id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);

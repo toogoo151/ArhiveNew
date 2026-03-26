@@ -43,6 +43,9 @@ class Salbar extends Model
                 if (isset($s->b_ner)) {
                     $s->b_ner = self::decryptIfNeeded($s->b_ner);
                 }
+                if (isset($s->t_ner)) {
+                    $s->t_ner = self::decryptIfNeeded($s->t_ner);
+                }
                 return $s;
             });
 

@@ -23,11 +23,27 @@ class SalbarController extends Controller
     //     return response()->json($angi);
     // }
 
+    public function safeDecrypt($value)
+    {
+        if (!$value) return null;
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable $e) {
+            return $value; // decrypt хийгдээгүй original утгыг буцаана
+        }
+    }
 
     public function getAngiID(Request $req)
     {
         try {
-            $getUnits = DB::table("db_angi")->where("comand_id", "=", $req->id)->get();
+            $getUnits = DB::table("db_angi")
+                ->where("comand_id", "=", $req->id)
+                ->get()
+                ->map(function ($item) {
+                    $item->ner = $this->safeDecrypt($item->ner);
+                    return $item;
+                });
             return $getUnits;
         } catch (\Throwable $th) {
             return response(
@@ -47,7 +63,7 @@ class SalbarController extends Controller
             $insertAngi->comand_id = $req->comand_id;
             $insertAngi->angi = $req->angi;
             $insertAngi->salbar = Crypt::encryptString($req->salbar);
-            $insertAngi->t_ner = $req->t_ner;
+            $insertAngi->t_ner = Crypt::encryptString($req->t_ner);
             $insertAngi->b_ner = Crypt::encryptString($req->b_ner);
             $insertAngi->save();
             return response(
@@ -97,7 +113,7 @@ class SalbarController extends Controller
             $edit->comand_id = $req->comand_id;
             $edit->angi = $req->angi;
             $edit->salbar = Crypt::encryptString($req->salbar);
-            $edit->t_ner = $req->t_ner;
+            $edit->t_ner = Crypt::encryptString($req->t_ner);
             $edit->b_ner = Crypt::encryptString($req->b_ner);
             $edit->save();
             return response(

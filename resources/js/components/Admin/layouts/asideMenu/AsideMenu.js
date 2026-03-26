@@ -175,16 +175,16 @@ export default function AsideMenu() {
                 { name: "Анги", url: "/get/classes", icon: "fa fa-flag" },
                 { name: "Салбар", url: "/get/salbars", icon: "fa fa-flag" },
                 { name: "Хэрэглэгчид", url: "/get/users", icon: "fa fa-users" },
-                {
-                    name: "Retention",
-                    url: "/get/retentions",
-                    icon: "fa fa-flag",
-                },
-                {
-                    name: "ProgrammType",
-                    url: "/get/programmType",
-                    icon: "fa fa-flag",
-                },
+                // {
+                //     name: "Retention",
+                //     url: "/get/retentions",
+                //     icon: "fa fa-flag",
+                // },
+                // {
+                //     name: "ProgrammType",
+                //     url: "/get/programmType",
+                //     icon: "fa fa-flag",
+                // },
             ],
         },
         {

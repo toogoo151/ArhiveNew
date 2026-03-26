@@ -34,22 +34,22 @@ class TurIlt extends Model
         'user_id',
     ];
 
-    protected static function booted()
-    {
-        static::created(function (TurIlt $turIlt) {
-            if (empty($turIlt->desk_id)) {
-                $turIlt->desk_id = $turIlt->id;
-                $turIlt->saveQuietly();
-            }
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::created(function (TurIlt $turIlt) {
+    //         if (empty($turIlt->id)) {
+    //             $turIlt->id = $turIlt->id;
+    //             $turIlt->saveQuietly();
+    //         }
+    //     });
+    // }
 
     public function getTurIlt()
     {
         try {
             $baingaIlt = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -58,7 +58,7 @@ class TurIlt extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -124,7 +124,7 @@ class TurIlt extends Model
         try {
             $baingaIlt = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivbaingahad.humrug_id")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
@@ -133,7 +133,7 @@ class TurIlt extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->leftJoin("db_arhivdans", "db_arhivdans.desk_id", "=", "db_arhivbaingahad.dans_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -197,11 +197,11 @@ class TurIlt extends Model
     {
         try {
             $dans = DB::table("db_arhivdans")
-                ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
                 ->where("db_arhivdans.user_id", Auth::id())
                 ->select(
-                    "db_arhivdans.desk_id as desk_id",
+                    "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",
                     "db_arhivdans.dans_ner",
                     "db_arhivdans.hadgalah_hugatsaa",
@@ -236,13 +236,13 @@ class TurIlt extends Model
     // {
     //     try {
     //         $dans = DB::table("db_arhivdans")
-    //             ->join("db_humrug", "db_humrug.desk_id", "=", "db_arhivdans.humrugID")
+    //             ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
     //             ->where("db_arhivdans.hadgalah_hugatsaa", "Түр хадгалагдах")
     //             ->where("db_arhivdans.dans_baidal", "Илт")
     //             ->where("db_arhivdans.humrugID", $humrugID)
     //             ->where("db_arhivdans.user_id", Auth::id())
     //             ->select(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
+    //                 "db_arhivdans.id", // 👈 ADD THIS
     //                 "db_arhivdans.id",
     //                 "db_arhivdans.humrugID",
     //                 "db_arhivdans.dans_ner",
@@ -257,7 +257,7 @@ class TurIlt extends Model
     //                 DB::raw("MAX(db_humrug.humrug_ner) as humrug_ner")
     //             )
     //             ->groupBy(
-    //                 "db_arhivdans.desk_id", // 👈 ADD THIS
+    //                 "db_arhivdans.id", // 👈 ADD THIS
     //                 "db_arhivdans.id",
     //                 "db_arhivdans.humrugID",
     //                 "db_arhivdans.dans_ner",
