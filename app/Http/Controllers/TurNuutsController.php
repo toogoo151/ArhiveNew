@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Redirect, Response, File;
 use Illuminate\Support\Str;
 
+
 class TurNuutsController extends Controller
 {
 

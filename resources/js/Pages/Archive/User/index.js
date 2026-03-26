@@ -6,6 +6,8 @@ import UserNew from "./UserNew";
 
 import Swal from "sweetalert2";
 import axios from "../../../AxiosUser";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const index = () => {
     const [getUser, setUser] = useState([]);
@@ -14,6 +16,7 @@ const index = () => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshUser();
@@ -35,6 +38,17 @@ const index = () => {
                 console.log(err);
             });
     };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnDelete = () => {
         setRowsSelected([]);
@@ -91,7 +105,8 @@ const index = () => {
                                         excelDownloadData={getUser}
                                         excelHeaders={excelHeaders}
                                         excelTitle="Хэрэглэгчид"
-                                        isHideInsert={true}
+                                        isHideInsert={isRestricted}
+                                        isHideEdit={isRestricted}
                                     />
                                 </>
                             }
@@ -104,8 +119,8 @@ const index = () => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                         <UserNew refreshUser={refreshUser} />
                         <UserEdit
@@ -243,22 +258,23 @@ const columns = [
             },
         },
     },
-    // {
-    //     name: "Uname",
-    //     label: "Хэрэглэгчийн түвшин",
-    //     options: {
-    //         filter: true,
-    //         sort: false,
-    //         setCellHeaderProps: (value) => {
-    //             return {
-    //                 style: {
-    //                     backgroundColor: "#5DADE2",
-    //                     color: "white",
-    //                 },
-    //             };
-    //         },
-    //     },
-    // },
+
+    {
+        name: "Uname",
+        label: "Хэрэглэгчийн эрх",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
+            },
+        },
+    },
     // {
     //     name: "Nname",
     //     label: "Нууцын төрөл",
@@ -283,6 +299,6 @@ const excelHeaders = [
     { label: "Анги", key: "ner" },
     { label: "Салбар", key: "salbar" },
     { label: "Хэрэглэгчийн түвшин", key: "Pname" },
-    // { label: "Хэрэглэгчийн түвшин", key: "Uname" },
+    { label: "эрх", key: "Uname" },
     // { label: "Нууцын төрөл", key: "Nname" },
 ];

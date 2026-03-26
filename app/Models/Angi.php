@@ -24,17 +24,25 @@ class Angi extends Model
                 ->orderBy("db_angi.id", "DESC")
                 ->get();
 
-            // db_comandlal.name is stored encrypted; decrypt it for the datatable UI.
-            $angi->transform(function ($row) {
-                if (!empty($row->name)) {
+
+            $angi->transform(function ($item) {
+                if (!empty($item->ner)) {
                     try {
-                        $row->name = Crypt::decryptString($row->name);
+                        $item->ner = Crypt::decryptString($item->ner);
                     } catch (\Throwable $e) {
                         // If it's already plain (or decryption fails), return as-is.
-                        $row->name = $row->name;
+                        $item->ner;
                     }
                 }
-                return $row;
+                if (!empty($item->name)) {
+                    try {
+                        $item->name = Crypt::decryptString($item->name);
+                    } catch (\Throwable $e) {
+                        // If it's already plain (or decryption fails), return as-is.
+                        $item->name;
+                    }
+                }
+                return $item;
             });
 
             return $angi;

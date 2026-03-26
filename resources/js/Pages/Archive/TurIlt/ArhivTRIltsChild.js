@@ -4,6 +4,8 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const ArhivTRIltsChild = (props) => {
     const [getTurIltsChild, setTurIltsChild] = useState([]);
@@ -12,6 +14,8 @@ const ArhivTRIltsChild = (props) => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshbaingaIltsChild(props.changeDataRow.id);
@@ -205,6 +209,18 @@ const ArhivTRIltsChild = (props) => {
     //         sortable: true,
     //     },
     // ];
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     return (
         <>
             <div className="row clearfix">
@@ -229,7 +245,8 @@ const ArhivTRIltsChild = (props) => {
                                     buttonName={"НЭМЭХ"}
                                     excelDownloadData={getTurIltsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={false}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -241,8 +258,8 @@ const ArhivTRIltsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={false}
-                            isHideEdit={false}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                             showArchive={false}
                         />
                     </div>

@@ -5,189 +5,84 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import BaingaHadgalahHugatsaa from "./BaingaHadgalahHugatsaa";
-import BaingaIltsChild from "./BaingaIltsChild";
-import BaingaIltsEdit from "./BaingaIltsEdit";
-import BaingaIltShiljuuleh from "./BaingaIltShiljuuleh";
-import BaingaIltsNew from "./BaingaIltsNew";
-import "./Index.css";
-
+import NomEdit from "./NomEdit";
+import NomNew from "./NomNew";
 const Index = () => {
-    const today = new Date();
-    const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
-    const defaultEnd = format(today, "yyyy-MM-dd");
 
-    const [getBaingaIlt, setBaingaIlt] = useState([]);
-    const [getHumrug, setHumrug] = useState([]);
-    const [getDans, setDans] = useState([]);
+    // ================= FILTER CONTROL =================
+    const [isFilterActive, setIsFilterActive] = useState(false);
 
-    //select
-    const [allDans, setAllDans] = useState([]); // анхны бүх дата
-    const [selectedHumrug, setSelectedHumrug] = useState(0);
-    const [selectedDans, setselectedDans] = useState(0);
-    //select
+    // ================= DATA =================
+    const [allNom, setallNom] = useState([]);
+    const [getNom, setNom] = useState([]);
 
     const [getRowsSelected, setRowsSelected] = useState([]);
-    const [clickedRowData, setclickedRowData] = useState(null); // анх null
+    const [clickedRowData, setclickedRowData] = useState(null);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
-    const [showArchiveModal, setShowArchiveModal] = useState(false);
-    const [activeTab, setActiveTab] = useState("ilt");
-    const [selectedFile, setSelectedFile] = useState(null);
+    const [editRequestId, setEditRequestId] = useState(0);
+    const [searchForm, setSearchForm] = useState({
+        humrugDugaar: "",
+        humrugNer: "",
+        dansDugaar: "",
+        dansNer: "",
+        nomDugaar: "",
+        nomNer: "",
+        beginDate: "",
+        endDate: "",
+    });
 
-    // const [showShiljuuleh, setShowShiljuuleh] = useState(false);
-    // const [comment, setComment] = useState("");
-    // const [shiljuulehMode, setShiljuulehMode] = useState(null);
+    // Don't let Bootstrap auto-open the edit modal before React fills the form.
+    // We'll open it programmatically inside `NomEdit`.
+    const [showModal] = useState(null);
 
-    const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
-
-    const [showModal] = useState("modal");
-
-    // useEffect(() => {
-    //     setRowsSelected([]);
-    // }, [activeTab]);
-
+    // FETCH
     useEffect(() => {
-        if (getBaingaIlt.length) {
-            console.log("ROW SAMPLE:", getBaingaIlt[0]);
-            console.log("EXPIRED:", isExpiredRow(getBaingaIlt[0]));
-        }
-    }, [getBaingaIlt]);
-    useEffect(() => {
-        refreshBaingaIlt();
-        console.log(getDans);
-    }, [selectedHumrug, selectedDans]);
+        refreshNom();
+    }, []);
 
-    const importExcel = (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-
+    const refreshNom = () => {
         axios
-            .post("/import/baingaIlts", formData)
+            .get("/get/ashignoms")
             .then((res) => {
-                Swal.fire(res.data.msg); // Мэдэгдэл
-                refreshBaingaIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+                setRowsSelected([]);
+                setallNom(res.data);
+                setNom  (res.data); // анх бүх өгөгдөл
+                setIsFilterActive(false);
             })
-            .catch((err) => {
-                Swal.fire("Import алдаа");
-            });
-    };
 
-    const isExpiredRow = (row) => {
-        if (!row?.on_suul || !row?.hugatsaa) return false;
-
-        // "1", "1 жил", "70 жил" → 1 / 70
-        const years = parseInt(row.hugatsaa, 10);
-
-        if (isNaN(years)) return false;
-
-        // 70 жил = байнгын хадгалалт
-        if (years >= 70) return false;
-
-        const start = new Date(row.on_suul);
-        const end = new Date(start);
-        end.setFullYear(end.getFullYear() + years);
-
-        return end < new Date();
-    };
-    const expiredCount = getBaingaIlt.filter(isExpiredRow).length;
-
-    const refreshBaingaIlt = () => {
-        axios.get("/get/BaingaIlt").then((res) => {
-            const reversed = [...res.data].reverse();
-            setAllDans(res.data); // бүх анхны дата-г хадгалах
-
-            if (selectedHumrug !== 0 && selectedDans !== 0) {
-                // 🔹 1. Фильтер хийх
-                let filteredData = res.data.filter(
-                    (item) =>
-                        Number(item.humrug_id) === Number(selectedHumrug) &&
-                        Number(item.dans_id) === Number(selectedDans)
-                );
-
-                // 🔹 2. Хугацаа хэтэрсэн мөрүүдийг дээд талд гаргах
-                filteredData.sort((a, b) => {
-                    const aExpired = isExpiredRow(a) ? 1 : 0;
-                    const bExpired = isExpiredRow(b) ? 1 : 0;
-
-                    // Хугацаа хэтэрсэн = 1 → дээд
-                    return bExpired - aExpired;
-                });
-
-                setBaingaIlt(filteredData);
-            } else {
-                setBaingaIlt([]);
-            }
-        });
-    };
-
-    const btnArchive = () => {
-        if (!clickedRowData) return;
-
-        setShowArchiveModal(true);
-        // setShowShiljuuleh(false);
-    };
-
-    useEffect(() => {
-        axios
-            .get("/get/Humrugs")
-            .then((res) => {
-                setHumrug(res.data);
-            })
             .catch((err) => {
                 console.log(err);
             });
-    }, []);
+    };
 
+    //  ROW SELECT
     useEffect(() => {
-        setselectedDans(0);
-    }, [selectedHumrug]);
+        if (getRowsSelected[0] !== undefined) {
+            setIsEditBtnClick(false);
+            setclickedRowData(getNom[getRowsSelected[0]]);
+        }
+    }, [getRowsSelected, getNom]);
 
+    //  DATE FILTER
     useEffect(() => {
-        if (selectedHumrug === 0) {
-            setDans([]);
+        if (!isFilterActive) {
+            setNom(allNom);
             return;
         }
 
-        axios
-            .get(`/get/Dansburtgel/${selectedHumrug}`)
-            .then((res) => {
-                setDans(res.data);
-                console.log("DANS RESPONSE:", res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, [selectedHumrug]);
-
-    useEffect(() => {
-        setRowsSelected([]);
-        setclickedRowData(null);
-    }, [selectedHumrug, selectedDans]);
-
-    // Row сонголтын watcher
-    useEffect(() => {
-        const rowIndex = getRowsSelected[0];
-
-        if (rowIndex !== undefined && getBaingaIlt[rowIndex] !== undefined) {
-            setIsEditBtnClick(false);
-            setclickedRowData(getBaingaIlt[rowIndex]);
-        } else {
-            setclickedRowData(null);
-        }
-    }, [getRowsSelected, getBaingaIlt]);
-    // useEffect(() => {
-    //     if (showShiljuuleh) {
-    //         setComment("");
-    //     }
-    // }, [showShiljuuleh]);
-
+    }, [isFilterActive,  allNom]);
     const btnEdit = () => {
+        // Ensure the edit modal gets the selected row immediately on first click
+        if (getRowsSelected[0] !== undefined) {
+            setclickedRowData(getNom[getRowsSelected[0]]);
+        }
         setIsEditBtnClick(true);
+        // Trigger edit modal open every click (even if already edited once)
+        setEditRequestId((prev) => prev + 1);
     };
 
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
-
         Swal.fire({
             title: "Та устгахдаа итгэлтэй байна уу?",
             showCancelButton: true,
@@ -196,12 +91,12 @@ const Index = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 axios
-                    .post("/delete/BaingaIlt", {
-                        id: getBaingaIlt[getRowsSelected[0]].id,
+                    .post("/delete/ashignom", {
+                        id: getNom[getRowsSelected[0]].id,
                     })
                     .then((res) => {
                         Swal.fire(res.data.msg);
-                        refreshBaingaIlt();
+                        refreshNom();
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -210,232 +105,223 @@ const Index = () => {
         });
     };
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setSearchForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+
+        const {
+            humrugDugaar,
+            humrugNer,
+            dansDugaar,
+            dansNer,
+            nomDugaar,
+            nomNer,
+            beginDate,
+            endDate,
+        } = searchForm;
+
+        const filtered = allNom.filter((item) => {
+            const createdAt = item?.created_at
+                ? new Date(item.created_at).getTime()
+                : null;
+            const from = beginDate ? new Date(beginDate).getTime() : null;
+            const to = endDate ? new Date(endDate).getTime() : null;
+
+            const matchesDateRange =
+                (!from || (createdAt && createdAt >= from)) &&
+                (!to || (createdAt && createdAt <= to));
+
+            return (
+                (item?.humrug_dugaar || "")
+                    .toString()
+                    .toLowerCase()
+                    .includes(humrugDugaar.toLowerCase()) &&
+                (item?.humrug_ner || "")
+                    .toLowerCase()
+                    .includes(humrugNer.toLowerCase()) &&
+                (item?.dans_dugaar || "")
+                    .toString()
+                    .toLowerCase()
+                    .includes(dansDugaar.toLowerCase()) &&
+                (item?.dans_ner || "")
+                    .toLowerCase()
+                    .includes(dansNer.toLowerCase()) &&
+                (item?.nom_dugaar || "")
+                    .toString()
+                    .toLowerCase()
+                    .includes(nomDugaar.toLowerCase()) &&
+                (item?.nom_ners || "")
+                    .toLowerCase()
+                    .includes(nomNer.toLowerCase()) &&
+                matchesDateRange
+            );
+        });
+
+        setRowsSelected([]);
+        setNom(filtered);
+    };
+
+    const handleClearSearch = () => {
+        setSearchForm({
+            humrugDugaar: "",
+            humrugNer: "",
+            dansDugaar: "",
+            dansNer: "",
+            nomDugaar: "",
+            nomNer: "",
+            beginDate: "",
+            endDate: "",
+        });
+        setRowsSelected([]);
+        setNom(allNom);
+    };
+
     const columns = [
-        {
-            name: "id",
-            label: "№",
-            options: {
-                filter: true,
-                sort: true,
-                filter: false,
-                align: "center",
-                customBodyRenderLite: (rowIndex, dataIndex) => {
-                    if (rowIndex == 0) {
-                        return rowIndex + 1;
-                    } else {
-                        return rowIndex + 1;
-                    }
-                },
-                setCellProps: () => {
-                    return { align: "center" };
-                },
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                            width: 50,
-                        },
-                    };
-                },
+    {
+        name: "id",
+        label: " ",
+        options: {
+            filter: true,
+            sort: true,
+            filter: false,
+            align: "center",
+            customBodyRenderLite: (rowIndex) => {
+                if (rowIndex == 0) {
+                    return rowIndex + 1;
+                } else {
+                    return rowIndex + 1;
+                }
+            },
+            setCellProps: () => {
+                return { align: "center" };
+            },
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                        width: 50,
+                    },
+                };
             },
         },
-        {
-            name: "hadgalamj_dugaar",
-            label: "Дугаар",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
+    },
+    {
+        name: "humrug_dugaar",
+        label: "Хөмрөгийн дугаар",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
             },
         },
-        {
-            name: "hadgalamj_garchig",
-            label: "Хадгаламжийн нэгжийн гарчиг",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
+    },
+    {
+        name: "humrug_ner",
+        label: "Хөмрөгийн нэр",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
             },
         },
-        {
-            name: "hadgalamj_zbn",
-            label: "Зохион байгуулалтын нэгжийн нэр",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
+    },
+    {
+        name: "dans_dugaar",
+        label: "Дансны дугаар",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
             },
         },
-        {
-            name: "hergiin_indeks",
-            label: "Хэргийн индекс",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
+    },
+    {
+        name: "dans_ner",
+        label: "Дансны нэр",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
             },
         },
-        {
-            name: "harya_on",
-            label: "Харьяа он",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
+    },
+    {
+        name: "nom_dugaar",
+        label: "Номын дугаар",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: (value) => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
             },
         },
-        {
-            name: "on_ehen",
-            label: "Эхэлсэн он,сар,өдөр",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-            },
-        },
-        {
-            name: "on_suul",
-            label: "Дууссан он,сар,өдөр",
-            options: {
-                customBodyRenderLite: (rowIndex) => {
-                    const row = getBaingaIlt[rowIndex]; // ✅ OK
-                    const expired = isExpiredRow(row); // ✅ OK
+    },
 
-                    return (
-                        <span
-                            style={{
-                                color: expired ? "#dc2626" : "inherit",
-                                fontWeight: expired ? 600 : "normal",
-                            }}
-                        >
-                            {row?.on_suul}
-                            {expired && " (хугацаа хэтэрсэн)"}
-                        </span>
-                    );
-                },
+    {
+        name: "nom_ners",
+        label: "Номын нэр",
+        options: {
+            filter: true,
+            sort: false,
+            setCellHeaderProps: () => {
+                return {
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                };
+            },
+            customBodyRender: (value) => {
+                if (
+                    value === null ||
+                    value === "" ||
+                    value === 0 ||
+                    value === undefined
+                ) {
+                    return "-";
+                }
+                return value;
             },
         },
-        {
-            name: "huudas_too",
-            label: "Хуудасны тоо",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-            },
-        },
+    },
 
-        {
-            name: "habsralt_too",
-            label: "Хавсралтын тоо",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-            },
-        },
-
-        {
-            name: "jagsaalt_zuildugaar",
-            label: "Хадгалах хугацааны жагсаалтын зүйлийн дугаар",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: () => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-                customBodyRender: (value) => {
-                    if (
-                        value === null ||
-                        value === "" ||
-                        value === 0 ||
-                        value === undefined
-                    ) {
-                        return "-";
-                    }
-                    return value;
-                },
-            },
-        },
-
-        {
-            name: "hn_tailbar",
-            label: "Тайлбар",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-            },
-        },
     ];
 
     //RENDER
@@ -444,322 +330,142 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Лавлагаа татах</h1>
-                        {/* DATE FILTER */}
-                        <div className="col-md-8 mb-3">
-                            <div className="input-group">
-                                <span className="input-group-text">
-                                    Хөмрөг:
-                                </span>
-
-                                <select
-                                    className="form-control"
-                                    value={selectedHumrug}
-                                    onChange={(e) => {
-                                        const value = Number(e.target.value);
-                                        setSelectedHumrug(value);
-
-                                        // 0 сонгосон бол alert
-                                        if (value === 0) {
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхаар!",
-                                                text: "Хөмрөгийг сонгоно уу",
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <option value={0}>Сонгоно уу</option>
-                                    {getHumrug.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
-                                            {el.humrug_ner}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="mx-2"></span>
-                                <span className="input-group-text">
-                                    Дансны дугаар:
-                                </span>
-
-                                <select
-                                    className="form-control"
-                                    value={selectedDans}
-                                    onChange={(e) =>
-                                        setselectedDans(Number(e.target.value))
-                                    }
-                                    disabled={
-                                        selectedHumrug === 0 || !getDans.length
-                                    } // Хөмрөг сонгогдоогүй бол хаалттай
-                                >
-                                    <option value={0}>
-                                        {selectedHumrug === 0
-                                            ? "Хөмрөг сонгоно уу"
-                                            : getDans.length
-                                            ? "Сонгоно уу"
-                                            : "Хоосон байна"}
-                                    </option>
-                                    {getDans.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
-                                            {el.dans_ner}
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="mx-2"></span>
-                                <button
-                                    className="btn d-flex align-items-center gap-2 px-4 py-2 fw-bold"
-                                    disabled={
-                                        selectedHumrug === 0 ||
-                                        selectedDans === 0
-                                    }
-                                    onClick={() => {
-                                        if (
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                        ) {
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхаар!",
-                                                text: "Хөмрөг болон данс сонгоно уу",
-                                            });
-                                            return;
-                                        }
-                                        setShowShiljuulehModal(true);
-                                    }}
-                                    style={{
-                                        borderRadius: "0.6rem",
-                                        background:
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                                ? "#e2e8f0" // disabled gray
-                                                : "#3b82f6", // soft blue
-                                        color:
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                                ? "#94a3b8"
-                                                : "#fff",
-                                        border: "none",
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-                                        transition: "all 0.25s ease",
-                                        cursor:
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                                ? "not-allowed"
-                                                : "pointer",
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (
-                                            !(
-                                                selectedHumrug === 0 ||
-                                                selectedDans === 0
-                                            )
-                                        ) {
-                                            e.currentTarget.style.transform =
-                                                "translateY(-2px)";
-                                            e.currentTarget.style.boxShadow =
-                                                "0 4px 14px rgba(0,0,0,0.18)";
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.transform =
-                                            "translateY(0)";
-                                        e.currentTarget.style.boxShadow =
-                                            "0 2px 8px rgba(0,0,0,0.12)";
-                                    }}
-                                >
-                                    <i className="fas fa-file-export"></i> 📂
-                                    Архивт шилжүүлэх
+                        <h1 className="text-center mb-4">Ашигласан номын жагсаалт</h1>
+                        <form
+                            className="card card-body mb-3"
+                            onSubmit={handleSearch}
+                        >
+                            <div className="row">
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Хөмрөгийн дугаар</label>
+                                    <input
+                                        type="text"
+                                        name="humrugDugaar"
+                                        className="form-control"
+                                        value={searchForm.humrugDugaar}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Хөмрөгийн нэр</label>
+                                    <input
+                                        type="text"
+                                        name="humrugNer"
+                                        className="form-control"
+                                        value={searchForm.humrugNer}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Дансны дугаар</label>
+                                    <input
+                                        type="text"
+                                        name="dansDugaar"
+                                        className="form-control"
+                                        value={searchForm.dansDugaar}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Дансны нэр</label>
+                                    <input
+                                        type="text"
+                                        name="dansNer"
+                                        className="form-control"
+                                        value={searchForm.dansNer}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Номын дугаар</label>
+                                    <input
+                                        type="text"
+                                        name="nomDugaar"
+                                        className="form-control"
+                                        value={searchForm.nomDugaar}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Номын нэр</label>
+                                    <input
+                                        type="text"
+                                        name="nomNer"
+                                        className="form-control"
+                                        value={searchForm.nomNer}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Эхлэх огноо</label>
+                                    <input
+                                        type="date"
+                                        name="beginDate"
+                                        className="form-control"
+                                        value={searchForm.beginDate}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-3 mb-3">
+                                    <label className="form-label">Дуусах огноо</label>
+                                    <input
+                                        type="date"
+                                        name="endDate"
+                                        className="form-control"
+                                        value={searchForm.endDate}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="d-flex justify-content-end gap-2">
+                                <button type="button" className="btn btn-secondary" onClick={handleClearSearch}>
+                                    Цэвэрлэх
+                                </button>
+                                <button type="submit" className="btn btn-primary">
+                                    Хайх
                                 </button>
                             </div>
-                        </div>
-                        <div className="labelWrapper">
-                            <div className={`tab-indicator ${activeTab}`} />
-
-                            <button
-                                className={`labelBtn ${
-                                    activeTab === "ilt" ? "active" : ""
-                                }`}
-                                onClick={() => setActiveTab("ilt")}
-                            >
-                                📊 Илт
-                            </button>
-
-                            <button
-                                className={`labelBtn ${
-                                    activeTab === "barimt" ? "active" : ""
-                                }`}
-                                onClick={() => {
-                                    if (!clickedRowData) {
-                                        Swal.fire("Илт мөр сонгоно уу!");
-                                        return;
-                                    }
-                                    setActiveTab("barimt");
-                                }}
-                            >
-                                📂Баримт бичиг
-                            </button>
-                        </div>
-                        {expiredCount > 0 && (
-                            <div
-                                style={{
-                                    background: "#fee2e2",
-                                    color: "#991b1b",
-                                    border: "1px solid #fca5a5",
-                                    padding: "10px 14px",
-                                    borderRadius: "8px",
-                                    marginBottom: "12px",
-                                    fontWeight: "600",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                            >
-                                ⚠️ Хадгалалтын хугацаа хэтэрсэн баримт:{" "}
-                                <strong>{expiredCount}</strong>
-                            </div>
-                        )}
-
-                        {activeTab === "ilt" && (
-                            <>
-                                <div className="col-md-12 mb-3">
-                                    <label
-                                        htmlFor="BainIltsExcel"
-                                        className="form-label"
-                                    >
-                                        Excel Import
-                                    </label>
-                                    <div className="d-flex align-items-center">
-                                        {/* Файл сонгох input */}
-                                        <input
-                                            type="file"
-                                            id="BainIltsExcel"
-                                            className="form-control form-control-sm me-2"
-                                            accept=".xlsx,.xls,.csv"
-                                            onChange={(e) => {
-                                                if (e.target.files.length)
-                                                    setSelectedFile(
-                                                        e.target.files[0]
-                                                    );
-                                            }}
-                                        />
-
-                                        {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
-                                        {selectedFile && (
-                                            <button
-                                                className="btn btn-primary btn-sm"
-                                                onClick={() => {
-                                                    importExcel(selectedFile); // Excel импортлох функц дуудна
-                                                    setSelectedFile(null); // файлыг цэвэрлэх
-                                                    document.getElementById(
-                                                        "BainIltsExcel"
-                                                    ).value = null; // input-ыг цэвэрлэх
-                                                }}
-                                            >
-                                                Import
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <MUIDatatable
-                                    data={getBaingaIlt}
-                                    setdata={setBaingaIlt}
-                                    columns={columns}
-                                    options={{
-                                        setRowProps: (row, dataIndex) => {
-                                            const r = getBaingaIlt[dataIndex];
-                                            if (isExpiredRow(r)) {
-                                                return {
-                                                    style: {
-                                                        backgroundColor:
-                                                            "#fee2e2",
-                                                    },
-                                                };
-                                            }
-                                        },
-                                    }}
-                                    costumToolbar={
-                                        <CustomToolbar
-                                            btnClassName="btn btn-success"
-                                            modelType="modal"
-                                            dataTargetID={
-                                                selectedHumrug !== 0 &&
-                                                selectedDans !== 0
-                                                    ? "#BaingaNew"
-                                                    : null
-                                            }
-                                            spanIconClassName="fas fa-plus"
-                                            buttonName="Нэмэх"
-                                            excelDownloadData={getBaingaIlt}
-                                            excelHeaders={excelHeaders}
-                                            excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /илт/"
-                                            isHideInsert={true}
-                                        />
-                                    }
-                                    btnEdit={btnEdit}
-                                    modelType={showModal}
-                                    editdataTargetID="#baingaIltedit"
-                                    btnDelete={btnDelete}
-                                    getRowsSelected={getRowsSelected}
-                                    setRowsSelected={setRowsSelected}
-                                    isHideDelete={true}
-                                    isHideEdit={true}
-                                    showArchive={false}
+                        </form>
+                        {/* TABLE */}
+                        <MUIDatatable
+                            data={getNom}
+                            setdata={setNom}
+                            sortOrder={{ name: "id", direction: "desc" }}
+                            columns={columns}
+                            costumToolbar={
+                                <CustomToolbar
+                                    btnClassName="btn btn-success"
+                                    modelType="modal"
+                                    dataTargetID="#NomNew"
+                                    spanIconClassName="fas fa-plus"
+                                    buttonName="Нэмэх"
+                                    excelDownloadData={getNom}
+                                    excelHeaders={excelHeaders}
+                                    excelTitle="Ашигласан номын жагсаалт"
+                                    isHideInsert={true}
                                 />
-                            </>
-                        )}
-                        <BaingaIltsNew
-                            refreshBaingaIlt={refreshBaingaIlt}
-                            selectedHumrug={selectedHumrug}
-                            selectedDans={selectedDans}
-                        />
-                        <BaingaIltsEdit
+                            }
+                            btnEdit={btnEdit}
+                            modelType={showModal}
+                            editdataTargetID="#NomEdit"
+                            btnDelete={btnDelete}
+                            getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            refreshBaingaIlt={refreshBaingaIlt}
-                            selectedHumrug={selectedHumrug}
-                            selectedDans={selectedDans}
+                            isHideDelete={true}
+                            isHideEdit={true}
+                        />
+
+                        <NomNew refreshNom={refreshNom} />
+                        <NomEdit
+                            setRowsSelected={setRowsSelected}
+                            refreshNom={refreshNom}
                             changeDataRow={clickedRowData}
                             isEditBtnClick={isEditBtnClick}
+                            editRequestId={editRequestId}
                         />
-
-                        <BaingaHadgalahHugatsaa />
                     </div>
                 </div>
             </div>
-
-            {activeTab === "barimt" && (
-                <>
-                    {clickedRowData ? (
-                        <BaingaIltsChild changeDataRow={clickedRowData} />
-                    ) : (
-                        <div className="text-center p-5">
-                            Илт мөр сонгоно уу
-                        </div>
-                    )}
-                </>
-            )}
-            {/* {clickedRowData ? (
-                <BaingaIltsChild changeDataRow={clickedRowData} />
-            ) : (
-                <div className="text-center p-5">Илт мөр сонгоно уу</div>
-            )} */}
-            {showShiljuulehModal && getBaingaIlt.length > 0 && (
-                <BaingaIltShiljuuleh
-                    selectedHumrug={selectedHumrug}
-                    selectedDans={selectedDans}
-                    getBaingaIlt={getBaingaIlt}
-                    getRowsSelected={getRowsSelected}
-                    setRowsSelected={setRowsSelected}
-                    // clickedRowData={getBaingaIlt[0]} // Эхний мөрийг автоматаар дамжуулж байна
-                    onClose={() => setShowShiljuulehModal(false)}
-                    refreshBaingaIlt={refreshBaingaIlt}
-                />
-            )}
         </>
     );
 };
@@ -767,18 +473,9 @@ const Index = () => {
 export default Index;
 
 const excelHeaders = [
-    { label: "Дугаар", key: "hadgalamj_dugaar" },
-    { label: "Хадгаламжийн нэгжийн гарчиг", key: "hadgalamj_garchig" },
-    { label: "Зохион байгуулалтын нэгжийн нэр", key: "hadgalamj_zbn" },
-    { label: "Хэргийн индекс", key: "hergiin_indeks" },
-    { label: "Харьяа он ", key: "harya_on" },
-    { label: "Эхэлсэн он,сар,өдөр", key: "on_ehen" },
-    { label: "Дууссан он,сар,өдөр", key: "on_suul" },
-    { label: "Хуудасны тоо", key: "huudas_too" },
-    { label: "Хавсралтын тоо", key: "habsralt_too" },
-    {
-        label: "Хадгалах хугацааны жагсаалтын зүйлийн дугаар",
-        key: "jagsaalt_zuildugaar",
-    },
-    { label: "Тайлбар", key: "hn_tailbar" },
+    { label: "id", key: "id" },
+    { label: "Хөмрөгийн дугаар", key: "humrug_dugaar" },
+    { label: "Дансны дугаар", key: "dans_dugaar" },
+    { label: "Номын дугаар", key: "nom_dugaar" },
+    { label: "Номын нэр", key: "nom_ners" },
 ];

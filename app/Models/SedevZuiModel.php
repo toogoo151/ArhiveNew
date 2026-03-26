@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 
 class SedevZuiModel extends Model
 {
@@ -36,6 +37,14 @@ class SedevZuiModel extends Model
                     "db_arhivdans.dans_dugaar"
                 )
                 ->get();
+
+
+            $sedev->transform(function ($item) {
+                $item->humrug_ner = $item->humrug_ner ? Crypt::decryptString($item->humrug_ner) : null;
+                return $item;
+            });
+
+
             return $sedev;
         } catch (\Throwable $th) {
             return response(

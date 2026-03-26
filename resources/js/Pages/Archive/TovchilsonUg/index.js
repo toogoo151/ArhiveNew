@@ -7,8 +7,10 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import TovchlolEdit from "./TovchlolEdit";
 import TovchlolNew from "./TovchlolNew";
-const Index = () => {
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
+const Index = () => {
     // ================= FILTER CONTROL =================
     const [isFilterActive, setIsFilterActive] = useState(false);
 
@@ -24,6 +26,7 @@ const Index = () => {
     // Don't let Bootstrap auto-open the edit modal before React fills the form.
     // We'll open it programmatically inside `TovchlolEdit`.
     const [showModal] = useState(null);
+    const { tubshin, loading, error } = useAuthPermission();
 
     // FETCH
     useEffect(() => {
@@ -58,8 +61,19 @@ const Index = () => {
             setTovchlol(allTovchlol);
             return;
         }
+    }, [isFilterActive, allTovchlol]);
 
-    }, [isFilterActive,  allTovchlol]);
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+    console.log("Tuvshin harah: ", isRestricted);
 
     const btnEdit = () => {
         // Ensure the edit modal gets the selected row immediately on first click
@@ -96,144 +110,143 @@ const Index = () => {
     };
 
     const columns = [
-    {
-        name: "id",
-        label: " ",
-        options: {
-            filter: true,
-            sort: true,
-            filter: false,
-            align: "center",
-            customBodyRenderLite: (rowIndex) => {
-                if (rowIndex == 0) {
-                    return rowIndex + 1;
-                } else {
-                    return rowIndex + 1;
-                }
-            },
-            setCellProps: () => {
-                return { align: "center" };
-            },
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                        width: 50,
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "humrug_dugaar",
-        label: "Хөмрөгийн дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "id",
+            label: " ",
+            options: {
+                filter: true,
+                sort: true,
+                filter: false,
+                align: "center",
+                customBodyRenderLite: (rowIndex) => {
+                    if (rowIndex == 0) {
+                        return rowIndex + 1;
+                    } else {
+                        return rowIndex + 1;
+                    }
+                },
+                setCellProps: () => {
+                    return { align: "center" };
+                },
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                            width: 50,
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "humrug_ner",
-        label: "Хөмрөгийн нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "humrug_dugaar",
+            label: "Хөмрөгийн дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "dans_dugaar",
-        label: "Дансны дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "humrug_ner",
+            label: "Хөмрөгийн нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "dans_ner",
-        label: "Дансны нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "dans_dugaar",
+            label: "Дансны дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "tobchlol",
-        label: "Товчлол",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "dans_ner",
+            label: "Дансны нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
+        {
+            name: "tobchlol",
+            label: "Товчлол",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
 
-    {
-        name: "tailal",
-        label: "Тайлал",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
+        {
+            name: "tailal",
+            label: "Тайлал",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: () => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+                customBodyRender: (value) => {
+                    if (
+                        value === null ||
+                        value === "" ||
+                        value === 0 ||
+                        value === undefined
+                    ) {
+                        return "-";
+                    }
+                    return value;
+                },
             },
         },
-    },
-
     ];
 
     //RENDER
@@ -242,7 +255,9 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Товчилсон үгийн жагсаалт </h1>
+                        <h1 className="text-center mb-4">
+                            Товчилсон үгийн жагсаалт{" "}
+                        </h1>
 
                         {/* TABLE */}
                         <MUIDatatable
@@ -260,7 +275,8 @@ const Index = () => {
                                     excelDownloadData={getTovchlol}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Товчилсон үгийн жагсаалт"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -269,8 +285,8 @@ const Index = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
 
                         <TovchlolNew refreshTovchlol={refreshTovchlol} />

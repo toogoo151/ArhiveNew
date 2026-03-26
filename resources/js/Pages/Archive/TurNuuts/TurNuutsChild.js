@@ -7,6 +7,9 @@ import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIData
 import TurNuutsChildEdit from "./TurNuutsChildEdit";
 import TurNuutsChildNew from "./TurNuutsChildNew";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const TurNuutsChild = (props) => {
     const [getTurNuutsChild, setTurNuutsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -14,6 +17,8 @@ const TurNuutsChild = (props) => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshTurNuutsChild(props.changeDataRow.id);
@@ -75,6 +80,18 @@ const TurNuutsChild = (props) => {
     //         }
     //     });
     // };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -196,7 +213,8 @@ const TurNuutsChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getTurNuutsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -208,8 +226,8 @@ const TurNuutsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                         <TurNuutsChildNew
                             _parentID={props.changeDataRow.desk_id}

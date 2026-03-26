@@ -7,6 +7,9 @@ import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIData
 import BaingaIltsChildEdit from "./BaingaIltsChildEdit";
 import BaingaIltsChildNew from "./BaingaIltsChildNew";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const BaingaIltsChild = (props) => {
     const [getbaingaIltsChild, setbaingaIltsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -15,6 +18,8 @@ const BaingaIltsChild = (props) => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshbaingaIltsChild(props.changeDataRow.id);
@@ -78,6 +83,18 @@ const BaingaIltsChild = (props) => {
     //         }
     //     });
     // };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -314,7 +331,8 @@ const BaingaIltsChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getbaingaIltsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -326,8 +344,8 @@ const BaingaIltsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                             showArchive={false}
                         />
                         <BaingaIltsChildNew

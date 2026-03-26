@@ -4,6 +4,8 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const ArhivBNuutsChild = (props) => {
     const [getbaingaNuutsChild, setbaingaNuutsChild] = useState([]);
@@ -103,6 +105,17 @@ const ArhivBNuutsChild = (props) => {
     //     });
     // };
 
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const refreshbaingaNuutsChild = (id) => {
         axios
             .post("get/baingaNuutsChild", {
@@ -170,7 +183,8 @@ const ArhivBNuutsChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getbaingaNuutsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={false}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -182,8 +196,8 @@ const ArhivBNuutsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={false}
-                            isHideEdit={false}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                     </div>
                 </div>

@@ -156,6 +156,7 @@ class CustomToolbar extends React.Component {
                                 spanIconClassName={this.props.spanIconClassName}
                                 buttonName={this.props.buttonName}
                                 clickHeaderOpenModal={this.props.btnInsert}
+                                disabled={this.props.isHideInsert}
                             />
                         </Tooltip>
                     </div>

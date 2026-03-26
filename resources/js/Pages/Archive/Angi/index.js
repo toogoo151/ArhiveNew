@@ -8,6 +8,9 @@ import axios from "../../../AxiosUser";
 import AngiEdit from "./AngiEdit";
 import AngiNew from "./AngiNew";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const index = () => {
     const [getAngi, setAngi] = useState([]);
 
@@ -16,6 +19,8 @@ const index = () => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshAngi();
@@ -37,6 +42,17 @@ const index = () => {
                 console.log(err);
             });
     };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnDelete = () => {
         setRowsSelected([]);
@@ -89,7 +105,8 @@ const index = () => {
                                     excelDownloadData={getAngi}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Анги"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -101,8 +118,8 @@ const index = () => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                         <AngiNew refreshAngi={refreshAngi} />
                         <AngiEdit

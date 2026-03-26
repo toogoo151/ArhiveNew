@@ -11,6 +11,9 @@ import TurNuutsEdit from "./TurNuutsEdit";
 import TurNuutsNew from "./TurNuutsNew";
 import TurNuutsShiljuuleh from "./TurNuutsShiljuuleh";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const Index = () => {
     const today = new Date();
     const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
@@ -37,6 +40,7 @@ const Index = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshTurNuuts();
@@ -142,53 +146,17 @@ const Index = () => {
             setclickedRowData(null);
         }
     }, [getRowsSelected, getTurNuuts]);
-    //  ROW SELECT
-    // useEffect(() => {
-    //     if (getRowsSelected[0] !== undefined) {
-    //         setIsEditBtnClick(false);
-    //         setclickedRowData(getTurNuuts[getRowsSelected[0]]);
-    //     }
-    // }, [getRowsSelected, getTurNuuts]);
 
-    // useEffect(() => {
-    //     if (selectedHumrug === 0 || selectedDans === 0) {
-    //         setTurNuuts([]);
-    //         return;
-    //     }
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
 
-    //     const filteredData = allDans.filter(
-    //         (item) =>
-    //             Number(item.humrugID) === Number(selectedHumrug) &&
-    //             Number(item.hadgalah_hugatsaa) === Number(selectedDans)
-    //     );
-
-    //     setTurNuuts(filteredData);
-    // }, [selectedHumrug, selectedDans, allDans]);
-
-    // useEffect(() => {
-    //     let filteredData = allDans;
-
-    //     if (selectedHumrug !== 0) {
-    //         filteredData = filteredData.filter(
-    //             (item) => Number(item.humrugID) === Number(selectedHumrug)
-    //         );
-    //     }
-
-    //     if (selectedDans !== 0) {
-    //         filteredData = filteredData.filter(
-    //             (item) =>
-    //                 Number(item.hadgalah_hugatsaa) === Number(selectedDans)
-    //         );
-    //     }
-
-    //     setTurNuuts(filteredData);
-    // }, [selectedHumrug, selectedDans, allDans]);
-    // useEffect(() => {
-    //     if (!isFilterActive) {
-    //         setTurNuuts(allHumrug);
-    //         return;
-    //     }
-    // }, [allHumrug]);
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -709,7 +677,8 @@ const Index = () => {
                                             excelDownloadData={getTurNuuts}
                                             excelHeaders={excelHeaders}
                                             excelTitle="Түр хадгалагдах хадгаламжийн нэгж /нууц/"
-                                            isHideInsert={true}
+                                            isHideInsert={isRestricted}
+                                            isHideEdit={isRestricted}
                                             onClick={() => {
                                                 if (
                                                     selectedHumrug === 0 ||
@@ -732,8 +701,8 @@ const Index = () => {
                                     btnDelete={btnDelete}
                                     getRowsSelected={getRowsSelected}
                                     setRowsSelected={setRowsSelected}
-                                    isHideDelete={true}
-                                    isHideEdit={true}
+                                    isHideDelete={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             </>
                         )}

@@ -52,6 +52,10 @@ class AuthController extends Controller
     {
         return Auth::user()->userType;
     }
+    public function getPermission()
+    {
+        return Auth::user()->tubshin;
+    }
 
     public function logout(Request $request)
     {

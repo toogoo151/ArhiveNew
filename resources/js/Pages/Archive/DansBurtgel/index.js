@@ -7,6 +7,8 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import DansBurtgelEdit from "./DansBurtgelEdit";
 import DansBurtgelNew from "./DansBurtgelNew";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const Index = () => {
     const today = new Date();
@@ -31,6 +33,7 @@ const Index = () => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshDans();
@@ -176,6 +179,17 @@ const Index = () => {
     //         return;
     //     }
     // }, [allHumrug]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -331,7 +345,8 @@ const Index = () => {
                                     excelDownloadData={getDans}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Данс бүртгэл"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                     onClick={() => {
                                         if (
                                             selectedHumrug === 0 ||
@@ -365,8 +380,8 @@ const Index = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideInsert={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                         <DansBurtgelNew
                             refreshDans={refreshDans}

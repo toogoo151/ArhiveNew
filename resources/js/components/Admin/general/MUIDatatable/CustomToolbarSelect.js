@@ -35,15 +35,6 @@ class CustomToolbarSelect extends React.Component {
                 {this.props.isHideEdit && (
                     <Tooltip title={"Засах"}>
                         <>
-                            {/* <IconButton
-                        className={classes.iconButton}
-                        onClick={this.insideBtnEdit}
-                    >
-                        <EditButton
-                            className={classes.icon}
-                            style={{ color: "#1F618D" }}
-                        />
-                    </IconButton> */}
                             <MUIButtonShowModel
                                 style={{ marginRight: 10 }}
                                 dataTargetID={this.props.dataTargetID}

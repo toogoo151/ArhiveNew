@@ -10,6 +10,8 @@ import DalanJilSanhuuChild from "./DalanJilSanhuuChild";
 import DalanJilSanhuuEdit from "./DalanJilSanhuuEdit";
 import DalanJilSanhuuNew from "./DalanJilSanhuuNew";
 import DalanJilSanhuuShiljuuleh from "./DalanJilSanhuuShiljuuleh";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const Index = () => {
     const today = new Date();
@@ -37,6 +39,7 @@ const Index = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         if (getDalSanhuu.length) {
@@ -158,6 +161,17 @@ const Index = () => {
     //         setComment("");
     //     }
     // }, [showShiljuuleh]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -625,7 +639,8 @@ const Index = () => {
                                             excelDownloadData={getDalSanhuu}
                                             excelHeaders={excelHeaders}
                                             excelTitle="70 жил хадгалагдах хадгаламжийн нэгж /Санхүү/"
-                                            isHideInsert={true}
+                                            isHideInsert={isRestricted}
+                                            isHideEdit={isRestricted}
                                             onClick={() => {
                                                 if (
                                                     selectedHumrug === 0 ||
@@ -649,9 +664,9 @@ const Index = () => {
                                     btnArchiveClick={btnArchive}
                                     getRowsSelected={getRowsSelected}
                                     setRowsSelected={setRowsSelected}
-                                    isHideDelete={true}
-                                    isHideEdit={true}
-                                    showArchive={false}
+                                    isHideDelete={isRestricted}
+                                    isHideEdit={isRestricted}
+                                    showArchive={isRestricted}
                                 />
                             </>
                         )}

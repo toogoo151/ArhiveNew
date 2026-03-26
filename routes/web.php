@@ -117,6 +117,9 @@ Route::get("/get/auth/name", function () {
 
 Route::get('/get/auth/tuvshin', [AuthController::class, 'getTuvshin']);
 
+// Get auth user's tubshin
+Route::get('/get/auth/permission', [AuthController::class, 'getPermission']);
+
 
 // Route::get("/get/auth/tuvshin", function () {
 //     $user = Auth::user();
@@ -598,6 +601,7 @@ Route::get('/get/jagsaaltturuldugaar', function () {
 Route::get('/get/jagsaaltTurul', function () {
     return DB::table('jagsaalt_turul')->get();
 });
+
 Route::get('/get/hugatsaaTurul', function () {
     $RetentionPeriod = new Retention();
     return $RetentionPeriod->getRetentionTuslah();

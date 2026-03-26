@@ -79,7 +79,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
         );
 
         setProgtypeID(String(row.progtypeIDshuu ?? row.userType ?? ""));
-        // setUtypeID(String(row.usertypeIDshuu ?? row.bichig_turul ?? ""));
+        setUtypeID(String(row.usertypeIDshuu ?? row.tubshin ?? ""));
         // setSectypeID(String(row.sectypeIDshuu ?? row.tubshin ?? ""));
 
         // Load units for the comandlal
@@ -141,6 +141,7 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
             comand_id,
             salbar_id: salbar || null,
             userType: Progtype || null,
+            tubshin: Utype || null,
         };
         if (nuuts_ug && nuuts_ug.trim() !== "") payload.nuuts_ug = nuuts_ug;
 
@@ -300,9 +301,9 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
                         </div>
 
                         {/* Хэрэглэгчийн түвшин */}
-                        {/* <div className="input-group mb-3">
+                        <div className="input-group mb-3">
                             <span className="input-group-text">
-                                Хэрэглэгчийн түвшин:
+                                Хэрэглэгчийн эрх:
                             </span>
                             <select
                                 className="form-control"
@@ -312,11 +313,11 @@ const UserEdit = ({ changeDataRow, refreshUser, closeModal }) => {
                                 <option value="">Сонгоно уу</option>
                                 {getUtype.map((el) => (
                                     <option key={el.id} value={String(el.id)}>
-                                        {el.Uname ?? el.name}
+                                        {el.Uname}
                                     </option>
                                 ))}
                             </select>
-                        </div> */}
+                        </div>
 
                         {/* Системийн түвшин */}
                         {/* <div className="input-group mb-3">

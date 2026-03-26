@@ -6,6 +6,8 @@ import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import ArhivBNuutsChild from "./ArhivBNuutsChild";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const ArhivBNuuts = () => {
     const today = new Date();
@@ -30,6 +32,7 @@ const ArhivBNuuts = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshBaingaNuuts();
@@ -127,6 +130,18 @@ const ArhivBNuuts = () => {
             setclickedRowData(null);
         }
     }, [getRowsSelected, getarchivebaingaNuuts]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     //  ROW SELECT
     // useEffect(() => {
     //     if (getRowsSelected[0] !== undefined) {
@@ -288,7 +303,8 @@ const ArhivBNuuts = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getarchivebaingaNuuts}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={false}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                     onClick={() => {
                                         if (
                                             selectedHumrug === 0 ||
@@ -310,8 +326,8 @@ const ArhivBNuuts = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={false}
-                            isHideEdit={false}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                     </div>
                 </div>

@@ -12,6 +12,9 @@ import TurIltNew from "./TurIltNew";
 import TurIltsChild from "./TurIltsChild";
 import TurIltShiljuuleh from "./TurIltShiljuuleh";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const Index = () => {
     const today = new Date();
     const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
@@ -41,6 +44,8 @@ const Index = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         if (getTurIlt.length) {
@@ -162,6 +167,17 @@ const Index = () => {
     //         setComment("");
     //     }
     // }, [showShiljuuleh]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -640,7 +656,8 @@ const Index = () => {
                                             excelDownloadData={getTurIlt}
                                             excelHeaders={excelHeaders}
                                             excelTitle="Түр хадгалагдах хадгаламжийн нэгж /илт/"
-                                            isHideInsert={true}
+                                            isHideInsert={isRestricted}
+                                            isHideEdit={isRestricted}
                                             onClick={() => {
                                                 if (
                                                     selectedHumrug === 0 ||
@@ -664,9 +681,8 @@ const Index = () => {
                                     btnArchiveClick={btnArchive}
                                     getRowsSelected={getRowsSelected}
                                     setRowsSelected={setRowsSelected}
-                                    isHideDelete={true}
-                                    isHideEdit={true}
-                                    showArchive={false}
+                                    isHideDelete={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             </>
                         )}

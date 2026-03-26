@@ -4,6 +4,8 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const ArhivTrNuutsChild = (props) => {
     const [getTurNuutsChild, setTurNuutsChild] = useState([]);
@@ -12,6 +14,7 @@ const ArhivTrNuutsChild = (props) => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshTurNuutsChild(props.changeDataRow.id);
@@ -56,6 +59,17 @@ const ArhivTrNuutsChild = (props) => {
             }
         });
     };
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnEdit = () => {
         if (!getRowsSelected.length) {
             Swal.fire("Засах мөр сонгоно уу!");
@@ -69,39 +83,6 @@ const ArhivTrNuutsChild = (props) => {
         setIsEditBtnClick(true);
     };
     const { changeDataRow } = props;
-
-    // const deleteOldFile = (file) => {
-    //     Swal.fire({
-    //         title: "Устгах уу?",
-    //         text: `"${file.filename}" файлыг устгах гэж байна`,
-    //         icon: "warning",
-    //         showCancelButton: true,
-    //         confirmButtonText: "Тийм, устга",
-    //         cancelButtonText: "Болих",
-    //     }).then((result) => {
-    //         if (result.isConfirmed) {
-    //             axios
-    //                 .post("/delete/TurIltChildFile", {
-    //                     id: props.changeDataRow.id,
-    //                     file_url: file.url,
-    //                 })
-    //                 .then((res) => {
-    //                     Swal.fire(res.data.msg);
-
-    //                     //  UI дээрээс устгасан файлыг хасна
-    //                     const filtered = oldFiles.filter(
-    //                         (f) => f.url !== file.url
-    //                     );
-    //                     setOldFiles(filtered);
-    //                 })
-    //                 .catch((err) => {
-    //                     Swal.fire(
-    //                         err.response?.data?.msg || "Устгах үед алдаа гарлаа"
-    //                     );
-    //                 });
-    //         }
-    //     });
-    // };
 
     const refreshTurNuutsChild = (id) => {
         axios
@@ -170,7 +151,8 @@ const ArhivTrNuutsChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getTurNuutsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={false}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -182,8 +164,8 @@ const ArhivTrNuutsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={false}
-                            isHideEdit={false}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                     </div>
                 </div>
