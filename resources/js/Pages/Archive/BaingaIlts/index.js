@@ -11,6 +11,10 @@ import BaingaIltsChild from "./BaingaIltsChild";
 import BaingaIltsEdit from "./BaingaIltsEdit";
 import BaingaIltShiljuuleh from "./BaingaIltShiljuuleh";
 import BaingaIltsNew from "./BaingaIltsNew";
+
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 import "./Index.css";
 
 const Index = () => {
@@ -48,6 +52,7 @@ const Index = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     setRowsSelected([]);
@@ -259,6 +264,17 @@ const Index = () => {
     //         setComment("");
     //     }
     // }, [showShiljuuleh]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -997,7 +1013,8 @@ const Index = () => {
                                                     }
                                                     excelHeaders={excelHeaders}
                                                     excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /илт/"
-                                                    isHideInsert={true}
+                                                    isHideInsert={isRestricted}
+                                                    isHideEdit={isRestricted}
                                                 />
                                             }
                                             btnEdit={btnEdit}
@@ -1006,8 +1023,8 @@ const Index = () => {
                                             btnDelete={btnDelete}
                                             getRowsSelected={getRowsSelected}
                                             setRowsSelected={setRowsSelected}
-                                            isHideDelete={true}
-                                            isHideEdit={true}
+                                            isHideDelete={isRestricted}
+                                            isHideEdit={isRestricted}
                                             showArchive={false}
                                         />
                                     </div>

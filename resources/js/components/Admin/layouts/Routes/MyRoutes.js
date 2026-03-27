@@ -32,6 +32,7 @@ import AshigNom from "../../../../Pages/Archive/AshigNom/index";
 import JagsaaltZuil from "../../../../Pages/Archive/JagsaaltZuil/index";
 import SedevZui from "../../../../Pages/Archive/SedevZui/index";
 import Tovchlol from "../../../../Pages/Archive/TovchilsonUg/index";
+import Lavlagaa from "../../../../Pages/Archive/Lavlagaa/index";
 
 // erhzui
 import Erhzui from "../../../../Pages/Archive/ErhZui/index";
@@ -90,6 +91,8 @@ const MyRoutes = (props) => {
             <Route path="/get/dictonaries" element={<AshigNom />} />
             <Route path="/get/tovchilsonug" element={<Tovchlol />} />
             <Route path="/get/erhzui-info" element={<Erhzui />} />
+            <Route path="/get/lavlagaa" element={<Lavlagaa />} />
+
             {/* Туслах сан дуусах*/}
             {/* Нуугдмал санд нэмэх */}
             <Route path="/get/retentions" element={<Retention />} />

@@ -98,7 +98,7 @@ const UserNew = ({ refreshUser }) => {
                 salbar_id: data.salbar || null,
                 // barimt_turul: data.barimt_turul,
                 // bichig_turul: data.bichig_turul,
-                // tubshin: data.tubshin,
+                tubshin: data.tubshin,
                 userType: data.userType,
             })
             .then((res) => {
@@ -159,7 +159,6 @@ const UserNew = ({ refreshUser }) => {
                                     {errors.hereglegch_ner?.message}
                                 </p>
                             </div>
-
                             {/* Password with Hide/Show */}
                             <div className="row">
                                 <div className="input-group mb-3">
@@ -198,7 +197,6 @@ const UserNew = ({ refreshUser }) => {
                                     {errors.nuuts_ug?.message}
                                 </p>
                             </div>
-
                             {/* Командлал */}
                             <div className="row">
                                 <div className="input-group mb-3">
@@ -224,7 +222,6 @@ const UserNew = ({ refreshUser }) => {
                                     </p>
                                 </div>
                             </div>
-
                             {/* Анги */}
                             {getUnits.length > 0 && (
                                 <div className="row">
@@ -267,7 +264,6 @@ const UserNew = ({ refreshUser }) => {
                                     </div>
                                 </div>
                             )}
-
                             {/* Салбар */}
                             {getSalbar.length > 0 && (
                                 <div className="row">
@@ -317,7 +313,6 @@ const UserNew = ({ refreshUser }) => {
                                     </div>
                                 </div>
                             )}
-
                             {/* Программын төрөл */}
                             <div className="row">
                                 <div className="input-group mb-3">
@@ -342,18 +337,18 @@ const UserNew = ({ refreshUser }) => {
                                     </p>
                                 </div>
                             </div>
-
                             {/* Хэрэглэгчийн түвшин */}
-                            {/* <div className="row">
+
+                            <div className="row">
                                 <div className="input-group mb-3">
                                     <div className="input-group-prepend">
                                         <span className="input-group-text">
-                                            Хэрэглэгчийн түвшин:
+                                            Хэрэглэгчийн эрх:
                                         </span>
                                     </div>
                                     <select
                                         className="form-control"
-                                        {...register("bichig_turul")}
+                                        {...register("tubshin")}
                                     >
                                         <option value="">Сонгоно уу</option>
                                         {getUtype.map((el) => (
@@ -362,10 +357,8 @@ const UserNew = ({ refreshUser }) => {
                                             </option>
                                         ))}
                                     </select>
-                                 
                                 </div>
-                            </div> */}
-
+                            </div>
                             {/* Нууцын төрөл */}
                             {/* <div className="row">
                                 <div className="input-group mb-3">
@@ -385,7 +378,7 @@ const UserNew = ({ refreshUser }) => {
                                             </option>
                                         ))}
                                     </select>
-                                   
+
                                 </div>
                             </div> */}
                         </div>

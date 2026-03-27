@@ -7,6 +7,8 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import HumrugEdit from "./HumrugEdit";
 import HumrugNew from "./HumrugNew";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const Index = () => {
     // ================= DATE =================
@@ -30,6 +32,7 @@ const Index = () => {
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     // FETCH
     useEffect(() => {
@@ -93,6 +96,17 @@ const Index = () => {
 
         setHumrug(filtered);
     }, [isFilterActive, getStartDate, getEndDate, allHumrug]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -226,7 +240,8 @@ const Index = () => {
                                     excelDownloadData={getHumrug}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Хөмрөг"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -235,8 +250,8 @@ const Index = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
 
                         <HumrugNew refreshHumrug={refreshHumrug} />

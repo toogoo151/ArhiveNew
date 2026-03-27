@@ -3,6 +3,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import { useEffect, useMemo, useState } from "react";
 import { Doughnut, Pie } from "react-chartjs-2";
 import axios from "../../../AxiosUser";
+import Spinner from "../../../Spinner";
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
@@ -350,13 +351,13 @@ const Graphic = () => {
 
             {yearsLoading && (
                 <div className="loading-box">
-                    Жилийн мэдээлэл ачааллаж байна...
+                    <Spinner />
                 </div>
             )}
 
             {!yearsLoading && availableYears.length === 0 && (
                 <div className="error-msg">
-                    Өгөгдөл олдсонгүй. Хадгаламжийн мэдээлэл байхгүй байна.
+                    Графикт харуулах мэдээлэл байхгүй байна.
                 </div>
             )}
 
@@ -430,7 +431,7 @@ const Graphic = () => {
 
                         {baingaLoading ? (
                             <div className="loading-box">
-                                Өгөгдөл ачааллаж байна...
+                                <Spinner />
                             </div>
                         ) : (
                             <div className="chart-box">
@@ -507,7 +508,7 @@ const Graphic = () => {
 
                         {turLoading ? (
                             <div className="loading-box">
-                                Өгөгдөл ачааллаж байна...
+                                <Spinner />
                             </div>
                         ) : (
                             <div className="chart-box">
@@ -595,7 +596,7 @@ const Graphic = () => {
                         )}
                         {dalan70Loading ? (
                             <div className="loading-box">
-                                Өгөгдөл ачааллаж байна...
+                                <Spinner />
                             </div>
                         ) : (
                             <div className="chart-box">

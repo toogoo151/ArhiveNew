@@ -9,6 +9,9 @@ import BaingaIltsChildEdit from "./BaingaIltsChildEdit";
 import BaingaIltsChildNew from "./BaingaIltsChildNew";
 import "./Index.css";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const BaingaIltsChild = (props) => {
     const [getbaingaIltsChild, setbaingaIltsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -19,6 +22,8 @@ const BaingaIltsChild = (props) => {
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshbaingaIltsChild(props.changeDataRow.id);
@@ -82,6 +87,18 @@ const BaingaIltsChild = (props) => {
     //         }
     //     });
     // };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -262,7 +279,7 @@ const BaingaIltsChild = (props) => {
                         Excel Import
                     </label>
                     <div className="d-flex align-items-center">
-               
+
                         <input
                             type="file"
                             id="bainagiltChildExcel"
@@ -274,16 +291,16 @@ const BaingaIltsChild = (props) => {
                             }}
                         />
 
-          
+
                         {selectedFile && (
                             <button
                                 className="btn btn-primary btn-sm"
                                 onClick={() => {
-                                    importExcel(selectedFile); 
-                                    setSelectedFile(null); 
+                                    importExcel(selectedFile);
+                                    setSelectedFile(null);
                                     document.getElementById(
                                         "bainagiltChildExcel"
-                                    ).value = null; 
+                                    ).value = null;
                                 }}
                             >
                                 Import

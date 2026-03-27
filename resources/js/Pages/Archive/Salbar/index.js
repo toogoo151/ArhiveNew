@@ -8,6 +8,9 @@ import axios from "../../../AxiosUser";
 import SalbarEdit from "./SalbarEdit";
 import SalbarNew from "./SalbarNew";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const index = () => {
     const [getSalbar, setSalbar] = useState([]);
 
@@ -16,6 +19,7 @@ const index = () => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshSalbar();
@@ -37,6 +41,17 @@ const index = () => {
                 console.log(err);
             });
     };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnDelete = () => {
         setRowsSelected([]);
@@ -99,21 +114,10 @@ const index = () => {
                                     excelDownloadData={getSalbar}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Салбарын жагсаалт"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
-                            // btnEdit={btnEdit}
-                            // modelType={showModal}
-                            // editdataTargetID={"#salbarEdit"}
-                            // btnDelete={btnDelete}
-                            // avgColumnIndex={-1}
-                            // avgColumnName={"email"}
-                            // avgName={"Дундаж: "}
-                            // getRowsSelected={getRowsSelected}
-                            // setRowsSelected={setRowsSelected}
-                            // isHideDelete={true}
-                            // isHideEdit={true}
-
                             btnEdit={btnEdit}
                             modelType={showModal}
                             editdataTargetID={"#salbarEdit"}
@@ -123,8 +127,8 @@ const index = () => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                         <SalbarNew refreshSalbar={refreshSalbar} />
                         {/* <SalbarEdit

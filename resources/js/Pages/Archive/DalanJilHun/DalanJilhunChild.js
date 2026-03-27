@@ -9,6 +9,9 @@ import DalanJilhunChildEdit from "./DalanJilhunChildEdit";
 import DalanJilhunChildNew from "./DalanJilhunChildNew";
 import "./Index.css";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const DalanJilhunChild = (props) => {
     const [getdalanhunChild, setdalanhunChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -19,6 +22,8 @@ const DalanJilhunChild = (props) => {
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshdalanHunChild(props.changeDataRow.id);
@@ -48,38 +53,17 @@ const DalanJilhunChild = (props) => {
     };
     const { changeDataRow } = props;
 
-    // const deleteOldFile = (file) => {
-    //     Swal.fire({
-    //         title: "Устгах уу?",
-    //         text: `"${file.filename}" файлыг устгах гэж байна`,
-    //         icon: "warning",
-    //         showCancelButton: true,
-    //         confirmButtonText: "Тийм, устга",
-    //         cancelButtonText: "Болих",
-    //     }).then((result) => {
-    //         if (result.isConfirmed) {
-    //             axios
-    //                 .post("/delete/baingaIltChildFile", {
-    //                     id: props.changeDataRow.id,
-    //                     file_url: file.url,
-    //                 })
-    //                 .then((res) => {
-    //                     Swal.fire(res.data.msg);
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
 
-    //                     //  UI дээрээс устгасан файлыг хасна
-    //                     const filtered = oldFiles.filter(
-    //                         (f) => f.url !== file.url
-    //                     );
-    //                     setOldFiles(filtered);
-    //                 })
-    //                 .catch((err) => {
-    //                     Swal.fire(
-    //                         err.response?.data?.msg || "Устгах үед алдаа гарлаа"
-    //                     );
-    //                 });
-    //         }
-    //     });
-    // };
+    const isRestricted = tubshin === 2;
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -566,7 +550,8 @@ const DalanJilhunChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getdalanhunChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -578,8 +563,8 @@ const DalanJilhunChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                             showArchive={false}
                         />
                         <DalanJilhunChildNew

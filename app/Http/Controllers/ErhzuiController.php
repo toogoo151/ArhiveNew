@@ -33,7 +33,6 @@ class ErhzuiController extends Controller
             // Fallback: sometimes DB might store plain relative path
             return $fileField;
         }
-
         return null;
     }
 

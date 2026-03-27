@@ -7,6 +7,9 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import ErhzuiEdit from "./ErhzuiEdit";
 import ErhzuiNew from "./ErhzuiNew";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const Index = () => {
     // ================= FILTER CONTROL =================
     const [isFilterActive, setIsFilterActive] = useState(false);
@@ -21,6 +24,7 @@ const Index = () => {
     // Don't let Bootstrap auto-open the edit modal before React fills the form.
     // We'll open it programmatically inside `ErhzuiEdit`.
     const [showModal] = useState(null);
+    const { tubshin, loading, error } = useAuthPermission();
 
     // FETCH
     useEffect(() => {
@@ -56,6 +60,18 @@ const Index = () => {
             return;
         }
     }, [isFilterActive, allErhzui]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnEdit = () => {
         // Ensure the edit modal gets the selected row immediately on first click
         if (getRowsSelected[0] !== undefined) {
@@ -275,7 +291,8 @@ const Index = () => {
                                     excelTitle="Эрх зүйн жагсаалт"
                                     excelDownloadData={getErhzui}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -284,8 +301,8 @@ const Index = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
 
                         <ErhzuiNew refreshErhzui={refreshErhzui} />

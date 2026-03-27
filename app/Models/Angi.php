@@ -19,7 +19,8 @@ class Angi extends Model
 
     public function safeDecrypt($value)
     {
-        if (!$value) return null;
+        if (!$value)
+            return null;
 
         try {
             return Crypt::decryptString($value);

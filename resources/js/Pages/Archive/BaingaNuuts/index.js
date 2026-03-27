@@ -12,6 +12,9 @@ import BaingaNuutsChild from "./BaingaNuutsChild";
 import BaingaNuutsEdit from "./BaingaNuutsEdit";
 import BaingaNuutsNew from "./BaingaNuutsNew";
 import "./Index.css";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const Index = () => {
     const today = new Date();
     const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
@@ -40,6 +43,7 @@ const Index = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshBaingaNuuts();
@@ -259,6 +263,17 @@ const Index = () => {
     //         return;
     //     }
     // }, [allHumrug]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         setIsEditBtnClick(true);
@@ -1192,7 +1207,8 @@ const Index = () => {
                                                     }
                                                     excelHeaders={excelHeaders}
                                                     excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /нууц/"
-                                                    isHideInsert={true}
+                                                    isHideInsert={isRestricted}
+                                                    isHideEdit={isRestricted}
                                                     onClick={() => {
                                                         if (
                                                             selectedHumrug ===
@@ -1216,8 +1232,8 @@ const Index = () => {
                                             btnDelete={btnDelete}
                                             getRowsSelected={getRowsSelected}
                                             setRowsSelected={setRowsSelected}
-                                            isHideDelete={true}
-                                            isHideEdit={true}
+                                            isHideDelete={isRestricted}
+                                            isHideEdit={isRestricted}
                                         />
                                     </div>
                                 </div>
