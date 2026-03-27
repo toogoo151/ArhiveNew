@@ -9,6 +9,9 @@ import "./Index.css";
 import TurIltsChildEdit from "./TurIltsChildEdit";
 import TurIltsChildNew from "./TurIltsChildNew";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const TurIltsChild = (props) => {
     const [getTurtIltsChild, setTurIltsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -18,6 +21,7 @@ const TurIltsChild = (props) => {
     const [previewData, setPreviewData] = useState([]);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshTurIltsChild(props.changeDataRow.id);
@@ -47,38 +51,17 @@ const TurIltsChild = (props) => {
     };
     const { changeDataRow = {} } = props;
 
-    // const deleteOldFile = (file) => {
-    //     Swal.fire({
-    //         title: "Устгах уу?",
-    //         text: `"${file.filename}" файлыг устгах гэж байна`,
-    //         icon: "warning",
-    //         showCancelButton: true,
-    //         confirmButtonText: "Тийм, устга",
-    //         cancelButtonText: "Болих",
-    //     }).then((result) => {
-    //         if (result.isConfirmed) {
-    //             axios
-    //                 .post("/delete/TurIltChildFile", {
-    //                     id: props.changeDataRow.id,
-    //                     file_url: file.url,
-    //                 })
-    //                 .then((res) => {
-    //                     Swal.fire(res.data.msg);
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
 
-    //                     //  UI дээрээс устгасан файлыг хасна
-    //                     const filtered = oldFiles.filter(
-    //                         (f) => f.url !== file.url
-    //                     );
-    //                     setOldFiles(filtered);
-    //                 })
-    //                 .catch((err) => {
-    //                     Swal.fire(
-    //                         err.response?.data?.msg || "Устгах үед алдаа гарлаа"
-    //                     );
-    //                 });
-    //         }
-    //     });
-    // };
+    const isRestricted = tubshin === 2;
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -453,7 +436,8 @@ const TurIltsChild = (props) => {
                                 buttonName={"Нэмэх"}
                                 excelDownloadData={getTurtIltsChild}
                                 excelHeaders={excelHeaders}
-                                isHideInsert={true}
+                                isHideInsert={isRestricted}
+                                isHideEdit={isRestricted}
                             />
                         }
                         btnEdit={btnEdit}
@@ -465,8 +449,8 @@ const TurIltsChild = (props) => {
                         avgName={"Дундаж: "}
                         getRowsSelected={getRowsSelected}
                         setRowsSelected={setRowsSelected}
-                        isHideDelete={true}
-                        isHideEdit={true}
+                        isHideDelete={isRestricted}
+                        isHideEdit={isRestricted}
                         showArchive={false}
                     />
                     <TurIltsChildNew
@@ -519,7 +503,7 @@ const TurIltsChild = (props) => {
                                 Excel Import
                             </label>
                             <div className="d-flex align-items-center">
-                             
+
                                 <input
                                     type="file"
                                     id="turIltsChildExcel"
@@ -535,8 +519,8 @@ const TurIltsChild = (props) => {
                                     <button
                                         className="btn btn-primary btn-sm"
                                         onClick={() => {
-                                            importExcel(selectedFile); 
-                                            setSelectedFile(null); 
+                                            importExcel(selectedFile);
+                                            setSelectedFile(null);
                                             document.getElementById(
                                                 "turIltsChildExcel"
                                             ).value = null;
@@ -565,7 +549,8 @@ const TurIltsChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getTurtIltsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -577,8 +562,8 @@ const TurIltsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                             showArchive={false}
                         />
                         <TurIltsChildNew

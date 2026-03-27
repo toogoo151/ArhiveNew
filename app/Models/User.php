@@ -97,10 +97,10 @@ class User extends Authenticatable
                 ->leftJoin("db_angi", "db_angi.id", "=", "db_user.angi_id")
                 ->leftJoin("db_salbar", "db_salbar.id", "=", "db_user.salbar_id")
                 ->leftJoin("programm_type", "programm_type.id", "=", "db_user.userType")
-                // ->leftJoin("user_type", "user_type.id", "=", "db_user.bichig_turul")
+                ->leftJoin("user_type", "user_type.id", "=", "db_user.tubshin")
                 // ->leftJoin("nuuts_turul", "nuuts_turul.id", "=", "db_user.tubshin")
                 ->orderBy("db_user.id", "DESC")
-                ->select("db_user.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu", "db_salbar.salbar", "db_salbar.id as salbarIDshuu", "programm_type.Pname")
+                ->select("db_user.*", "db_comandlal.ShortName", "db_comandlal.id as comandlalIDshuu", "db_angi.ner", "db_angi.id as unitIDshuu", "db_salbar.salbar", "db_salbar.id as salbarIDshuu", "programm_type.Pname", "user_type.Uname")
                 ->get();
 
             $user->transform(function ($u) {

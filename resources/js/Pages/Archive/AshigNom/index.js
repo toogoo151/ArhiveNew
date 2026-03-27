@@ -7,8 +7,10 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import NomEdit from "./NomEdit";
 import NomNew from "./NomNew";
-const Index = () => {
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
+const Index = () => {
     // ================= FILTER CONTROL =================
     const [isFilterActive, setIsFilterActive] = useState(false);
 
@@ -24,6 +26,7 @@ const Index = () => {
     // Don't let Bootstrap auto-open the edit modal before React fills the form.
     // We'll open it programmatically inside `NomEdit`.
     const [showModal] = useState(null);
+    const { tubshin, loading, error } = useAuthPermission();
 
     // FETCH
     useEffect(() => {
@@ -36,7 +39,7 @@ const Index = () => {
             .then((res) => {
                 setRowsSelected([]);
                 setallNom(res.data);
-                setNom  (res.data); // анх бүх өгөгдөл
+                setNom(res.data); // анх бүх өгөгдөл
                 setIsFilterActive(false);
             })
             .catch((err) => {
@@ -58,8 +61,19 @@ const Index = () => {
             setNom(allNom);
             return;
         }
+    }, [isFilterActive, allNom]);
 
-    }, [isFilterActive,  allNom]);
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnEdit = () => {
         // Ensure the edit modal gets the selected row immediately on first click
         if (getRowsSelected[0] !== undefined) {
@@ -95,144 +109,143 @@ const Index = () => {
     };
 
     const columns = [
-    {
-        name: "id",
-        label: " ",
-        options: {
-            filter: true,
-            sort: true,
-            filter: false,
-            align: "center",
-            customBodyRenderLite: (rowIndex) => {
-                if (rowIndex == 0) {
-                    return rowIndex + 1;
-                } else {
-                    return rowIndex + 1;
-                }
-            },
-            setCellProps: () => {
-                return { align: "center" };
-            },
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                        width: 50,
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "humrug_dugaar",
-        label: "Хөмрөгийн дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "id",
+            label: " ",
+            options: {
+                filter: true,
+                sort: true,
+                filter: false,
+                align: "center",
+                customBodyRenderLite: (rowIndex) => {
+                    if (rowIndex == 0) {
+                        return rowIndex + 1;
+                    } else {
+                        return rowIndex + 1;
+                    }
+                },
+                setCellProps: () => {
+                    return { align: "center" };
+                },
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                            width: 50,
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "humrug_ner",
-        label: "Хөмрөгийн нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "humrug_dugaar",
+            label: "Хөмрөгийн дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "dans_dugaar",
-        label: "Дансны дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "humrug_ner",
+            label: "Хөмрөгийн нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "dans_ner",
-        label: "Дансны нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "dans_dugaar",
+            label: "Дансны дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
-    {
-        name: "nom_dugaar",
-        label: "Номын дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
+        {
+            name: "dans_ner",
+            label: "Дансны нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
             },
         },
-    },
+        {
+            name: "nom_dugaar",
+            label: "Номын дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
 
-    {
-        name: "nom_ners",
-        label: "Номын нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
+        {
+            name: "nom_ners",
+            label: "Номын нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: () => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+                customBodyRender: (value) => {
+                    if (
+                        value === null ||
+                        value === "" ||
+                        value === 0 ||
+                        value === undefined
+                    ) {
+                        return "-";
+                    }
+                    return value;
+                },
             },
         },
-    },
-
     ];
 
     //RENDER
@@ -241,7 +254,9 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Ашигласан номын жагсаалт</h1>
+                        <h1 className="text-center mb-4">
+                            Ашигласан номын жагсаалт
+                        </h1>
                         {/* TABLE */}
                         <MUIDatatable
                             data={getNom}
@@ -258,7 +273,8 @@ const Index = () => {
                                     excelDownloadData={getNom}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Ашигласан номын жагсаалт"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -267,8 +283,8 @@ const Index = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
 
                         <NomNew refreshNom={refreshNom} />

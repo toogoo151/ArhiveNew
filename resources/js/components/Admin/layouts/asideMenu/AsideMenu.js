@@ -156,6 +156,11 @@ export default function AsideMenu() {
                     url: "/get/erhzui-info",
                     icon: "fa fa-gavel",
                 },
+                {
+                    name: "Лавлагаа",
+                    url: "/get/lavlagaa",
+                    icon: "fa fa-download",
+                },
                 // GANBAT NEMSEN END
             ],
         },

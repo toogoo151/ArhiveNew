@@ -5,6 +5,9 @@ import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const ArhivDSanhuuChild = (props) => {
     const [getdalanSanhuuChild, setdalanSanhuuChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -12,6 +15,8 @@ const ArhivDSanhuuChild = (props) => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshdalansanhuuChild(props.changeDataRow.id);
@@ -26,6 +31,17 @@ const ArhivDSanhuuChild = (props) => {
         setRowsSelected([]);
         setIsEditBtnClick(false);
     }, [props.changeDataRow.id]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -145,66 +161,6 @@ const ArhivDSanhuuChild = (props) => {
         setGetDataRowLenght(rowIndex);
     };
 
-    //     {
-    //         text: "№",
-    //         key: "id",
-    //         cell: (row, index) => {
-    //             if (index === 0) {
-    //                 if (changeDataRow.id === row.id && getDataRowLenght > -1) {
-    //                     return (
-    //                         <div className="bg-success position-static mt-2 rounded text-center p-1 pointer-on-hover">
-    //                             <span hidden={true}>{parseInt(index) + 1}</span>
-    //                             <i className="fa fa-check text-white"></i>
-    //                         </div>
-    //                     );
-    //                 }
-    //                 return (
-    //                     <div className="text-center pointer-on-hover">
-    //                         {parseInt(index) + 1}
-    //                     </div>
-    //                 );
-    //             } else {
-    //                 if (changeDataRow.id === row.id && getDataRowLenght > -1) {
-    //                     return (
-    //                         <div className="bg-success position-static mt-2 rounded text-center p-1 pointer-on-hover">
-    //                             <span hidden={true}>{parseInt(index) + 1}</span>
-    //                             <i className="fa fa-check text-white"></i>
-    //                         </div>
-    //                     );
-    //                 }
-    //                 return (
-    //                     <div className="text-center pointer-on-hover">
-    //                         {parseInt(index) + 1}
-    //                     </div>
-    //                 );
-    //             }
-    //         },
-    //         align: "center",
-    //         sortable: true,
-    //         className: "small-column-id",
-    //     },
-
-    //     {
-    //         text: "Нэр",
-    //         key: "way_child",
-    //         align: "center",
-    //         sortable: true,
-    //     },
-    //     {
-    //         text: "Төлөв",
-    //         key: "status",
-    //         cell: (row) => {
-    //             if (row.status === 1) {
-    //                 return "Харуулсан";
-    //             } else {
-    //                 return "Нуусан";
-    //             }
-    //         },
-
-    //         align: "center",
-    //         sortable: true,
-    //     },
-    // ];
     return (
         <>
             <div className="row clearfix">
@@ -229,7 +185,8 @@ const ArhivDSanhuuChild = (props) => {
                                     buttonName={"Нэмэх"}
                                     excelDownloadData={getdalanSanhuuChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={false}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -241,8 +198,8 @@ const ArhivDSanhuuChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={false}
-                            isHideEdit={false}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                             showArchive={false}
                         />
                     </div>

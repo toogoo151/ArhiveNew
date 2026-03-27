@@ -8,6 +8,10 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 import JagsaaltEdit from "./JagsaaltEdit";
 import JagsaaltNew from "./JagsaaltNew";
 
@@ -42,6 +46,8 @@ const Index = () => {
     const [clickedRowData, setclickedRowData] = useState(null);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
     const [editRequestId, setEditRequestId] = useState(0);
+
+    const { tubshin, loading, error } = useAuthPermission();
 
     // Don't let Bootstrap auto-open the edit modal before React fills it.
     // We open it programmatically inside `JagsaaltEdit`.
@@ -160,13 +166,22 @@ const Index = () => {
             });
     }, []);
 
-    // (debug logging removed)
-
     /** Row spans for Жагсаалтын төрөл: merge consecutive same values into one cell. */
     const jagsaaltRowSpans = useMemo(
         () => computeMergeRowSpans(getJagsaalt),
         [getJagsaalt]
     );
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const columns = [
         {
@@ -214,6 +229,7 @@ const Index = () => {
                         },
                     };
                 },
+
                 customBodyRender: (value) => {
                     if (
                         value === null ||
@@ -608,20 +624,14 @@ const Index = () => {
                                     excelDownloadData={getJagsaalt}
                                     excelHeaders={excelHeaders}
                                     excelTitle="Хадгалах хугацааны зүйлийн жагсаалт"
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                     onClick={() => {
                                         if (
                                             selectedJname === 0 ||
                                             selectedRetention === 0
                                         ) {
-                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                            // Swal.fire({
-                                            //     icon: "warning",
-                                            //     title: "Анхааруулга",
-                                            //     text: "Жагсаалтын төрөл болон хадгалах хугацааг сонгоно уу!",
-                                            // });
                                         }
-                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
                                     }}
                                 />
                             }
@@ -631,8 +641,8 @@ const Index = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
 
                         <JagsaaltNew refreshJagsaalt={refreshJagsaalt} />

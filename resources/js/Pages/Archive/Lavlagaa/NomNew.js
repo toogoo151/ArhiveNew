@@ -43,19 +43,9 @@ const NomNew = ({ refreshNom }) => {
     const selectedDansId = watch("dans_id");
 
     // ================= FILTER DANS =================
-    const selectedHumrug = humrugList.find(
-        h => String(h.id) === String(selectedHumrugId)
+    const filteredDans = dansList.filter(
+        d => String(d.humrugID) == selectedHumrugId
     );
-    const selectedHumrugDeskId = selectedHumrug?.desk_id;
-
-    const filteredDans = dansList.filter((d) => {
-        if (!selectedHumrugId) return false;
-        // db_arhivdans.humrugID references db_humrug.desk_id in this project.
-        return (
-            String(d.humrugID) === String(selectedHumrugDeskId) ||
-            String(d.humrugID) === String(selectedHumrugId)
-        );
-    });
 
     // Reset dans when humrug changes
     useEffect(() => {

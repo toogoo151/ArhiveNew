@@ -8,6 +8,8 @@ import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIData
 import BaingaNuutsChildEdit from "./BaingaNuutsChildEdit";
 import BaingaNuutsChildNew from "./BaingaNuutsChildNew";
 import "./Index.css";
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
 
 const BaingaNuutsChild = (props) => {
     const [getbaingaNuutsChild, setbaingaNuutsChild] = useState([]);
@@ -19,6 +21,7 @@ const BaingaNuutsChild = (props) => {
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshbaingaNuutsChild(props.changeDataRow.id);
@@ -80,6 +83,18 @@ const BaingaNuutsChild = (props) => {
     //         }
     //     });
     // };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -406,7 +421,8 @@ const BaingaNuutsChild = (props) => {
                                 buttonName={"НЭМЭХ"}
                                 excelDownloadData={getbaingaNuutsChild}
                                 excelHeaders={excelHeaders}
-                                isHideInsert={true}
+                                isHideInsert={isRestricted}
+                                isHideEdit={isRestricted}
                             />
                         }
                         btnEdit={btnEdit}
@@ -418,8 +434,8 @@ const BaingaNuutsChild = (props) => {
                         avgName={"Дундаж: "}
                         getRowsSelected={getRowsSelected}
                         setRowsSelected={setRowsSelected}
-                        isHideDelete={true}
-                        isHideEdit={true}
+                        isHideDelete={isRestricted}
+                        isHideEdit={isRestricted}
                     />
                     <BaingaNuutsChildNew
                         _parentID={props.changeDataRow.id}
@@ -516,7 +532,8 @@ const BaingaNuutsChild = (props) => {
                                     buttonName={"НЭМЭХ"}
                                     excelDownloadData={getbaingaNuutsChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                 />
                             }
                             btnEdit={btnEdit}
@@ -528,8 +545,8 @@ const BaingaNuutsChild = (props) => {
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={true}
-                            isHideEdit={true}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                         <BaingaNuutsChildNew
                             _parentID={props.changeDataRow.id}

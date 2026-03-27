@@ -12,6 +12,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\TurNuutsImport;
 
+
 class TurNuutsController extends Controller
 {
 

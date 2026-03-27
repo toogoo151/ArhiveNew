@@ -7,6 +7,9 @@ import CustomToolbar from "../../../components/Admin/general/MUIDatatable/Custom
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import ArhivTrNuutsChild from "./ArhivTrNuutsChild";
 
+import useAuthPermission from "../../../useAuthPermission";
+import Spinner from "../../../Spinner";
+
 const ArhivTrNuuts = () => {
     const today = new Date();
     const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
@@ -30,6 +33,7 @@ const ArhivTrNuuts = () => {
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
         refreshTurNuuts();
@@ -52,6 +56,7 @@ const ArhivTrNuuts = () => {
             }
         });
     };
+
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
 
@@ -127,53 +132,17 @@ const ArhivTrNuuts = () => {
             setclickedRowData(null);
         }
     }, [getRowsSelected, getarchiveTurNuuts]);
-    //  ROW SELECT
-    // useEffect(() => {
-    //     if (getRowsSelected[0] !== undefined) {
-    //         setIsEditBtnClick(false);
-    //         setclickedRowData(getarchiveTurNuuts[getRowsSelected[0]]);
-    //     }
-    // }, [getRowsSelected, getarchiveTurNuuts]);
 
-    // useEffect(() => {
-    //     if (selectedHumrug === 0 || selectedDans === 0) {
-    //         setarchiveTurNuuts([]);
-    //         return;
-    //     }
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
 
-    //     const filteredData = allDans.filter(
-    //         (item) =>
-    //             Number(item.humrugID) === Number(selectedHumrug) &&
-    //             Number(item.hadgalah_hugatsaa) === Number(selectedDans)
-    //     );
-
-    //     setarchiveTurNuuts(filteredData);
-    // }, [selectedHumrug, selectedDans, allDans]);
-
-    // useEffect(() => {
-    //     let filteredData = allDans;
-
-    //     if (selectedHumrug !== 0) {
-    //         filteredData = filteredData.filter(
-    //             (item) => Number(item.humrugID) === Number(selectedHumrug)
-    //         );
-    //     }
-
-    //     if (selectedDans !== 0) {
-    //         filteredData = filteredData.filter(
-    //             (item) =>
-    //                 Number(item.hadgalah_hugatsaa) === Number(selectedDans)
-    //         );
-    //     }
-
-    //     setarchiveTurNuuts(filteredData);
-    // }, [selectedHumrug, selectedDans, allDans]);
-    // useEffect(() => {
-    //     if (!isFilterActive) {
-    //         setarchiveTurNuuts(allHumrug);
-    //         return;
-    //     }
-    // }, [allHumrug]);
+    const isRestricted = tubshin === 2;
 
     //RENDER
     return (
@@ -282,7 +251,8 @@ const ArhivTrNuuts = () => {
                                     buttonName="Нэмэх"
                                     excelDownloadData={getarchiveTurNuuts}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={true}
+                                    isHideInsert={isRestricted}
+                                    isHideEdit={isRestricted}
                                     onClick={() => {
                                         if (
                                             selectedHumrug === 0 ||
@@ -304,8 +274,8 @@ const ArhivTrNuuts = () => {
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={false}
-                            isHideEdit={false}
+                            isHideDelete={isRestricted}
+                            isHideEdit={isRestricted}
                         />
                     </div>
                 </div>

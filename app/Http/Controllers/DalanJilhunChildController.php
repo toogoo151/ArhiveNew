@@ -40,18 +40,6 @@ class DalanJilhunChildController extends Controller
         }
     }
 
-    // {
-    //     try {
-    //         $DalanJilHunChild = DalanJilHunChild::where("hnID", "=", $req->_parentID)
-    //             ->orderBy('id', 'desc')
-    //             // $DalanJilHunChild = DB::table("db_arhivbaingilt")
-    //             // ->where("way_parent", "=", $req->_parentID)
-    //             ->get();
-    //         return $DalanJilHunChild;
-    //     } catch (\Throwable $th) {
-    //         // throw $th;
-    //     }
-    // }
 
 
     public function DeleteChildFile(Request $req)
@@ -139,11 +127,13 @@ class DalanJilhunChildController extends Controller
 
                 foreach ($files as $fileUrl) {
 
-                    if (empty($fileUrl)) continue;
+                    if (empty($fileUrl))
+                        continue;
 
                     $parsedUrl = parse_url($fileUrl);
 
-                    if (!isset($parsedUrl['path'])) continue;
+                    if (!isset($parsedUrl['path']))
+                        continue;
 
                     // /storage/doc/BaingaIlt/5/file.pdf
                     $relativePath = $parsedUrl['path'];
@@ -209,7 +199,7 @@ class DalanJilhunChildController extends Controller
             // 2b. DB-д хадгалах
             $insertBainga = new DalanJilHunChild();
             $insertBainga->hnID = $req->hnID;
-            //encrypte start 
+            //encrypte start
             $insertBainga->barimt_ner = Crypt::encryptString($req->barimt_ner);
             $insertBainga->uild_gazar = Crypt::encryptString($req->uild_gazar);
             $insertBainga->aguulga = Crypt::encryptString($req->aguulga);
@@ -250,84 +240,9 @@ class DalanJilhunChildController extends Controller
             ], 500);
         }
     }
-    // {
-    //     $userId = Auth::id();
-    //     $userFolder = "public/doc/DalanJilHun/{$userId}";
-    //     $fullURL = "";
 
-    //     if (!Storage::exists($userFolder)) {
-    //         Storage::makeDirectory($userFolder);
-    //     }
-
-
-    //     DB::beginTransaction();
-
-    //     try {
-
-    //         $savedFiles = []; 
-    //         foreach ($req->data_url as $value) {
-    //             $pdf_data = $value["fileimage"];
-    //             $pdf_64 = substr($pdf_data, strpos($pdf_data, ',') + 1);
-    //             $pdfContent = base64_decode($pdf_64);
-
-    //             $originalName = $value["filename"];
-    //             $setPDFPathID = uniqid() . '_' . $originalName;
-    //             $path = $userFolder . "/" . $setPDFPathID;
-
-
-
-
-    //             Storage::put($path, $pdfContent, 'public');
-    //             $savedFiles[] = $path;
-
-    //             $getPDFUrl = 'storage/doc/DalanJilHun/' . $userId . '/' . $setPDFPathID;
-    //             $fullURL .= asset($getPDFUrl) . ';';
-    //         }
-
-
-    //         $insertBainga = new DalanJilHunChild();
-    //         $insertBainga->hnID = $req->hnID;
-    //         $insertBainga->barimt_ner = $req->barimt_ner;
-    //         $insertBainga->barimt_ognoo = $req->barimt_ognoo;
-    //         $insertBainga->barimt_dugaar = $req->barimt_dugaar; 
-    //         $insertBainga->irsen_dugaar = $req->irsen_dugaar;
-    //         $insertBainga->yabsan_dugaar = $req->yabsan_dugaar;
-    //         $insertBainga->uild_gazar = $req->uild_gazar;
-    //         $insertBainga->huudas_too = $req->huudas_too;
-    //         $insertBainga->habsralt_too = $req->habsralt_too;
-    //         $insertBainga->huudas_dugaar = $req->huudas_dugaar;
-    //         $insertBainga->aguulga = $req->aguulga;
-    //         $insertBainga->bichsen_ner = $req->bichsen_ner;
-    //         $insertBainga->bichsen_ognoo = $req->bichsen_ognoo;
-    //         $insertBainga->file_ner = $fullURL;
-    //         $insertBainga->user_id = $userId;
-    //         $insertBainga->save();
-
-    //         DB::commit();
-
-    //         return response([
-    //             "status" => "success",
-    //             "msg" => "Амжилттай хадгаллаа."
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-    //         DB::rollBack();
-
-
-    //         foreach ($savedFiles as $path) {
-    //             if (Storage::exists($path)) {
-    //                 Storage::delete($path);
-    //             }
-    //         }
-
-    //         return response([
-    //             "status" => "error",
-    //             "msg" => $th->getMessage()
-    //         ], 500);
-    //     }
-    // }
 
     public function EditDalanJilhunChild(Request $req)
-
     {
         $userId = Auth::id();
         $userFolder = "public/doc/DalanJilHun/{$userId}";
@@ -425,109 +340,6 @@ class DalanJilhunChildController extends Controller
             ], 500);
         }
     }
-    // {
-    //     $userId = Auth::id();
-    //     $userFolder = "public/doc/DalanJilHun/{$userId}";
-    //     $fullURL = "";
-
-    //     if (!Storage::exists($userFolder)) {
-    //         Storage::makeDirectory($userFolder);
-    //     }
-
-    //     try {
-
-    //         if ($req->old_files) {
-    //             foreach ($req->old_files as $file) {
-    //                 $fullURL .= $file['url'] . ';';
-    //             }
-    //         }
-
-
-    //         if ($req->data_url) {
-
-
-    //             $existingFiles = $req->old_files
-    //                 ? array_map(fn($f) => basename($f['url']), $req->old_files)
-    //                 : [];
-
-    //             foreach ($req->data_url as $value) {
-    //                 $filename = $value["filename"];
-    //                 $path = $userFolder . "/" . $filename;
-
-
-    //                 if (in_array($filename, $existingFiles)) continue;
-
-    //                 if (Storage::exists($path)) {
-    //                     return response([
-    //                         "status" => "error",
-    //                         "msg" => "Файл \"{$filename}\" аль хэдийн байна!"
-    //                     ], 422);
-    //                 }
-
-
-    //                 if (!isset($value["fileimage"]) || !$value["fileimage"]) {
-    //                     return response([
-    //                         "status" => "error",
-    //                         "msg" => "File image хоосон байна: {$filename}"
-    //                     ], 422);
-    //                 }
-
-
-    //                 $pdf_64 = substr($value["fileimage"], strpos($value["fileimage"], ',') + 1);
-    //                 $pdfContent = base64_decode($pdf_64, true); 
-
-    //                 if ($pdfContent === false) {
-    //                     return response([
-    //                         "status" => "error",
-    //                         "msg" => "Base64 decode амжилтгүй боллоо: {$filename}"
-    //                     ], 422);
-    //                 }
-
-
-    //                 Storage::put($path, $pdfContent, 'public');
-
-    //                 $fullURL .= asset('storage/doc/DalanJilHun/' . $userId . '/' . $filename) . ';';
-    //             }
-    //         }
-
-    //         $edit = DalanJilHunChild::find($req->id);
-    //         if (!$edit) {
-    //             return response([
-    //                 "status" => "error",
-    //                 "msg" => "ID: {$req->id} -тай бичлэг олдсонгүй!"
-    //             ], 404);
-    //         }
-
-    //         $edit->barimt_ner = $req->barimt_ner;
-    //         $edit->barimt_ognoo = $req->barimt_ognoo;
-    //         $edit->barimt_dugaar = $req->barimt_dugaar;
-    //         $edit->irsen_dugaar = $req->irsen_dugaar;
-    //         $edit->yabsan_dugaar = $req->yabsan_dugaar;
-    //         $edit->uild_gazar = $req->uild_gazar;
-    //         $edit->huudas_too = $req->huudas_too;
-    //         $edit->habsralt_too = $req->habsralt_too;
-    //         $edit->huudas_dugaar = $req->huudas_dugaar;
-    //         $edit->aguulga = $req->aguulga;
-    //         $edit->bichsen_ner = $req->bichsen_ner;
-    //         $edit->bichsen_ognoo = $req->bichsen_ognoo;
-    //         $edit->file_ner = $fullURL;
-    //         $edit->user_id = $userId;
-
-    //         $edit->save();
-
-    //         return response([
-    //             "status" => "success",
-    //             "msg" => "Амжилттай заслаа."
-    //         ], 200);
-    //     } catch (\Throwable $th) {
-
-    //         return response([
-    //             "status" => "error",
-    //             "msg" => "Алдаа гарлаа: " . $th->getMessage(),
-    //             "trace" => $th->getTraceAsString()
-    //         ], 500);
-    //     }
-    // }
 
 
     public function ChildDalanJilhunImport(Request $request)

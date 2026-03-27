@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 
-
 class jagsaaltZuilDugaar extends Model
 {
     use HasFactory;
@@ -57,6 +56,7 @@ class jagsaaltZuilDugaar extends Model
                     return $item;
                 });
             return $jagsaalt;
+
         } catch (\Throwable $th) {
             return response(
                 array(
