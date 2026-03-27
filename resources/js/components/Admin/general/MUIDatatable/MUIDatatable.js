@@ -1,20 +1,18 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import TableCell from "@mui/material/TableCell";
+import TableFooter from "@mui/material/TableFooter";
+import TableRow from "@mui/material/TableRow";
 import clsx from "clsx";
 import MUIDataTable from "mui-datatables";
 import { withStyles } from "tss-react/mui";
 import CustomToolbarSelect from "./CustomToolbarSelect";
-import TableCell from "@mui/material/TableCell";
-import TableFooter from "@mui/material/TableFooter";
-import TableRow from "@mui/material/TableRow";
-
 
 const customStyles = (theme) => ({
     GreyLine: {
-    "& td": {
-        backgroundColor: "#fafafa",
+        "& td": {
+            backgroundColor: "#fafafa",
+        },
     },
-},
-
 });
 
 const MUIDatatable = (props) => {
@@ -155,7 +153,6 @@ const MUIDatatable = (props) => {
                                         }
                                     }
 
-
                                     return null;
                                 })}
                             </TableRow>
@@ -221,7 +218,9 @@ const MUIDatatable = (props) => {
             props.setRowsSelected(rowsSelected);
             // props.setRowSelectedIndex(rowsSelectedData[0].index);
         },
-        ...(props.customRowRender && { customRowRender: props.customRowRender }),
+        ...(props.customRowRender && {
+            customRowRender: props.customRowRender,
+        }),
     };
     const optionsWithServerSide = {
         textLabels: {
@@ -484,115 +483,115 @@ const MUIDatatable = (props) => {
             props.setRowsSelected(rowsSelected);
             // props.setRowSelectedIndex(rowsSelectedData[0].index);
         },
-        ...(props.customRowRender && { customRowRender: props.customRowRender }),
+        ...(props.customRowRender && {
+            customRowRender: props.customRowRender,
+        }),
     };
 
-  const getMuiTheme = createTheme({
-  components: {
-    /* ===== Card container ===== */
-    MUIDataTable: {
-      styleOverrides: {
-        paper: {
-          borderRadius: 12,
-          boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
-          overflow: "hidden",
-          border: "1px solid #e2e8f0",
+    const getMuiTheme = createTheme({
+        components: {
+            /* ===== Card container ===== */
+            MUIDataTable: {
+                styleOverrides: {
+                    paper: {
+                        borderRadius: 12,
+                        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
+                        overflow: "hidden",
+                        border: "1px solid #e2e8f0",
+                    },
+                },
+            },
+
+            /* ===== Toolbar ===== */
+            MuiToolbar: {
+                styleOverrides: {
+                    root: {
+                        background: "#ffffff",
+                        borderBottom: "1px solid #e2e8f0",
+                        minHeight: 56,
+                        paddingLeft: 16,
+                        paddingRight: 16,
+                    },
+                },
+            },
+
+            /* ===== Header ===== */
+            MuiTableCell: {
+                styleOverrides: {
+                    head: {
+                        backgroundColor: "#f8fafc",
+                        fontWeight: 600,
+                        fontSize: 13,
+                        color: "#475569",
+                        borderBottom: "none",
+                        paddingTop: 12,
+                        paddingBottom: 12,
+                    },
+
+                    body: {
+                        fontSize: 14,
+                        color: "#1e293b",
+
+                        /* 🔥 lighter separators */
+                        borderBottom: "1px solid #e2e8f0",
+
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                    },
+                },
+            },
+
+            /* ===== Rows ===== */
+            MuiTableRow: {
+                styleOverrides: {
+                    root: {
+                        transition: "all 0.12s ease",
+
+                        /* very soft zebra */
+                        "&:nth-of-type(even)": {
+                            backgroundColor: "#fcfdff",
+                        },
+
+                        /* modern hover */
+                        "&:hover": {
+                            backgroundColor: "#f3f6fb",
+                        },
+                    },
+                },
+            },
+
+            /* ===== Footer ===== */
+            MuiTableFooter: {
+                styleOverrides: {
+                    root: {
+                        background: "#f8fafc",
+                        borderTop: "none",
+                        fontWeight: 600,
+                    },
+                },
+            },
+
+            /* ===== Pagination ===== */
+            MUIDataTablePagination: {
+                styleOverrides: {
+                    toolbar: {
+                        background: "#ffffff",
+                        borderTop: "none",
+                        minHeight: 52,
+                    },
+                },
+            },
+
+            /* ===== Icons softer ===== */
+            MUIDataTableToolbar: {
+                styleOverrides: {
+                    icon: {
+                        color: "#94a3b8",
+                    },
+                },
+            },
         },
-      },
-    },
-
-    /* ===== Toolbar ===== */
-    MuiToolbar: {
-      styleOverrides: {
-        root: {
-          background: "#ffffff",
-          borderBottom: "1px solid #e2e8f0",
-          minHeight: 56,
-          paddingLeft: 16,
-          paddingRight: 16,
-        },
-      },
-    },
-
-    /* ===== Header ===== */
-    MuiTableCell: {
-      styleOverrides: {
-        head: {
-          backgroundColor: "#f8fafc",
-          fontWeight: 600,
-          fontSize: 13,
-          color: "#475569",
-          borderBottom: "none",
-          paddingTop: 12,
-          paddingBottom: 12,
-        },
-
-        body: {
-          fontSize: 14,
-          color: "#1e293b",
-
-          /* 🔥 lighter separators */
-          borderBottom: "1px solid #e2e8f0",
-
-          paddingTop: 10,
-          paddingBottom: 10,
-        },
-      },
-    },
-
-    /* ===== Rows ===== */
-    MuiTableRow: {
-      styleOverrides: {
-        root: {
-          transition: "all 0.12s ease",
-
-          /* very soft zebra */
-          "&:nth-of-type(even)": {
-            backgroundColor: "#fcfdff",
-          },
-
-          /* modern hover */
-          "&:hover": {
-            backgroundColor: "#f3f6fb",
-          },
-        },
-      },
-    },
-
-    /* ===== Footer ===== */
-    MuiTableFooter: {
-      styleOverrides: {
-        root: {
-          background: "#f8fafc",
-          borderTop: "none",
-          fontWeight: 600,
-        },
-      },
-    },
-
-    /* ===== Pagination ===== */
-    MUIDataTablePagination: {
-      styleOverrides: {
-        toolbar: {
-          background: "#ffffff",
-          borderTop: "none",
-          minHeight: 52,
-        },
-      },
-    },
-
-    /* ===== Icons softer ===== */
-    MUIDataTableToolbar: {
-      styleOverrides: {
-        icon: {
-          color: "#94a3b8",
-        },
-      },
-    },
-  },
-});
-
-
+    });
 
     return (
         <>
@@ -604,7 +603,6 @@ const MUIDatatable = (props) => {
                     options={
                         props.isServerSide ? optionsWithServerSide : options
                     }
-
                 />
             </ThemeProvider>
         </>

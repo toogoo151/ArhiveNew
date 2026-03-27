@@ -1,24 +1,19 @@
 .labelWrapper {
-    position: relative;
-    display: flex;
-    background: #f1f5f9;
-    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 4px;
-    width: 300px;
+    border-radius: 8px;
 }
 
 .labelBtn {
-    flex: 1;
-    position: relative;
-    z-index: 2;
-    padding: 10px 0;
+    font-size: 8px;
+    padding: 5px 0;
+    border-radius: 6px;
     border: none;
     background: transparent;
-    font-weight: 600;
-    border-radius: 10px;
     cursor: pointer;
-    transition: 0.3s;
-    color: #475569;
+    transition: all 0.2s ease;
 }
 
 .labelBtn.active {
@@ -90,4 +85,20 @@
 
 .btn-import:hover {
     background: #2563eb;
+}
+
+.excel-bar {
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.excel-label {
+    font-weight: 500;
+    font-size: 12px;
+}
+.excel-right input[type="file"] {
+    font-size: 11px;
+    height: 26px; /* 🔥 багасгасан */
+    padding: 2px 6px;
 }

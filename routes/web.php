@@ -273,6 +273,10 @@ Route::post('/import/dansburtgel', [DansController::class, 'importDansburtgel'])
 //Данс бүртгэл end
 
 // Байнга хадгалах Илт start
+// Route::get("/get/BaingaIlt", function (Request $request) {
+//     $baingaIlt = new BaingaIlt();
+//     return $baingaIlt->getBaingaIlt($request);
+// });
 Route::get("/get/BaingaIlt", function (Request $request) {
     $baingaIlt = new BaingaIlt();
     return $baingaIlt->getBaingaIlt($request);

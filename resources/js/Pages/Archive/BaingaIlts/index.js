@@ -21,6 +21,9 @@ const Index = () => {
     const [getBaingaIlt, setBaingaIlt] = useState([]);
     const [getHumrug, setHumrug] = useState([]);
     const [getDans, setDans] = useState([]);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     //select
     const [allDans, setAllDans] = useState([]); // анхны бүх дата
@@ -57,30 +60,30 @@ const Index = () => {
     }, [selectedHumrug, selectedDans]);
 
     useEffect(() => {
+        console.log("UPDATED DATA:", getBaingaIlt);
+        console.log("UPDATED TOTAL:", totalRows);
+    }, [getBaingaIlt, totalRows]);
+    useEffect(() => {
         if (getBaingaIlt.length) {
             console.log("ROW SAMPLE:", getBaingaIlt[0]);
             console.log("EXPIRED:", isExpiredRow(getBaingaIlt[0]));
         }
     }, [getBaingaIlt]);
+
     useEffect(() => {
-        refreshBaingaIlt();
-        console.log(getDans);
+        setPage(0); // 🔥 reset page
     }, [selectedHumrug, selectedDans]);
 
-    // const importExcel = (file) => {
-    //     const formData = new FormData();
-    //     formData.append("file", file);
+    useEffect(() => {
+        if (selectedHumrug && selectedDans) {
+            console.log("FETCH:", page, rowsPerPage);
+            console.log("TOTAL:", totalRows); // 18s
+            console.log("DATA LENGTH:", getBaingaIlt.length); // 10
+            console.log("PAGE:", page); // 0 эсвэл 1
+            refreshBaingaIlt();
+        }
+    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
 
-    //     axios
-    //         .post("/import/baingaIlts", formData)
-    //         .then((res) => {
-    //             Swal.fire(res.data.msg); // Мэдэгдэл
-    //             refreshBaingaIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
-    //         })
-    //         .catch((err) => {
-    //             Swal.fire("Import алдаа");
-    //         });
-    // };
     const selectedHumrugName = getHumrug.find(
         (h) => h.id === selectedHumrug
     )?.humrug_ner;
@@ -146,33 +149,55 @@ const Index = () => {
     };
 
     const refreshBaingaIlt = () => {
-        axios.get("/get/BaingaIlt").then((res) => {
-            const reversed = [...res.data].reverse();
-            setAllDans(res.data); // бүх анхны дата-г хадгалах
+        if (!selectedHumrug || !selectedDans) {
+            setBaingaIlt([]);
+            setTotalRows(0);
+            return;
+        }
 
-            if (selectedHumrug !== 0 && selectedDans !== 0) {
-                // 🔹 1. Фильтер хийх
-                let filteredData = res.data.filter(
-                    (item) =>
-                        Number(item.humrug_id) === Number(selectedHumrug) &&
-                        Number(item.dans_id) === Number(selectedDans)
-                );
-
-                // 🔹 2. Хугацаа хэтэрсэн мөрүүдийг дээд талд гаргах
-                filteredData.sort((a, b) => {
-                    const aExpired = isExpiredRow(a) ? 1 : 0;
-                    const bExpired = isExpiredRow(b) ? 1 : 0;
-
-                    // Хугацаа хэтэрсэн = 1 → дээд
-                    return bExpired - aExpired;
-                });
-
-                setBaingaIlt(filteredData);
-            } else {
-                setBaingaIlt([]);
-            }
-        });
+        axios
+            .get("/get/BaingaIlt", {
+                params: {
+                    humrug_id: selectedHumrug,
+                    dans_id: selectedDans,
+                    page: page + 1,
+                    perPage: rowsPerPage,
+                },
+            })
+            .then((res) => {
+                console.log("API RESPONSE:", res.data);
+                setBaingaIlt(res.data.data || []);
+                setTotalRows(res.data.total || 0);
+            });
     };
+    // const refreshBaingaIlt = () => {
+    //     axios.get("/get/BaingaIlt").then((res) => {
+    //         const reversed = [...res.data].reverse();
+    //         setAllDans(res.data); // бүх анхны дата-г хадгалах
+
+    //         if (selectedHumrug !== 0 && selectedDans !== 0) {
+    //             // 🔹 1. Фильтер хийх
+    //             let filteredData = res.data.filter(
+    //                 (item) =>
+    //                     Number(item.humrug_id) === Number(selectedHumrug) &&
+    //                     Number(item.dans_id) === Number(selectedDans)
+    //             );
+
+    //             // 🔹 2. Хугацаа хэтэрсэн мөрүүдийг дээд талд гаргах
+    //             filteredData.sort((a, b) => {
+    //                 const aExpired = isExpiredRow(a) ? 1 : 0;
+    //                 const bExpired = isExpiredRow(b) ? 1 : 0;
+
+    //                 // Хугацаа хэтэрсэн = 1 → дээд
+    //                 return bExpired - aExpired;
+    //             });
+
+    //             setBaingaIlt(filteredData);
+    //         } else {
+    //             setBaingaIlt([]);
+    //         }
+    //     });
+    // };
 
     const btnArchive = () => {
         if (!clickedRowData) return;
@@ -503,14 +528,24 @@ const Index = () => {
                             бичиг/илт/{" "}
                         </h4>
                         {/* DATE FILTER */}
-                        <div className="col-md-8 mb-3">
-                            <div className="input-group">
-                                <span className="input-group-text">
+                        <div
+                            className="col-md-8 mb-2"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                flexWrap: "wrap",
+                                fontWeight: 500,
+                                fontSize: "12px",
+                            }}
+                        >
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text py-1 px-2">
                                     Хөмрөг:
                                 </span>
 
                                 <select
-                                    className="form-control"
+                                    className="form-control form-control-sm py-1"
                                     value={selectedHumrug}
                                     onChange={(e) => {
                                         const value = Number(e.target.value);
@@ -563,7 +598,7 @@ const Index = () => {
                                 </select>
                                 <span className="mx-2"></span>
                                 <button
-                                    className="btn d-flex align-items-center gap-2 px-4 py-2 fw-bold"
+                                    className="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 fw-semibold"
                                     disabled={
                                         selectedHumrug === 0 ||
                                         selectedDans === 0
@@ -687,7 +722,7 @@ const Index = () => {
                                 >
                                     <div
                                         style={{
-                                            padding: "14px 18px",
+                                            padding: "8px 12px",
                                             display: "flex",
                                             justifyContent: "space-between",
                                             alignItems: "center",
@@ -898,7 +933,36 @@ const Index = () => {
                                             data={getBaingaIlt}
                                             setdata={setBaingaIlt}
                                             columns={columns}
+                                            isServerSide={true}
+                                            count={totalRows}
+                                            page={page}
+                                            rowsPerPage={rowsPerPage}
+                                            setPage={setPage}
+                                            setRowsPerPage={setRowsPerPage}
                                             options={{
+                                                // serverSide: true,
+                                                // count: totalRows,
+
+                                                // page: page,
+                                                // rowsPerPage: rowsPerPage,
+                                                onTableChange: (
+                                                    action,
+                                                    tableState
+                                                ) => {
+                                                    switch (action) {
+                                                        case "changePage":
+                                                            setPage(
+                                                                tableState.page
+                                                            );
+                                                            break;
+                                                        case "changeRowsPerPage":
+                                                            setRowsPerPage(
+                                                                tableState.rowsPerPage
+                                                            );
+                                                            break;
+                                                    }
+                                                },
+
                                                 setRowProps: (
                                                     row,
                                                     dataIndex
@@ -913,6 +977,7 @@ const Index = () => {
                                                             },
                                                         };
                                                     }
+                                                    return {};
                                                 },
                                             }}
                                             costumToolbar={

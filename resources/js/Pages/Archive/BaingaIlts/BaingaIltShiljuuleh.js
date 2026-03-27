@@ -13,7 +13,7 @@ const BaingaIltShiljuuleh = ({
     getRowsSelected,
     setRowsSelected,
     onClose,
-    fetchBaingaIlt,
+    refreshBaingaIlt,
 }) => {
     const [clickedRowData, setclickedRowData] = useState(
         getRowsSelected[0] !== undefined
@@ -103,7 +103,7 @@ const BaingaIltShiljuuleh = ({
                     setComments({});
                     setRowsSelected([]); // selection цэвэрлэх
                     onClose(); //  ЭЦЭГ MODAL ХААХ
-                    fetchBaingaIlt();
+                    refreshBaingaIlt();
                 });
             })
             .catch(() => {
