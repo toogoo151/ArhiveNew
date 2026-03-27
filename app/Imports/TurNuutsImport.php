@@ -2,15 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\BaingaNuuts;
+use App\Models\TurNuuts;
 use App\Models\Dansburtgel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Maatwebsite\Excel\Concerns\ToModel;
 
 
-
-class BaingaNuutsImport implements ToModel
+class TurNuutsImport implements ToModel
 {
     protected $humrug_id;
     protected $dans_id;
@@ -36,7 +35,7 @@ class BaingaNuutsImport implements ToModel
         // (<=12 column) dotor
         if (!$isFull) {
 
-            return new BaingaNuuts([
+            return new TurNuuts([
                 'desk_id' => null,
                 'humrug_id' => $this->humrug_id,
                 'dans_id' => $this->dans_id,
@@ -68,7 +67,7 @@ class BaingaNuutsImport implements ToModel
             return null;
         }
 
-        return new BaingaNuuts([
+        return new TurNuuts([
             'desk_id' => $row[0] ?? null,
             'humrug_id' => $dans->humrugID,
             'dans_id' => $dans->id,

@@ -29,6 +29,7 @@ const BaingaIltsChildNew = ({ _parentID, refreshbaingaIltsChild }) => {
     const fileInputRef = useRef(null);
     const [selectedfile, SetSelectedFile] = useState([]);
     const [previewFile, setPreviewFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         refreshbaingaIltsChild(_parentID);
@@ -92,6 +93,17 @@ const BaingaIltsChildNew = ({ _parentID, refreshbaingaIltsChild }) => {
     };
 
     const onSubmit = (data) => {
+        setLoading(true);
+
+        Swal.fire({
+            title: "Уншиж байна...",
+            text: "Түр хүлээнэ үү",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
         axios
             .post("/new/baingaIltChild", {
                 hnID: _parentID,
@@ -142,6 +154,9 @@ const BaingaIltsChildNew = ({ _parentID, refreshbaingaIltsChild }) => {
             })
             .catch((err) => {
                 Swal.fire(err.response.data.msg);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 

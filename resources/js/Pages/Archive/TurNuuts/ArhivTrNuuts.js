@@ -5,7 +5,8 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-// import ArhivTrNuutsChild from "./ArhivTrNuutsChild";
+import ArhivTrNuutsChild from "./ArhivTrNuutsChild";
+
 import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
 
@@ -103,7 +104,7 @@ const ArhivTrNuuts = () => {
         }
 
         axios
-            .get(`/get/DansburtgelNuuts/${selectedHumrug}`)
+            .get(`/get/DansburtgelTurNuuts/${selectedHumrug}`)
             .then((res) => {
                 setDans(res.data);
             })
@@ -179,10 +180,7 @@ const ArhivTrNuuts = () => {
                                 >
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.humrug_ner}
                                         </option>
                                     ))}
@@ -211,10 +209,7 @@ const ArhivTrNuuts = () => {
                                     </option>
 
                                     {getDans.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.dans_ner}
                                         </option>
                                     ))}

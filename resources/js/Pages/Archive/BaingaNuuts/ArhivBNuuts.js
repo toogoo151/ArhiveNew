@@ -226,10 +226,7 @@ const ArhivBNuuts = () => {
                                 >
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.humrug_ner}
                                         </option>
                                     ))}
@@ -258,10 +255,7 @@ const ArhivBNuuts = () => {
                                     </option>
 
                                     {getDans.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.dans_ner}
                                         </option>
                                     ))}

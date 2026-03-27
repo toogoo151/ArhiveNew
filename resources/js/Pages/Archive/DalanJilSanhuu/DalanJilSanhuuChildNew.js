@@ -11,13 +11,13 @@ const DalanJilSanhuuChildNew = ({ _parentID, refreshdalanSanhuuChild }) => {
         barimt_ner: Yup.string().required("Баримт нэр оруулна уу"),
         barimt_ognoo: Yup.string().required("Баримт огноо оруулна уу"),
         barimt_dugaar: Yup.string().required("Баримт дугаар оруулна уу"),
-        irsen_dugaar: Yup.string().required("Ирсэн дугаар оруулна уу"),
-        yabsan_dugaar: Yup.string().required("Явсан дугаар оруулна уу"),
-        uild_gazar: Yup.string().required("Үйлдсэн газар оруулна уу"),
-        huudas_too: Yup.string().required("Хуудас тоо оруулна уу"),
-        habsralt_too: Yup.string().required("Хавсралт тоо оруулна уу"),
-        huudas_dugaar: Yup.string().required("Хуудас дугаар оруулна уу"),
-        aguulga: Yup.string().required("Агуулга оруулна уу"),
+        // irsen_dugaar: Yup.string().required("Ирсэн дугаар оруулна уу"),
+        // yabsan_dugaar: Yup.string().required("Явсан дугаар оруулна уу"),
+        // uild_gazar: Yup.string().required("Үйлдсэн газар оруулна уу"),
+        // huudas_too: Yup.string().required("Хуудас тоо оруулна уу"),
+        // habsralt_too: Yup.string().required("Хавсралт тоо оруулна уу"),
+        // huudas_dugaar: Yup.string().required("Хуудас дугаар оруулна уу"),
+        // aguulga: Yup.string().required("Агуулга оруулна уу"),
         bichsen_ner: Yup.string().nullable(),
         bichsen_ognoo: Yup.string().nullable(),
     });
@@ -36,6 +36,7 @@ const DalanJilSanhuuChildNew = ({ _parentID, refreshdalanSanhuuChild }) => {
     const fileInputRef = useRef(null);
     const [selectedfile, SetSelectedFile] = useState([]);
     const [previewFile, setPreviewFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         refreshdalanSanhuuChild(_parentID);
@@ -99,6 +100,16 @@ const DalanJilSanhuuChildNew = ({ _parentID, refreshdalanSanhuuChild }) => {
     };
 
     const onSubmit = (data) => {
+        setLoading(true);
+
+        Swal.fire({
+            title: "Уншиж байна...",
+            text: "Түр хүлээнэ үү",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
         axios
             .post("/new/DalanJilsanhuuChild", {
                 hnID: _parentID,
@@ -149,6 +160,9 @@ const DalanJilSanhuuChildNew = ({ _parentID, refreshdalanSanhuuChild }) => {
             })
             .catch((err) => {
                 Swal.fire(err.response.data.msg);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 

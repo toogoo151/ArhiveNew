@@ -201,33 +201,39 @@ class DalanJilHunController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
-        Excel::import(new DalanJilHunImport, $request->file('file'));
+        Excel::import(
+            new DalanJilHunImport(
+                $request->humrug_id,
+                $request->dans_id
+            ),
+            $request->file('file')
+        );
 
         return response()->json([
             'msg' => 'Амжилттай импорт хийлээ'
         ]);
     }
 
-    public function ArchiveBaingIlt(Request $req)
-    {
-        try {
-            foreach ($req->data as $item) {
-                $archive = DalanJilHun::find($item['id']);
-                if ($archive) {
-                    $archive->ustgasan_temdeglel = $item['ustgasan_temdeglel'];
-                    $archive->save();
-                }
-            }
+    // public function ArchiveBaingIlt(Request $req)
+    // {
+    //     try {
+    //         foreach ($req->data as $item) {
+    //             $archive = DalanJilHun::find($item['id']);
+    //             if ($archive) {
+    //                 $archive->ustgasan_temdeglel = $item['ustgasan_temdeglel'];
+    //                 $archive->save();
+    //             }
+    //         }
 
-            return response([
-                "status" => "success",
-                "msg" => "Сонгосон баримтууд амжилттай архивлагдлаа."
-            ], 200);
-        } catch (\Throwable $th) {
-            return response([
-                "status" => "error",
-                "msg" => "Алдаа гарлаа."
-            ], 500);
-        }
-    }
+    //         return response([
+    //             "status" => "success",
+    //             "msg" => "Сонгосон баримтууд амжилттай архивлагдлаа."
+    //         ], 200);
+    //     } catch (\Throwable $th) {
+    //         return response([
+    //             "status" => "error",
+    //             "msg" => "Алдаа гарлаа."
+    //         ], 500);
+    //     }
+    // }
 }

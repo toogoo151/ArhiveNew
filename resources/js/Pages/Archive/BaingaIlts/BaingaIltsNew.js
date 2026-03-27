@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import * as Yup from "yup";
 import axios from "../../../AxiosUser";
 
-const BaingaIltsNew = ({ refreshBaingaIlt, selectedHumrug, selectedDans }) => {
+const BaingaIltsNew = ({ fetchBaingaIlt, selectedHumrug, selectedDans }) => {
     // 🔥 MODAL НЭЭГДЭХ ҮЕД ШАЛГАХ
     // ===============================
     useEffect(() => {
@@ -111,7 +111,7 @@ const BaingaIltsNew = ({ refreshBaingaIlt, selectedHumrug, selectedDans }) => {
                         keepSubmitCount: false,
                     }
                 );
-                refreshBaingaIlt();
+                fetchBaingaIlt();
             })
             .catch((err) => {
                 Swal.fire(err.response.data.msg);

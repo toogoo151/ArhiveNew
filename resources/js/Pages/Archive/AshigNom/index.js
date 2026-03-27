@@ -18,8 +18,6 @@ const Index = () => {
     const [allNom, setallNom] = useState([]);
     const [getNom, setNom] = useState([]);
 
-    const { tubshin, loading, error } = useAuthPermission();
-
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState(null);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
@@ -28,6 +26,7 @@ const Index = () => {
     // Don't let Bootstrap auto-open the edit modal before React fills the form.
     // We'll open it programmatically inside `NomEdit`.
     const [showModal] = useState(null);
+    const { tubshin, loading, error } = useAuthPermission();
 
     // FETCH
     useEffect(() => {

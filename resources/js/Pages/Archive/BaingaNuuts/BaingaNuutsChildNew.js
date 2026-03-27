@@ -36,6 +36,7 @@ const BaingaNuutsChildNew = ({ _parentID, refreshbaingaNuutsChild }) => {
     const fileInputRef = useRef(null);
     const [selectedfile, SetSelectedFile] = useState([]);
     const [previewFile, setPreviewFile] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         refreshbaingaNuutsChild(_parentID);
@@ -99,6 +100,16 @@ const BaingaNuutsChildNew = ({ _parentID, refreshbaingaNuutsChild }) => {
     };
 
     const onSubmit = (data) => {
+        setLoading(true);
+
+        Swal.fire({
+            title: "Уншиж байна...",
+            text: "Түр хүлээнэ үү",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
         axios
             .post("/new/baingaNuutsChild", {
                 hnID: _parentID,
@@ -149,6 +160,9 @@ const BaingaNuutsChildNew = ({ _parentID, refreshbaingaNuutsChild }) => {
             })
             .catch((err) => {
                 Swal.fire(err.response.data.msg);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 

@@ -175,25 +175,12 @@ class BaingaIltChildController extends Controller
             Storage::makeDirectory($userFolder);
         }
 
-        // 1. Давхардсан файл шалгах
-        // foreach ($req->data_url as $value) {
-        //     $setPDFPathID = $value["filename"];
-        //     $path = $userFolder . "/" . $setPDFPathID;
 
-        //     if (Storage::exists($path)) {
-        //         return response([
-        //             "status" => "error",
-        //             "msg" => "Файл \"{$setPDFPathID}\" аль хэдийн хадгалагдсан байна!"
-        //         ], 422);
-        //     }
-        // }
-
-        // 2. DB Transaction эхлэх
         DB::beginTransaction();
 
         try {
-            // 2a. Файлуудыг хадгалах (амжилттай бол URL-г цуглуулах)
-            $savedFiles = []; // хадгалагдсан файлуудын path
+
+            $savedFiles = [];
             foreach ($req->data_url as $value) {
                 $pdf_data = $value["fileimage"];
                 $pdf_64 = substr($pdf_data, strpos($pdf_data, ',') + 1);
@@ -210,25 +197,24 @@ class BaingaIltChildController extends Controller
                 $fullURL .= asset($getPDFUrl) . ';';
             }
 
-            // 2b. DB-д хадгалах
+
             $insertBainga = new BaingaIltChild();
             $insertBainga->hnID = $req->hnID;
-            //encrypte start
             $insertBainga->barimt_ner = Crypt::encryptString($req->barimt_ner);
             $insertBainga->uild_gazar = Crypt::encryptString($req->uild_gazar);
             $insertBainga->aguulga = Crypt::encryptString($req->aguulga);
             $insertBainga->bichsen_ner = Crypt::encryptString($req->bichsen_ner);
             $insertBainga->file_ner = Crypt::encryptString($fullURL);
-            //encrypte end
+
             $insertBainga->barimt_ognoo = $req->barimt_ognoo;
-            $insertBainga->barimt_dugaar = $req->barimt_dugaar; // integer эсвэл validation шалгах
+            $insertBainga->barimt_dugaar = $req->barimt_dugaar;
             $insertBainga->irsen_dugaar = $req->irsen_dugaar;
             $insertBainga->yabsan_dugaar = $req->yabsan_dugaar;
             $insertBainga->huudas_too = $req->huudas_too;
             $insertBainga->habsralt_too = $req->habsralt_too;
             $insertBainga->huudas_dugaar = $req->huudas_dugaar;
             $insertBainga->bichsen_ognoo = $req->bichsen_ognoo;
-            // $insertBainga->file_ner = $fullURL;
+
             $insertBainga->user_id = $userId;
             $insertBainga->save();
 
@@ -241,7 +227,7 @@ class BaingaIltChildController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
 
-            // 3. Алдаа гарсан тохиолдолд хадгалагдсан файлуудыг устгах
+
             foreach ($savedFiles as $path) {
                 if (Storage::exists($path)) {
                     Storage::delete($path);
@@ -442,8 +428,9 @@ class BaingaIltChildController extends Controller
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
+        $hnID = $request->hnID; // 🔥
 
-        Excel::import(new BaingaIltChildImport, $request->file('file'));
+        Excel::import(new BaingaIltChildImport($hnID), $request->file('file'));
 
         return response()->json([
             'msg' => 'Амжилттай импорт хийлээ'

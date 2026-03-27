@@ -14,6 +14,7 @@ const ArhivBNuutsChild = (props) => {
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
 
     const [showModal] = useState("modal");
+    const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshbaingaNuutsChild(props.changeDataRow.id);
@@ -21,7 +22,7 @@ const ArhivBNuutsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshbaingaNuutsChild(props.changeDataRow.desk_id);
+        refreshbaingaNuutsChild(props.changeDataRow.id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);

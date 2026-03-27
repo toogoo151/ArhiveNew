@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Redirect, Response, File;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Crypt;
+
 
 
 class AngiController extends Controller
@@ -29,7 +30,10 @@ class AngiController extends Controller
             $insertAngi = new Angi();
             $insertAngi->comand_id = $req->comand_id;
             $insertAngi->idangi = $req->idangi;
-            $insertAngi->ner = $req->ner;
+            $insertAngi->ner = $req->ner
+                ? Crypt::encryptString($req->ner)
+                : null;
+
             $insertAngi->save();
             return response(
                 array(
@@ -77,7 +81,9 @@ class AngiController extends Controller
             $edit = Angi::find($req->id);
             $edit->comand_id = $req->comand_id;
             $edit->idangi = $req->idangi;
-            $edit->ner = $req->ner;
+            $edit->ner = $req->ner
+                ? Crypt::encryptString($req->ner)
+                : null;
             $edit->save();
             return response(
                 array(

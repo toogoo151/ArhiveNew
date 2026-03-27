@@ -23,7 +23,7 @@ const ArhivTRIltsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurIltsChild(props.changeDataRow.desk_id);
+        refreshTurIltsChild(props.changeDataRow.id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);

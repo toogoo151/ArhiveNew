@@ -175,8 +175,6 @@ class DalanJilhunChildController extends Controller
             Storage::makeDirectory($userFolder);
         }
 
-
-        // 2. DB Transaction эхлэх
         DB::beginTransaction();
 
         try {

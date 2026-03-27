@@ -193,8 +193,8 @@ const ArhivTRIlts = () => {
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
                                         <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
+                                            key={el.id}
+                                            value={el.id}
                                         >
                                             {el.humrug_ner}
                                         </option>
@@ -225,8 +225,8 @@ const ArhivTRIlts = () => {
 
                                     {getDans.map((el) => (
                                         <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
+                                            key={el.id}
+                                            value={el.id}
                                         >
                                             {el.dans_ner}
                                         </option>

@@ -1,11 +1,13 @@
 import { format, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
+// import BaingaHadgalahHugatsaa from "./BaingaHadgalahHugatsaa";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-// import BaingaHadgalahHugatsaa from "./BaingaHadgalahHugatsaa";
+import "./Index.css";
 import TurHadgalahHugatsaa from "./TurHadgalahHugatsaa";
 import TurIltEdit from "./TurIltEdit";
 import TurIltNew from "./TurIltNew";
@@ -40,8 +42,12 @@ const Index = () => {
     // const [comment, setComment] = useState("");
     // const [shiljuulehMode, setShiljuulehMode] = useState(null);
 
+    const [selectedFile, setSelectedFile] = useState(null);
     const [activeTab, setActiveTab] = useState("ilt");
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const isDisabled = selectedHumrug === 0 || selectedDans === 0;
 
     const [showModal] = useState("modal");
 
@@ -53,6 +59,12 @@ const Index = () => {
             console.log("EXPIRED:", isExpiredRow(getTurIlt[0]));
         }
     }, [getTurIlt]);
+
+    useEffect(() => {
+        setSelectedFile(null);
+        const input = document.getElementById("TurIlts");
+        if (input) input.value = null;
+    }, [selectedHumrug, selectedDans]);
 
     useEffect(() => {
         refreshTurIlt();
@@ -77,6 +89,52 @@ const Index = () => {
         return end < new Date();
     };
     const expiredCount = getTurIlt.filter(isExpiredRow).length;
+
+    const selectedHumrugName = getHumrug.find(
+        (h) => h.id === selectedHumrug
+    )?.humrug_ner;
+
+    const selectedDansName = getDans.find(
+        (d) => d.id === selectedDans
+    )?.dans_ner;
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("humrug_id", selectedHumrug);
+        formData.append("dans_id", selectedDans);
+
+        axios
+            .post("/import/turIlt", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshTurIlt(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
 
     const refreshTurIlt = () => {
         axios.get("/get/TurIlt").then((res) => {
@@ -440,9 +498,9 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">
+                        <h4 className="text-center mb-4">
                             Түр хадгалагдах хадгаламжийн нэгж, баримт бичиг/илт/{" "}
-                        </h1>
+                        </h4>
                         {/* DATE FILTER */}
                         <div className="col-md-8 mb-3">
                             <div className="input-group">
@@ -469,10 +527,7 @@ const Index = () => {
                                 >
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.humrug_ner}
                                         </option>
                                     ))}
@@ -501,10 +556,7 @@ const Index = () => {
                                     </option>
 
                                     {getDans.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.dans_ner}
                                         </option>
                                     ))}
@@ -624,66 +676,484 @@ const Index = () => {
                         )}
                         {activeTab === "ilt" && (
                             <>
-                                <MUIDatatable
-                                    data={getTurIlt}
-                                    setdata={setTurIlt}
-                                    columns={columns}
-                                    options={{
-                                        setRowProps: (row, dataIndex) => {
-                                            const r = getTurIlt[dataIndex];
-                                            if (isExpiredRow(r)) {
-                                                return {
-                                                    style: {
-                                                        backgroundColor:
-                                                            "#fee2e2",
-                                                    },
-                                                };
-                                            }
-                                        },
+                                <div
+                                    style={{
+                                        background: "#ffffff",
+                                        borderRadius: "12px",
+                                        border: "1px solid #e2e8f0",
+                                        overflow: "hidden", // 🔥 чухал (table тасрахгүй)
                                     }}
-                                    costumToolbar={
-                                        <CustomToolbar
-                                            btnClassName="btn btn-success"
-                                            modelType="modal"
-                                            dataTargetID={
-                                                selectedHumrug !== 0 &&
-                                                selectedDans !== 0
-                                                    ? "#TurNew"
-                                                    : null
+                                >
+                                    <div
+                                        style={{
+                                            padding: "14px 18px",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            borderBottom: "1px solid #e2e8f0",
+                                            background: "#f8fafc",
+                                        }}
+                                    >
+                                        <div className="excel-bar">
+                                            {/* <div className="excel-left"></div> */}
+
+                                            <div className="excel-right">
+                                                <span className="excel-label">
+                                                    📊 Excel:
+                                                </span>
+                                                <input
+                                                    type="file"
+                                                    id="TurIltsExcel"
+                                                    accept=".xlsx,.xls,.csv"
+                                                    disabled={isDisabled}
+                                                    onChange={(e) => {
+                                                        if (
+                                                            e.target.files
+                                                                .length
+                                                        ) {
+                                                            setSelectedFile(
+                                                                e.target
+                                                                    .files[0]
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+
+                                                {selectedFile && (
+                                                    <>
+                                                        <button
+                                                            className="btn-preview"
+                                                            onClick={() =>
+                                                                handlePreview(
+                                                                    selectedFile
+                                                                )
+                                                            }
+                                                        >
+                                                            👁
+                                                        </button>
+
+                                                        <button
+                                                            className="btn-import"
+                                                            onClick={() => {
+                                                                importExcel(
+                                                                    selectedFile
+                                                                );
+                                                                setSelectedFile(
+                                                                    null
+                                                                );
+                                                                document.getElementById(
+                                                                    "TurIltsExcel"
+                                                                ).value = null;
+                                                            }}
+                                                        >
+                                                            ⬆ Import
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {showPreviewModal && (
+                                        <div
+                                            className="modal fade show d-block"
+                                            style={{
+                                                backgroundColor:
+                                                    "rgba(0,0,0,0.5)",
+                                            }}
+                                        >
+                                            <div className="modal-dialog modal-xl">
+                                                <div className="modal-content">
+                                                    <div className="modal-header bg-primary text-white">
+                                                        <h5 className="modal-title">
+                                                            📊 Excel урьдчилж
+                                                            харах
+                                                        </h5>
+
+                                                        <button
+                                                            className="btn btn-sm btn-light"
+                                                            onClick={() =>
+                                                                setShowPreviewModal(
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                    <div className="px-3 py-2 border-bottom bg-light d-flex gap-3 flex-wrap">
+                                                        <span className="badge bg-primary fs-6">
+                                                            📁 Хөмрөг:{" "}
+                                                            {selectedHumrugName ||
+                                                                "-"}
+                                                        </span>
+
+                                                        <span className="badge bg-success fs-6">
+                                                            📂 Данс:{" "}
+                                                            {selectedDansName ||
+                                                                "-"}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="modal-body p-0">
+                                                        <div
+                                                            style={{
+                                                                maxHeight:
+                                                                    "60vh",
+                                                                overflow:
+                                                                    "auto",
+                                                            }}
+                                                        >
+                                                            <table className="table table-bordered table-hover mb-0">
+                                                                <thead
+                                                                    className="table-dark"
+                                                                    style={{
+                                                                        position:
+                                                                            "sticky",
+                                                                        top: 0,
+                                                                        zIndex: 1,
+                                                                    }}
+                                                                >
+                                                                    <tr>
+                                                                        {excelHeaders.map(
+                                                                            (
+                                                                                col,
+                                                                                i
+                                                                            ) => (
+                                                                                <th
+                                                                                    key={
+                                                                                        i
+                                                                                    }
+                                                                                    className="text-nowrap"
+                                                                                >
+                                                                                    {
+                                                                                        col.label
+                                                                                    }
+                                                                                </th>
+                                                                            )
+                                                                        )}
+                                                                    </tr>
+                                                                </thead>
+
+                                                                <tbody>
+                                                                    {previewData
+                                                                        .slice(
+                                                                            1
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                row,
+                                                                                i
+                                                                            ) => (
+                                                                                <tr
+                                                                                    key={
+                                                                                        i
+                                                                                    }
+                                                                                >
+                                                                                    {excelHeaders.map(
+                                                                                        (
+                                                                                            col,
+                                                                                            j
+                                                                                        ) => (
+                                                                                            <td
+                                                                                                key={
+                                                                                                    j
+                                                                                                }
+                                                                                                className="text-nowrap"
+                                                                                            >
+                                                                                                {row[
+                                                                                                    j
+                                                                                                ] ??
+                                                                                                    ""}
+                                                                                            </td>
+                                                                                        )
+                                                                                    )}
+                                                                                </tr>
+                                                                            )
+                                                                        )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="modal-footer">
+                                                        <button
+                                                            className="btn btn-outline-secondary"
+                                                            onClick={() =>
+                                                                setShowPreviewModal(
+                                                                    false
+                                                                )
+                                                            }
+                                                        >
+                                                            Хаах
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div style={{ padding: "10px" }}>
+                                        <MUIDatatable
+                                            data={getTurIlt}
+                                            setdata={setTurIlt}
+                                            columns={columns}
+                                            options={{
+                                                setRowProps: (
+                                                    row,
+                                                    dataIndex
+                                                ) => {
+                                                    const r =
+                                                        getTurIlt[dataIndex];
+                                                    if (isExpiredRow(r)) {
+                                                        return {
+                                                            style: {
+                                                                backgroundColor:
+                                                                    "#fee2e2",
+                                                            },
+                                                        };
+                                                    }
+                                                },
+                                            }}
+                                            costumToolbar={
+                                                <CustomToolbar
+                                                    btnClassName="btn btn-success"
+                                                    modelType="modal"
+                                                    dataTargetID={
+                                                        selectedHumrug !== 0 &&
+                                                        selectedDans !== 0
+                                                            ? "#TurNew"
+                                                            : null
+                                                    }
+                                                    spanIconClassName="fas fa-plus"
+                                                    buttonName="Нэмэх"
+                                                    excelDownloadData={
+                                                        getTurIlt
+                                                    }
+                                                    excelHeaders={excelHeaders}
+                                                    excelTitle="Түр хадгалагдах хадгаламжийн нэгж /илт/"
+                                                    isHideInsert={isRestricted}
+                                                    isHideEdit={isRestricted}
+                                                    onClick={() => {
+                                                        if (
+                                                            selectedHumrug ===
+                                                                0 ||
+                                                            selectedDans === 0
+                                                        ) {
+                                                            Swal.fire({
+                                                                icon: "warning",
+                                                                title: "Анхааруулга",
+                                                                text: "Хөмрөг болон дансны дугаар сонгоно уу!",
+                                                            });
+                                                        }
+                                                    }}
+                                                />
                                             }
-                                            spanIconClassName="fas fa-plus"
-                                            buttonName="Нэмэх"
-                                            excelDownloadData={getTurIlt}
-                                            excelHeaders={excelHeaders}
-                                            excelTitle="Түр хадгалагдах хадгаламжийн нэгж /илт/"
-                                            isHideInsert={isRestricted}
+                                            btnEdit={btnEdit}
+                                            modelType={showModal}
+                                            editdataTargetID="#turIltEdit"
+                                            btnDelete={btnDelete}
+                                            btnArchiveClick={btnArchive}
+                                            getRowsSelected={getRowsSelected}
+                                            setRowsSelected={setRowsSelected}
+                                            isHideDelete={isRestricted}
                                             isHideEdit={isRestricted}
-                                            onClick={() => {
-                                                if (
-                                                    selectedHumrug === 0 ||
-                                                    selectedDans === 0
-                                                ) {
-                                                    // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                                    Swal.fire({
-                                                        icon: "warning",
-                                                        title: "Анхааруулга",
-                                                        text: "Хөмрөг болон дансны дугаар сонгоно уу!",
-                                                    });
+                                            showArchive={false}
+                                        />
+                                    </div>
+                                </div>
+                                {/* <div className="col-md-12 mb-3">
+                                    <label
+                                        htmlFor="TurIlts"
+                                        className="form-label"
+                                    >
+                                        Excel Import
+                                    </label>
+                                    <div className="d-flex align-items-center">
+                                        <input
+                                            style={{
+                                                cursor: isDisabled
+                                                    ? "not-allowed"
+                                                    : "pointer",
+                                                opacity: isDisabled ? 0.6 : 1,
+                                            }}
+                                            type="file"
+                                            id="TurIlts"
+                                            className="form-control form-control-sm me-2"
+                                            accept=".xlsx,.xls,.csv"
+                                            disabled={isDisabled}
+                                            onChange={(e) => {
+                                                if (e.target.files.length) {
+                                                    const file =
+                                                        e.target.files[0];
+                                                    setSelectedFile(file);
                                                 }
-                                                // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
                                             }}
                                         />
-                                    }
-                                    btnEdit={btnEdit}
-                                    modelType={showModal}
-                                    editdataTargetID="#turIltEdit"
-                                    btnDelete={btnDelete}
-                                    btnArchiveClick={btnArchive}
-                                    getRowsSelected={getRowsSelected}
-                                    setRowsSelected={setRowsSelected}
-                                    isHideDelete={isRestricted}
-                                    isHideEdit={isRestricted}
-                                />
+
+                                        {!isDisabled && selectedFile && (
+                                            <>
+                                                <button
+                                                    className="btn btn-outline-secondary btn-sm me-2"
+                                                    onClick={() =>
+                                                        handlePreview(
+                                                            selectedFile
+                                                        )
+                                                    }
+                                                >
+                                                    👁
+                                                </button>
+
+                                                <button
+                                                    className="btn btn-primary btn-sm"
+                                                    onClick={() => {
+                                                        importExcel(
+                                                            selectedFile
+                                                        );
+                                                        setSelectedFile(null);
+                                                        document.getElementById(
+                                                            "TurIlts"
+                                                        ).value = null;
+                                                    }}
+                                                >
+                                                    Import
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div> */}
+
+                                {/* {showPreviewModal && (
+                                    <div
+                                        className="modal fade show d-block"
+                                        style={{
+                                            backgroundColor: "rgba(0,0,0,0.5)",
+                                        }}
+                                    >
+                                        <div className="modal-dialog modal-xl">
+                                            <div className="modal-content">
+                                                <div className="modal-header bg-primary text-white">
+                                                    <h5 className="modal-title">
+                                                        📊 Excel урьдчилж харах
+                                                    </h5>
+
+                                                    <button
+                                                        className="btn btn-sm btn-light"
+                                                        onClick={() =>
+                                                            setShowPreviewModal(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                <div className="px-3 py-2 border-bottom bg-light d-flex gap-3 flex-wrap">
+                                                    <span className="badge bg-primary fs-6">
+                                                        📁 Хөмрөг:{" "}
+                                                        {selectedHumrugName ||
+                                                            "-"}
+                                                    </span>
+
+                                                    <span className="badge bg-success fs-6">
+                                                        📂 Данс:{" "}
+                                                        {selectedDansName ||
+                                                            "-"}
+                                                    </span>
+                                                </div>
+
+                                                <div className="modal-body p-0">
+                                                    <div
+                                                        style={{
+                                                            maxHeight: "60vh",
+                                                            overflow: "auto",
+                                                        }}
+                                                    >
+                                                        <table className="table table-bordered table-hover mb-0">
+                                                            <thead
+                                                                className="table-dark"
+                                                                style={{
+                                                                    position:
+                                                                        "sticky",
+                                                                    top: 0,
+                                                                    zIndex: 1,
+                                                                }}
+                                                            >
+                                                                <tr>
+                                                                    {excelHeaders.map(
+                                                                        (
+                                                                            col,
+                                                                            i
+                                                                        ) => (
+                                                                            <th
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                                className="text-nowrap"
+                                                                            >
+                                                                                {
+                                                                                    col.label
+                                                                                }
+                                                                            </th>
+                                                                        )
+                                                                    )}
+                                                                </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                                {previewData
+                                                                    .slice(1)
+                                                                    .map(
+                                                                        (
+                                                                            row,
+                                                                            i
+                                                                        ) => (
+                                                                            <tr
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                            >
+                                                                                {excelHeaders.map(
+                                                                                    (
+                                                                                        col,
+                                                                                        j
+                                                                                    ) => (
+                                                                                        <td
+                                                                                            key={
+                                                                                                j
+                                                                                            }
+                                                                                            className="text-nowrap"
+                                                                                        >
+                                                                                            {row[
+                                                                                                j
+                                                                                            ] ??
+                                                                                                ""}
+                                                                                        </td>
+                                                                                    )
+                                                                                )}
+                                                                            </tr>
+                                                                        )
+                                                                    )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                                <div className="modal-footer">
+                                                    <button
+                                                        className="btn btn-outline-secondary"
+                                                        onClick={() =>
+                                                            setShowPreviewModal(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        Хаах
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )} */}
                             </>
                         )}
                         <TurIltNew
@@ -700,14 +1170,6 @@ const Index = () => {
                             isEditBtnClick={isEditBtnClick}
                         />
 
-                        {/* <TurIltShiljuuleh
-                            setRowsSelected={setRowsSelected}
-                            refreshTurIlt={refreshTurIlt}
-                            selectedHumrug={selectedHumrug}
-                            selectedDans={selectedDans}
-                            changeDataRow={clickedRowData}
-                            isEditBtnClick={isEditBtnClick}
-                        /> */}
                         <TurHadgalahHugatsaa />
                     </div>
                 </div>
@@ -724,15 +1186,7 @@ const Index = () => {
                     )}
                 </>
             )}
-            {/* <div className="row clearfix">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div className="card2">
-                        {clickedRowData && (
-                            <TurIltsChild changeDataRow={clickedRowData} />
-                        )}
-                    </div>
-                </div>
-            </div> */}
+
             {showShiljuulehModal && getTurIlt.length > 0 && (
                 <TurIltShiljuuleh
                     selectedHumrug={selectedHumrug}
@@ -745,263 +1199,6 @@ const Index = () => {
                     refreshTurIlt={refreshTurIlt}
                 />
             )}
-            {/* {showArchiveModal && clickedRowData && (
-                <div
-                    className="modal fade show"
-                    style={{
-                        display: "block",
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                        backdropFilter: "blur(3px)",
-                    }}
-                >
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content rounded shadow-lg border-0">
-                            <div className="modal-header bg-gradient-primary text-white">
-                                <h5 className="modal-title fw-bold">
-                                    📂 Архивт шилжүүлэх
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close btn-close-white"
-                                    onClick={() => setShowArchiveModal(false)}
-                                />
-                            </div>
-
-                            <div className="px-4 py-3 bg-light border-bottom d-flex flex-wrap gap-3 align-items-center">
-                                <span>
-                                    <b>Хөмрөг:</b> {clickedRowData.humrug_ner}
-                                </span>
-                                <span>|</span>
-                                <span>
-                                    <b>Данс:</b> {clickedRowData.dans_ner}
-                                </span>
-                                <span>|</span>
-                                <span>
-                                    <b>ХН төрөл:</b>{" "}
-                                    {clickedRowData.dans_baidal || "-"}
-                                </span>
-                                <span>|</span>
-                                <span>
-                                    <b>Нууцын зэрэг:</b>{" "}
-                                    <span className="badge bg-warning text-dark">
-                                        {clickedRowData.hadgalah_hugatsaa ||
-                                            "-"}
-                                    </span>
-                                </span>
-                            </div>
-
-                            <div
-                                className="px-4 py-3"
-                                style={{
-                                    maxHeight: "300px",
-                                    overflowY: "auto",
-                                }}
-                            >
-                                <div className="table-responsive">
-                                    <table className="table table-striped table-hover table-sm align-middle mb-0">
-                                        <thead className="table-dark">
-                                            <tr>
-                                                <th style={{ width: "35%" }}>
-                                                    Талбар
-                                                </th>
-                                                <th>Утга</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Хадгаламжийн дугаар</td>
-                                                <td>
-                                                    {clickedRowData.hadgalamj_dugaar ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Хадгаламжийн гарчиг</td>
-                                                <td>
-                                                    {clickedRowData.hadgalamj_garchig ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    Зохион байгуулалтын нэгжийн
-                                                    нэр
-                                                </td>
-                                                <td>
-                                                    {clickedRowData.hadgalamj_zbn ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Хэргийн индекс</td>
-                                                <td>
-                                                    {clickedRowData.hergiin_indeks ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Харьяа он</td>
-                                                <td>
-                                                    {clickedRowData.harya_on ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Хуудасны тоо</td>
-                                                <td>
-                                                    {clickedRowData.huudas_too ||
-                                                        "-"}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div className="px-4 pb-4 d-flex flex-wrap gap-2 justify-content-end">
-                                {!showShiljuuleh ? (
-                                    <>
-                                        <button
-                                            className="btn btn-outline-danger d-flex align-items-center gap-2"
-                                            onClick={() => {
-                                                setShiljuulehMode("delete");
-                                                setShowShiljuuleh(true);
-                                            }}
-                                        >
-                                            <i className="fas fa-trash-alt"></i>
-                                            Устгах жагсаалт болон акт үүсгэх
-                                        </button>
-
-                                        <button
-                                            className="btn btn-success d-flex align-items-center gap-2"
-                                            onClick={() =>
-                                                setShowShiljuuleh(true)
-                                            }
-                                        >
-                                            <i className="fas fa-file-export"></i>{" "}
-                                            Архивт шилжүүлэх болон устгах
-                                        </button>
-
-                                        <button
-                                            className="btn btn-outline-secondary d-flex align-items-center gap-2"
-                                            onClick={() =>
-                                                setShowArchiveModal(false)
-                                            }
-                                        >
-                                            <i className="fas fa-times"></i>{" "}
-                                            Болих
-                                        </button>
-                                    </>
-                                ) : null}
-                            </div>
-
-                            {showShiljuuleh && (
-                                <div className="px-4 pb-4">
-                                    <div className="mb-3">
-                                        <label
-                                            htmlFor="commentInput"
-                                            className="form-label"
-                                        >
-                                            Устгасан буюу архивт шилжүүлсэн
-                                            тухай тэмдэглэл оруулах:
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="commentInput"
-                                            className="form-control"
-                                            placeholder="Тэмдэглэл оруулна уу"
-                                            value={comment}
-                                            onChange={(e) =>
-                                                setComment(e.target.value)
-                                            }
-                                        />
-                                    </div>
-
-                                    <div className="d-flex gap-2 justify-content-end">
-                                        <button
-                                            className="btn btn-success"
-                                            onClick={() => {
-                                                if (!comment.trim()) {
-                                                    Swal.fire({
-                                                        icon: "error",
-                                                        title: "Анхаар!",
-                                                        text: "Тэмдэглэл хоосон байна",
-                                                    });
-                                                    return;
-                                                }
-
-                                                if (!clickedRowData?.id) return;
-
-                                                axios
-                                                    .post(
-                                                        "/archive/BaingaIlt",
-                                                        {
-                                                            id: clickedRowData.id,
-                                                            ustgasan_temdeglel:
-                                                                comment.trim(),
-                                                        }
-                                                    )
-                                                    .then((res) => {
-                                                        Swal.fire({
-                                                            icon: "success",
-                                                            title:
-                                                                res.data.msg ||
-                                                                "Амжилттай хадгалагдлаа",
-                                                        });
-                                                        setShowShiljuuleh(
-                                                            false
-                                                        );
-                                                        setComment("");
-                                                        setShowArchiveModal(
-                                                            false
-                                                        ); // modal хаах
-                                                        refreshTurIlt();
-                                                    })
-                                                    .catch((err) => {
-                                                        Swal.fire({
-                                                            icon: "error",
-                                                            title: "Алдаа гарлаа",
-                                                            text:
-                                                                err.response
-                                                                    ?.data
-                                                                    ?.msg || "",
-                                                        });
-                                                    });
-                                            }}
-                                        >
-                                            Хадгалах
-                                        </button>
-
-                                        <button
-                                            className="btn btn-outline-secondary"
-                                            onClick={() =>
-                                                setShowShiljuuleh(false)
-                                            }
-                                        >
-                                            <i className="fas fa-times"></i>{" "}
-                                            Болих
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="modal-body">
-                                {showShiljuuleh && (
-                                    <BaingaIltShiljuuleh
-                                        setRowsSelected={setRowsSelected}
-                                        refreshTurIlt={refreshTurIlt}
-                                        selectedHumrug={selectedHumrug}
-                                        selectedDans={selectedDans}
-                                        changeDataRow={clickedRowData}
-                                        isEditBtnClick={true}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            )} */}
         </>
     );
 };

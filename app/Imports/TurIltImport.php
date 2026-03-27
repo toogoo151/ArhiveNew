@@ -2,14 +2,14 @@
 
 namespace App\Imports;
 
-use App\Models\BaingaIlt;
+use App\Models\TurIlt;
 use App\Models\Dansburtgel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Maatwebsite\Excel\Concerns\ToModel;
 
 
-class BaingaIltImport implements ToModel
+class TurIltImport implements ToModel
 {
     protected $humrug_id;
     protected $dans_id;
@@ -35,11 +35,11 @@ class BaingaIltImport implements ToModel
         // (<=12 column) dotor
         if (!$isFull) {
 
-            return new BaingaIlt([
-                // 'desk_id' => null,
+            return new TurIlt([
+                'desk_id' => null,
                 'humrug_id' => $this->humrug_id,
                 'dans_id' => $this->dans_id,
-                'hadgalamj_turul' => 0,
+                'hadgalamj_turul' => 2,
                 'hadgalamj_dugaar' => $row[0] ?? null,
                 'hadgalamj_zbn' => isset($row[1]) ? Crypt::encryptString($row[1]) : null,
                 'hergiin_indeks' => $row[2] ?? null,
@@ -56,7 +56,6 @@ class BaingaIltImport implements ToModel
             ]);
         }
 
-
         // (>12 column) buten
 
         $dansId = $row[2] ?? null;
@@ -68,7 +67,7 @@ class BaingaIltImport implements ToModel
         if (!$dans) {
             return null;
         }
-        return new BaingaIlt([
+        return new TurIlt([
             'desk_id' => $row[0] ?? null,
             'humrug_id' => $dans->humrugID,
             'dans_id' => $dans->id,
@@ -93,27 +92,3 @@ class BaingaIltImport implements ToModel
         ]);
     }
 }
-// {
-//     public function model(array $row)
-//     {
-//         return new BaingaIlt([
-//             'desk_id' => $row[0] ?? null,
-//             'humrug_id' => $row[1] ?? null,
-//             'dans_id' => $row[2] ?? null,
-//             'hadgalamj_turul' => $row[3] ?? null,
-//             'hadgalamj_dugaar' => $row[4] ?? null,
-//             'hadgalamj_zbn' =>  isset($row[5]) ? Crypt::encryptString($row[5]) : null,
-//             'hergiin_indeks' => $row[6] ?? null,
-//             'hadgalamj_garchig' =>  isset($row[7]) ? Crypt::encryptString($row[7]) : null,
-//             'harya_on' => $row[8] ?? null,
-//             'on_ehen' => $row[9] ?? null,
-//             'on_suul' => $row[10] ?? null,
-//             'huudas_too' => $row[11] ?? null,
-//             'habsralt_too' => $row[12] ?? null,
-//             'jagsaalt_zuildugaar' => $row[13] ?? null,
-//             'ustgasan_temdeglel' => isset($row[14]) ? Crypt::encryptString($row[14]) : null,
-//             'hn_tailbar' => isset($row[15]) ? Crypt::encryptString($row[15]) : null,
-//             'user_id' => Auth::id(),
-//         ]);
-//     }
-// }

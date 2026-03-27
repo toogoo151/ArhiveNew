@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import BaingaIltsChildEdit from "./BaingaIltsChildEdit";
 import BaingaIltsChildNew from "./BaingaIltsChildNew";
+import "./Index.css";
 
 import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
@@ -16,6 +18,8 @@ const BaingaIltsChild = (props) => {
     const [clickedRowData, setclickedRowData] = useState([]);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
 
     const [showModal] = useState("modal");
 
@@ -27,7 +31,7 @@ const BaingaIltsChild = (props) => {
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshbaingaIltsChild(props.changeDataRow.desk_id);
+        refreshbaingaIltsChild(props.changeDataRow.id);
 
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
@@ -116,7 +120,7 @@ const BaingaIltsChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshbaingaIltsChild(props.changeDataRow.desk_id);
+                        refreshbaingaIltsChild(props.changeDataRow.id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -128,16 +132,38 @@ const BaingaIltsChild = (props) => {
     const importExcel = (file) => {
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("hnID", props.changeDataRow.id);
 
         axios
             .post("/import/BaingaIltsChild", formData)
             .then((res) => {
                 Swal.fire(res.data.msg); // Мэдэгдэл
-                refreshbaingaIltsChild(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+                refreshbaingaIltsChild(props.changeDataRow.id);
             })
             .catch((err) => {
                 Swal.fire("Import алдаа");
             });
+    };
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
     };
 
     const refreshbaingaIltsChild = (id) => {
@@ -159,6 +185,9 @@ const BaingaIltsChild = (props) => {
         length_menu: [10, 20, 50],
         show_filter: true,
         show_pagination: true,
+        responsive: "standard",
+        tableBodyHeight: "500px",
+        tableBodyMaxHeight: "700px",
 
         filename: "Чиглэл",
         button: {
@@ -245,121 +274,272 @@ const BaingaIltsChild = (props) => {
     // ];
     return (
         <>
-            <div className="row clearfix">
-                <div className="info-box">
-                    <div className="col-md-12">
-                        <h1 className="text-center">БАРИМТ БИЧИГ</h1>
-                        <div
-                            style={{
-                                background: "#f1f5f9",
-                                padding: "12px 16px",
-                                borderRadius: "8px",
-                                marginBottom: "16px",
-                                display: "flex",
-                                gap: "40px",
-                                fontWeight: 600,
-                            }}
-                        >
-                            <div>
-                                📁 Дугаар:{" "}
-                                <span style={{ color: "#2563eb" }}>
-                                    {changeDataRow?.hadgalamj_dugaar || "-"}
-                                </span>
-                            </div>
+            {/* <div className="col-md-12 mb-3">
+                    <label htmlFor="bainagiltChildExcel" className="form-label">
+                        Excel Import
+                    </label>
+                    <div className="d-flex align-items-center">
 
-                            <div>
-                                🏷 Хадгаламжийн гарчиг:{" "}
-                                <span style={{ color: "#2563eb" }}>
-                                    {changeDataRow?.hadgalamj_garchig || "-"}
-                                </span>
-                            </div>
+                        <input
+                            type="file"
+                            id="bainagiltChildExcel"
+                            className="form-control form-control-sm me-2"
+                            accept=".xlsx,.xls,.csv"
+                            onChange={(e) => {
+                                if (e.target.files.length)
+                                    setSelectedFile(e.target.files[0]);
+                            }}
+                        />
+
+
+                        {selectedFile && (
+                            <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => {
+                                    importExcel(selectedFile);
+                                    setSelectedFile(null);
+                                    document.getElementById(
+                                        "bainagiltChildExcel"
+                                    ).value = null;
+                                }}
+                            >
+                                Import
+                            </button>
+                        )}
+                    </div>
+                </div> */}
+            <div
+                style={{
+                    background: "#ffffff",
+                    borderRadius: "12px",
+                    border: "1px solid #e2e8f0",
+                    overflow: "hidden", // 🔥 чухал (table тасрахгүй)
+                }}
+            >
+                {/* HEADER */}
+                <div
+                    style={{
+                        padding: "14px 18px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid #e2e8f0",
+                        background: "#f8fafc",
+                    }}
+                >
+                    {/* LEFT */}
+                    <div style={{ display: "flex", gap: "30px" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>📁 Дугаар:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hadgalamj_dugaar || "-"}
+                            </span>
                         </div>
 
-                        <div className="col-md-12 mb-3">
-                            <label
-                                htmlFor="bainagiltChildExcel"
-                                className="form-label"
-                            >
-                                Excel Import
-                            </label>
-                            <div className="d-flex align-items-center">
-                                {/* Файл сонгох input */}
-                                <input
-                                    type="file"
-                                    id="bainagiltChildExcel"
-                                    className="form-control form-control-sm me-2"
-                                    accept=".xlsx,.xls,.csv"
-                                    onChange={(e) => {
-                                        if (e.target.files.length)
-                                            setSelectedFile(e.target.files[0]);
-                                    }}
-                                />
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>🏷 Гарчиг:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hadgalamj_garchig || "-"}
+                            </span>
+                        </div>
+                    </div>
 
-                                {/* Файл сонгогдсон үед л Import товч гарч ирнэ */}
-                                {selectedFile && (
+                    {/* RIGHT */}
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                        }}
+                    >
+                        <span style={{ color: "#64748b" }}>📊 Excel:</span>
+
+                        <input
+                            type="file"
+                            id="BainIltsExcel"
+                            accept=".xlsx,.xls,.csv"
+                            onChange={(e) => {
+                                if (e.target.files.length) {
+                                    setSelectedFile(e.target.files[0]);
+                                }
+                            }}
+                        />
+
+                        {selectedFile && (
+                            <>
+                                <button
+                                    className="btn-preview"
+                                    onClick={() => handlePreview(selectedFile)}
+                                >
+                                    👁
+                                </button>
+
+                                <button
+                                    className="btn-import"
+                                    onClick={() => {
+                                        importExcel(selectedFile);
+                                        setSelectedFile(null);
+                                        document.getElementById(
+                                            "BainIltsExcel"
+                                        ).value = null;
+                                    }}
+                                >
+                                    ⬆ Import
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+                {showPreviewModal && (
+                    <div
+                        className="modal fade show d-block"
+                        style={{
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                        }}
+                    >
+                        <div className="modal-dialog modal-xl">
+                            <div className="modal-content">
+                                <div className="modal-header bg-primary text-white">
+                                    <h5 className="modal-title">
+                                        📊 Excel урьдчилж харах
+                                    </h5>
+
                                     <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={() => {
-                                            importExcel(selectedFile); // Excel импортлох функц дуудна
-                                            setSelectedFile(null); // файлыг цэвэрлэх
-                                            document.getElementById(
-                                                "bainagiltChildExcel"
-                                            ).value = null; // input-ыг цэвэрлэх
+                                        className="btn btn-sm btn-light"
+                                        onClick={() =>
+                                            setShowPreviewModal(false)
+                                        }
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div className="px-3 py-2 border-bottom bg-light d-flex gap-3 flex-wrap">
+                                    <span className="badge bg-primary fs-6">
+                                        📁 Дугаар::{" "}
+                                        {changeDataRow?.hadgalamj_dugaar || "-"}
+                                    </span>
+
+                                    <span className="badge bg-success fs-6">
+                                        📂 Гарчиг:{" "}
+                                        {changeDataRow?.hadgalamj_garchig ||
+                                            "-"}
+                                    </span>
+                                </div>
+
+                                <div className="modal-body p-0">
+                                    <div
+                                        style={{
+                                            maxHeight: "60vh",
+                                            overflow: "auto",
                                         }}
                                     >
-                                        Import
+                                        <table className="table table-bordered table-hover mb-0">
+                                            <thead
+                                                className="table-dark"
+                                                style={{
+                                                    position: "sticky",
+                                                    top: 0,
+                                                    zIndex: 1,
+                                                }}
+                                            >
+                                                <tr>
+                                                    {excelHeaders.map(
+                                                        (col, i) => (
+                                                            <th
+                                                                key={i}
+                                                                className="text-nowrap"
+                                                            >
+                                                                {col.label}
+                                                            </th>
+                                                        )
+                                                    )}
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                {previewData
+                                                    .slice(1)
+                                                    .map((row, i) => (
+                                                        <tr key={i}>
+                                                            {excelHeaders.map(
+                                                                (col, j) => (
+                                                                    <td
+                                                                        key={j}
+                                                                        className="text-nowrap"
+                                                                    >
+                                                                        {row[
+                                                                            j
+                                                                        ] ?? ""}
+                                                                    </td>
+                                                                )
+                                                            )}
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        onClick={() =>
+                                            setShowPreviewModal(false)
+                                        }
+                                    >
+                                        Хаах
                                     </button>
-                                )}
+                                </div>
                             </div>
                         </div>
-
-                        <MUIDatatable
-                            data={getbaingaIltsChild}
-                            setdata={setbaingaIltsChild}
-                            columns={columns}
-                            onRowClick={(rowData, rowMeta) => {
-                                const selectedRow =
-                                    getbaingaIltsChild[rowMeta.dataIndex];
-                                setclickedRowData(selectedRow); // 🔥 ЭНД гол set
-                            }}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName={"btn btn-success"}
-                                    modelType={"modal"}
-                                    dataTargetID={"#baingaIltsChildNew"}
-                                    spanIconClassName={"fas fa-solid fa-plus"}
-                                    buttonName={"Нэмэх"}
-                                    excelDownloadData={getbaingaIltsChild}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={isRestricted}
-                                    isHideEdit={isRestricted}
-                                />
-                            }
-                            btnEdit={btnEdit}
-                            modelType={showModal}
-                            editdataTargetID={"#baingaIltsChildEdit"}
-                            btnDelete={btnDelete}
-                            avgColumnIndex={-1}
-                            avgColumnName={"email"}
-                            avgName={"Дундаж: "}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={isRestricted}
-                            isHideEdit={isRestricted}
-                            showArchive={false}
-                        />
-                        <BaingaIltsChildNew
-                            _parentID={props.changeDataRow.desk_id}
-                            refreshbaingaIltsChild={refreshbaingaIltsChild}
-                        />
-                        <BaingaIltsChildEdit
-                            setRowsSelected={setRowsSelected}
-                            refreshbaingaIltsChild={refreshbaingaIltsChild}
-                            changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.desk_id}
-                            isEditBtnClick={isEditBtnClick}
-                        />
                     </div>
+                )}
+                <div style={{ padding: "10px" }}>
+                    <MUIDatatable
+                        data={getbaingaIltsChild}
+                        setdata={setbaingaIltsChild}
+                        columns={columns}
+                        onRowClick={(rowData, rowMeta) => {
+                            const selectedRow =
+                                getbaingaIltsChild[rowMeta.dataIndex];
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+                        }}
+                        costumToolbar={
+                            <CustomToolbar
+                                btnClassName={"btn btn-success"}
+                                modelType={"modal"}
+                                dataTargetID={"#baingaIltsChildNew"}
+                                spanIconClassName={"fas fa-solid fa-plus"}
+                                buttonName={"Нэмэх"}
+                                excelDownloadData={getbaingaIltsChild}
+                                excelHeaders={excelHeaders}
+                                isHideInsert={true}
+                            />
+                        }
+                        btnEdit={btnEdit}
+                        modelType={showModal}
+                        editdataTargetID={"#baingaIltsChildEdit"}
+                        btnDelete={btnDelete}
+                        avgColumnIndex={-1}
+                        avgColumnName={"email"}
+                        avgName={"Дундаж: "}
+                        getRowsSelected={getRowsSelected}
+                        setRowsSelected={setRowsSelected}
+                        isHideDelete={true}
+                        isHideEdit={true}
+                        showArchive={false}
+                    />
+                    <BaingaIltsChildNew
+                        _parentID={props.changeDataRow.id}
+                        refreshbaingaIltsChild={refreshbaingaIltsChild}
+                    />
+                    <BaingaIltsChildEdit
+                        setRowsSelected={setRowsSelected}
+                        refreshbaingaIltsChild={refreshbaingaIltsChild}
+                        changeDataRow={clickedRowData}
+                        parentID={props.changeDataRow.id}
+                        isEditBtnClick={isEditBtnClick}
+                    />
                 </div>
             </div>
         </>

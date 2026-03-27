@@ -297,7 +297,11 @@ const UserNew = ({ refreshUser }) => {
                                                     "salbar",
                                                     selected
                                                         ? selected.value
-                                                        : ""
+                                                        : null,
+                                                    {
+                                                        shouldValidate: true,
+                                                        shouldDirty: true,
+                                                    }
                                                 )
                                             }
                                             placeholder="Сонгоно уу"

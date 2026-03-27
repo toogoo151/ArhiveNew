@@ -62,6 +62,7 @@ use App\Models\ArhivTovchlolModel;
 use App\Models\Retention;
 
 
+use Illuminate\Http\Request;
 
 
 
@@ -239,8 +240,7 @@ Route::post("/delete/humrug", [HumrugController::class, "DeleteHuthereg"]);
 Route::post("/new/humrug", [HumrugController::class, "NewHumrug"])
     ->middleware('auth');
 Route::post("/edit/humrug", [HumrugController::class, "EditHumrug"])
-    ->middleware('auth');
-;
+    ->middleware('auth');;
 Route::get("/get/humrugType", [HumrugController::class, "HumrugType"]);
 //Хөмрөг end
 
@@ -276,9 +276,9 @@ Route::post('/import/dansburtgel', [DansController::class, 'importDansburtgel'])
 //Данс бүртгэл end
 
 // Байнга хадгалах Илт start
-Route::get("/get/BaingaIlt", function () {
+Route::get("/get/BaingaIlt", function (Request $request) {
     $baingaIlt = new BaingaIlt();
-    return $baingaIlt->getBaingaIlt();
+    return $baingaIlt->getBaingaIlt($request);
 });
 
 Route::get("/get/Dansburtgel/{humrugID}", function ($humrugID) {
@@ -313,7 +313,6 @@ Route::post("/new/baingaIltChild", [BaingaIltChildController::class, "NewChildBa
 Route::post("/edit/baingaIltChild", [BaingaIltChildController::class, "EditChildBaingIlt"])
     ->middleware('auth');
 Route::post("/delete/baingaIltChildFile", [BaingaIltChildController::class, "DeleteChildFile"]);
-
 Route::post('/import/BaingaIltsChild', [BaingaIltChildController::class, 'importBaingaIltsChild']);
 
 //Childtable Байнга хадгалах барим бичиг end
@@ -359,9 +358,6 @@ Route::post("/edit/baingaNuutsChild", [BaingaNuutsChildController::class, "EditC
     ->middleware('auth');
 Route::post("/delete/baingaNuutsChildFile", [BaingaNuutsChildController::class, "DeleteNuutsChildFile"]);
 Route::post('/import/BaingaNuutsChild', [BaingaNuutsChildController::class, 'importBaingaNuutsChild']);
-
-
-
 //Байнга хадгалах нууц баримт бичиг child end
 
 
@@ -381,6 +377,15 @@ Route::post("/new/TurNuuts", [TurNuutsController::class, "NewTurNuuts"])
     ->middleware('auth');
 Route::post("/edit/TurNuuts", [TurNuutsController::class, "EditTurNuuts"])
     ->middleware('auth');
+Route::post("/import/TurNuuts", [TurNuutsController::class, "importTurNuuts"]);
+
+
+Route::post("/archive/TurNuuts", [TurNuutsController::class, "ArchiveTurNuuts"]);
+
+Route::get("/get/archiveTurNuuts", function () {
+    $ArchiveTurNuuts = new TurNuuts();
+    return $ArchiveTurNuuts->getArchiveTurNuuts();
+});
 //Түр хадгалах Нууц end
 
 //Түр хадгалах нууц баримт бичиг child start
@@ -391,6 +396,8 @@ Route::post("/new/TurNuutsChild", [TurNuutsChildController::class, "NewChildTurN
 Route::post("/edit/TurNuutsChild", [TurNuutsChildController::class, "EditChildTurNuuts"])
     ->middleware('auth');
 Route::post("/delete/TurNuutsChildFile", [TurNuutsChildController::class, "DeleteTurNuutsChildFile"]);
+Route::post('/import/TurNuutsChild', [TurNuutsChildController::class, 'importTurNuutsChild']);
+
 //Түр хадгалах нууц баримт бичиг child end
 
 
@@ -426,6 +433,9 @@ Route::get("/get/ArchiveTurIlt", function () {
     $ArchiveTurIlt = new TurIlt();
     return $ArchiveTurIlt->getArchiveTurIlt();
 });
+Route::post("/import/turIlt", [TurIltController::class, "importTurIlt"]);
+
+
 // arhive shiljuuleh end
 
 //Childtable Түр хадгалах баримт бичиг start Илт
@@ -436,6 +446,8 @@ Route::post("/new/TurIltChild", [TurIltChildController::class, "NewChildTurIlt"]
 Route::post("/edit/TurIltChild", [TurIltChildController::class, "EditChildTurIlt"])
     ->middleware('auth');
 Route::post("/delete/TurIltChildFile", [TurIltChildController::class, "DeleteChildFile"]);
+Route::post("/import/TurIltChild", [TurIltChildController::class, "importTurIltChild"]);
+
 //Childtable Түр хадгалах баримт бичиг end Илт
 
 
@@ -501,6 +513,8 @@ Route::post("/new/DalanJilSanhuu", [DalanJilSanhuuController::class, "NewDalanJi
     ->middleware('auth');
 Route::post("/edit/DalanJilSanhuu", [DalanJilSanhuuController::class, "EditDalanJilSanhuu"])
     ->middleware('auth');
+Route::post("/import/DalanJilSanhuu", [DalanJilSanhuuController::class, "ImportJilSanhuu"]);
+
 //Dalan jil Sanhuu  end
 
 
@@ -512,6 +526,8 @@ Route::post("/new/DalanJilsanhuuChild", [DalanJilSanhuuChildController::class, "
 Route::post("/edit/DalanJilsanhuuChild", [DalanJilSanhuuChildController::class, "EditDalanJilsanhuuChild"])
     ->middleware('auth');
 Route::post("/delete/DalanJilsanhuuChildFile", [DalanJilSanhuuChildController::class, "DeleteChildFile"]);
+Route::post("/import/DalanSanhuuChild", [DalanJilSanhuuChildController::class, "ChildDalanJilSanhuuImport"]);
+
 //Dalan jil Sanhuu child end
 
 //Dalan jil Sanhuu archive start
@@ -606,6 +622,8 @@ Route::get('/get/hugatsaaTurul', function () {
     $RetentionPeriod = new Retention();
     return $RetentionPeriod->getRetentionTuslah();
 });
+
+
 
 
 // Jagsaalt TURUL END

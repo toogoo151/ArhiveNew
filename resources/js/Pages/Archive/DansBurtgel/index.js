@@ -44,12 +44,17 @@ const Index = () => {
         formData.append("file", file);
 
         axios
-            .post("/import/dansburtgel", formData)
+            .post("/import/dansburtgel", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            })
             .then((res) => {
-                Swal.fire(res.data.msg); // Мэдэгдэл
-                refreshDans(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+                Swal.fire(res.data.msg);
+                refreshDans();
             })
             .catch((err) => {
+                console.log(err.response);
                 Swal.fire("Import алдаа");
             });
     };
@@ -253,10 +258,7 @@ const Index = () => {
                                 >
                                     <option value={0}>Сонгоно уу</option>
                                     {getHumrug.map((el) => (
-                                        <option
-                                            key={el.desk_id}
-                                            value={el.desk_id}
-                                        >
+                                        <option key={el.id} value={el.id}>
                                             {el.humrug_ner}
                                         </option>
                                     ))}

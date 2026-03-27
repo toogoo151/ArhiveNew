@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Redirect, Response, File;
-use Illuminate\Support\Str;
+use App\Imports\TurIltImport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Crypt;
 
 class TurIltController extends Controller
 {
@@ -54,8 +56,12 @@ class TurIltController extends Controller
             $insertTurIlt->dans_id = $req->dans_id;
             $insertTurIlt->hadgalamj_dugaar = $req->hadgalamj_dugaar;
             $insertTurIlt->hadgalamj_turul = 2;
-            $insertTurIlt->hadgalamj_garchig = $req->hadgalamj_garchig;
-            $insertTurIlt->hadgalamj_zbn = $req->hadgalamj_zbn;
+
+
+            $insertTurIlt->hadgalamj_garchig = Crypt::encryptString($req->hadgalamj_garchig);
+            $insertTurIlt->hadgalamj_zbn = Crypt::encryptString($req->hadgalamj_zbn);
+            $insertTurIlt->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
+
             $insertTurIlt->hergiin_indeks = $req->hergiin_indeks;
             $insertTurIlt->harya_on = $req->harya_on;
             $insertTurIlt->on_ehen = $req->on_ehen;
@@ -63,8 +69,7 @@ class TurIltController extends Controller
             $insertTurIlt->huudas_too = $req->huudas_too;
             $insertTurIlt->habsralt_too = $req->habsralt_too;
             $insertTurIlt->jagsaalt_zuildugaar = $req->jagsaalt_zuildugaar;
-            $insertTurIlt->hn_tailbar = $req->hn_tailbar;
-            // $insertTurIlt->dans_tailbar = $req->dans_tailbar;
+
             $insertTurIlt->user_id = Auth::id();
             $insertTurIlt->save();
             return response([
@@ -85,10 +90,14 @@ class TurIltController extends Controller
             $edit = TurIlt::find($req->id);
             $edit->humrug_id = $req->humrug_id;
             $edit->dans_id = $req->dans_id;
-            $edit->hadgalamj_dugaar = $req->hadgalamj_dugaar;
             $edit->hadgalamj_turul = 2;
-            $edit->hadgalamj_garchig = $req->hadgalamj_garchig;
-            $edit->hadgalamj_zbn = $req->hadgalamj_zbn;
+            $edit->hadgalamj_dugaar = $req->hadgalamj_dugaar;
+
+
+            $edit->hadgalamj_garchig = Crypt::encryptString($req->hadgalamj_garchig);
+            $edit->hadgalamj_zbn = Crypt::encryptString($req->hadgalamj_zbn);
+            $edit->hn_tailbar = Crypt::encryptString($req->hn_tailbar);
+
             $edit->hergiin_indeks = $req->hergiin_indeks;
             $edit->harya_on = $req->harya_on;
             $edit->on_ehen = $req->on_ehen;
@@ -96,7 +105,6 @@ class TurIltController extends Controller
             $edit->huudas_too = $req->huudas_too;
             $edit->habsralt_too = $req->habsralt_too;
             $edit->jagsaalt_zuildugaar = $req->jagsaalt_zuildugaar;
-            $edit->hn_tailbar = $req->hn_tailbar;
             $edit->user_id = Auth::id();
             $edit->save();
 
@@ -118,7 +126,7 @@ class TurIltController extends Controller
             foreach ($req->data as $item) {
                 $archive = TurIlt::find($item['id']);
                 if ($archive) {
-                    $archive->ustgasan_temdeglel = $item['ustgasan_temdeglel'];
+                    $archive->ustgasan_temdeglel = Crypt::encryptString($item['ustgasan_temdeglel']);
                     $archive->save();
                 }
             }
@@ -133,5 +141,21 @@ class TurIltController extends Controller
                 "msg" => "Алдаа гарлаа."
             ], 500);
         }
+    }
+
+    public function importTurIlt(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new TurIltImport(
+            $request->humrug_id,
+            $request->dans_id
+        ), $request->file('file'));
+
+        return response()->json([
+            'msg' => 'Амжилттай импорт хийлээ'
+        ]);
     }
 }

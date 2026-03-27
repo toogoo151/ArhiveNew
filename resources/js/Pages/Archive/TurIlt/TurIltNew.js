@@ -38,16 +38,16 @@ const TurIltNew = ({ refreshTurIlt, selectedHumrug, selectedDans }) => {
     const formSchema = Yup.object().shape({
         hadgalamj_dugaar: Yup.string().required("Дугаар оруулна уу"),
         hadgalamj_garchig: Yup.string().required("Гарчиг оруулна уу"),
-        hadgalamj_zbn: Yup.string().required("ЗБ нэгжийн нэр оруулна уу"),
-        hergiin_indeks: Yup.string().required("Хэргийн индекс оруулна уу"),
-        harya_on: Yup.string().required("Харьяа он оруулна уу"),
-        on_ehen: Yup.string().required("Эхэлсэн он,сар,өдөр оруулна уу"),
-        on_suul: Yup.string().required("Дууссан он,сар,өдөр оруулна уу"),
-        huudas_too: Yup.string().required("Хуудасны тоо оруулна уу"),
-        habsralt_too: Yup.string().required("Хавсралтын тоо оруулна уу"),
-        jagsaalt_zuildugaar: Yup.string().required(
-            "Хадгалах хугацааны жагсаалтын зүйлийн дугаар оруулна уу"
-        ),
+        // hadgalamj_zbn: Yup.string().required("ЗБ нэгжийн нэр оруулна уу"),
+        // hergiin_indeks: Yup.string().required("Хэргийн индекс оруулна уу"),
+        // harya_on: Yup.string().required("Харьяа он оруулна уу"),
+        // on_ehen: Yup.string().required("Эхэлсэн он,сар,өдөр оруулна уу"),
+        // on_suul: Yup.string().required("Дууссан он,сар,өдөр оруулна уу"),
+        // huudas_too: Yup.string().required("Хуудасны тоо оруулна уу"),
+        // habsralt_too: Yup.string().required("Хавсралтын тоо оруулна уу"),
+        // jagsaalt_zuildugaar: Yup.string().required(
+        //     "Хадгалах хугацааны жагсаалтын зүйлийн дугаар оруулна уу"
+        // ),
         hn_tailbar: Yup.string().nullable(),
     });
     const {

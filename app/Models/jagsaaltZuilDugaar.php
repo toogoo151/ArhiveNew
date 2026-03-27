@@ -49,13 +49,12 @@ class jagsaaltZuilDugaar extends Model
                 ->get()
                 ->map(function ($item) {
                     try {
-                        $item->RetName = Crypt::decryptString($item->RetName);
+                        $item->RetName = Crypt::ecryptString($item->RetName);
                     } catch (\Exception $e) {
                         $item->RetName = null; // эсвэл хуучнаар нь үлдээж болно
                     }
                     return $item;
                 });
-
             return $jagsaalt;
 
         } catch (\Throwable $th) {

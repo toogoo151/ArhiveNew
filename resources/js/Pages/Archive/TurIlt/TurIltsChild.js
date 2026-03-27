@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+import "./Index.css";
 import TurIltsChildEdit from "./TurIltsChildEdit";
 import TurIltsChildNew from "./TurIltsChildNew";
 
@@ -13,9 +15,11 @@ import Spinner from "../../../Spinner";
 const TurIltsChild = (props) => {
     const [getTurtIltsChild, setTurIltsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
-    const [clickedRowData, setclickedRowData] = useState([]);
+    const [clickedRowData, setclickedRowData] = useState(null);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
-
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showModal] = useState("modal");
     const { tubshin, loading, error } = useAuthPermission();
 
@@ -24,14 +28,14 @@ const TurIltsChild = (props) => {
     // }, []);
 
     useEffect(() => {
-        // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurIltsChild(props.changeDataRow.desk_id);
+        if (props.changeDataRow?.id) {
+            refreshTurIltsChild(props.changeDataRow.id);
+        }
 
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
-        setclickedRowData([]);
+        setclickedRowData(null);
         setRowsSelected([]);
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+    }, [props.changeDataRow?.id]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -45,7 +49,7 @@ const TurIltsChild = (props) => {
         setclickedRowData(rowData); // 🔥 ЭНД өгөгдөл дамжуулна
         setIsEditBtnClick(true);
     };
-    const { changeDataRow } = props;
+    const { changeDataRow = {} } = props;
 
     // Get current authenticated user's tubshin on mount
     if (loading)
@@ -79,13 +83,48 @@ const TurIltsChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshTurIltsChild(props.changeDataRow.desk_id);
+                        refreshTurIltsChild(props.changeDataRow.id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
                     });
             }
         });
+    };
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+            .post("/import/TurIltChild", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshTurIltsChild(props.changeDataRow.id);
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
     };
     const refreshTurIltsChild = (id) => {
         axios
@@ -94,7 +133,7 @@ const TurIltsChild = (props) => {
             })
             .then((res) => {
                 // console.log(res.data);
-                setTurIltsChild(res.data);
+                setTurIltsChild(Array.isArray(res.data) ? res.data : []);
             })
             .catch((err) => {
                 console.log(err);
@@ -125,10 +164,10 @@ const TurIltsChild = (props) => {
             },
         },
     };
-    const handleChangeNew = (event, data, rowIndex) => {
-        setChangeDataRow(data);
-        setGetDataRowLenght(rowIndex);
-    };
+    // const handleChangeNew = (event, data, rowIndex) => {
+    //     setChangeDataRow(data);
+    //     setGetDataRowLenght(rowIndex);
+    // };
 
     //     {
     //         text: "№",
@@ -192,7 +231,242 @@ const TurIltsChild = (props) => {
     // ];
     return (
         <>
-            <div className="row clearfix">
+            <div
+                style={{
+                    background: "#ffffff",
+                    borderRadius: "12px",
+                    border: "1px solid #e2e8f0",
+                    overflow: "hidden", // 🔥 чухал (table тасрахгүй)
+                }}
+            >
+                {/* HEADER */}
+                <div
+                    style={{
+                        padding: "14px 18px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid #e2e8f0",
+                        background: "#f8fafc",
+                    }}
+                >
+                    {/* LEFT */}
+                    <div style={{ display: "flex", gap: "30px" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>📁 Дугаар:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hadgalamj_dugaar || "-"}
+                            </span>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>🏷 Гарчиг:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hadgalamj_garchig || "-"}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                        }}
+                    >
+                        <span style={{ color: "#64748b" }}>📊 Excel:</span>
+
+                        <input
+                            type="file"
+                            id="BainIltsExcel"
+                            accept=".xlsx,.xls,.csv"
+                            onChange={(e) => {
+                                if (e.target.files.length) {
+                                    setSelectedFile(e.target.files[0]);
+                                }
+                            }}
+                        />
+
+                        {selectedFile && (
+                            <>
+                                <button
+                                    className="btn-preview"
+                                    onClick={() => handlePreview(selectedFile)}
+                                >
+                                    👁
+                                </button>
+
+                                <button
+                                    className="btn-import"
+                                    onClick={() => {
+                                        importExcel(selectedFile);
+                                        setSelectedFile(null);
+                                        document.getElementById(
+                                            "BainIltsExcel"
+                                        ).value = null;
+                                    }}
+                                >
+                                    ⬆ Import
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+                {showPreviewModal && (
+                    <div
+                        className="modal fade show d-block"
+                        style={{
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                        }}
+                    >
+                        <div className="modal-dialog modal-xl">
+                            <div className="modal-content">
+                                <div className="modal-header bg-primary text-white">
+                                    <h5 className="modal-title">
+                                        📊 Excel урьдчилж харах
+                                    </h5>
+
+                                    <button
+                                        className="btn btn-sm btn-light"
+                                        onClick={() =>
+                                            setShowPreviewModal(false)
+                                        }
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div className="px-3 py-2 border-bottom bg-light d-flex gap-3 flex-wrap">
+                                    <span className="badge bg-primary fs-6">
+                                        📁 Дугаар::{" "}
+                                        {changeDataRow?.hadgalamj_dugaar || "-"}
+                                    </span>
+
+                                    <span className="badge bg-success fs-6">
+                                        📂 Гарчиг:{" "}
+                                        {changeDataRow?.hadgalamj_garchig ||
+                                            "-"}
+                                    </span>
+                                </div>
+
+                                <div className="modal-body p-0">
+                                    <div
+                                        style={{
+                                            maxHeight: "60vh",
+                                            overflow: "auto",
+                                        }}
+                                    >
+                                        <table className="table table-bordered table-hover mb-0">
+                                            <thead
+                                                className="table-dark"
+                                                style={{
+                                                    position: "sticky",
+                                                    top: 0,
+                                                    zIndex: 1,
+                                                }}
+                                            >
+                                                <tr>
+                                                    {excelHeaders.map(
+                                                        (col, i) => (
+                                                            <th
+                                                                key={i}
+                                                                className="text-nowrap"
+                                                            >
+                                                                {col.label}
+                                                            </th>
+                                                        )
+                                                    )}
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                {previewData
+                                                    .slice(1)
+                                                    .map((row, i) => (
+                                                        <tr key={i}>
+                                                            {excelHeaders.map(
+                                                                (col, j) => (
+                                                                    <td
+                                                                        key={j}
+                                                                        className="text-nowrap"
+                                                                    >
+                                                                        {row[
+                                                                            j
+                                                                        ] ?? ""}
+                                                                    </td>
+                                                                )
+                                                            )}
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        onClick={() =>
+                                            setShowPreviewModal(false)
+                                        }
+                                    >
+                                        Хаах
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <div style={{ padding: "10px" }}>
+                    <MUIDatatable
+                        data={getTurtIltsChild}
+                        setdata={setTurIltsChild}
+                        columns={columns}
+                        onRowClick={(rowData, rowMeta) => {
+                            const selectedRow =
+                                getTurtIltsChild[rowMeta.dataIndex];
+                            setclickedRowData(selectedRow);
+                        }}
+                        costumToolbar={
+                            <CustomToolbar
+                                btnClassName={"btn btn-success"}
+                                modelType={"modal"}
+                                dataTargetID={"#turIltsChildNew"}
+                                spanIconClassName={"fas fa-solid fa-plus"}
+                                buttonName={"Нэмэх"}
+                                excelDownloadData={getTurtIltsChild}
+                                excelHeaders={excelHeaders}
+                                isHideInsert={isRestricted}
+                                isHideEdit={isRestricted}
+                            />
+                        }
+                        btnEdit={btnEdit}
+                        modelType={showModal}
+                        editdataTargetID={"#turIltsChildEdit"}
+                        btnDelete={btnDelete}
+                        avgColumnIndex={-1}
+                        avgColumnName={"email"}
+                        avgName={"Дундаж: "}
+                        getRowsSelected={getRowsSelected}
+                        setRowsSelected={setRowsSelected}
+                        isHideDelete={isRestricted}
+                        isHideEdit={isRestricted}
+                        showArchive={false}
+                    />
+                    <TurIltsChildNew
+                        _parentID={props.changeDataRow.id}
+                        refreshTurIltsChild={refreshTurIltsChild}
+                    />
+                    <TurIltsChildEdit
+                        setRowsSelected={setRowsSelected}
+                        refreshTurIltsChild={refreshTurIltsChild}
+                        changeDataRow={clickedRowData}
+                        parentID={props.changeDataRow.id}
+                        isEditBtnClick={isEditBtnClick}
+                    />
+                </div>
+            </div>
+            {/* <div className="row clearfix">
                 <div className="info-box">
                     <div className="col-md-12">
                         <h1 className="text-center">Баримт бичиг</h1>
@@ -221,6 +495,42 @@ const TurIltsChild = (props) => {
                                 </span>
                             </div>
                         </div>
+                        <div className="col-md-12 mb-3">
+                            <label
+                                htmlFor="turIltsChildExcel"
+                                className="form-label"
+                            >
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+
+                                <input
+                                    type="file"
+                                    id="turIltsChildExcel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile);
+                                            setSelectedFile(null);
+                                            document.getElementById(
+                                                "turIltsChildExcel"
+                                            ).value = null;
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         <MUIDatatable
                             data={getTurtIltsChild}
                             setdata={setTurIltsChild}
@@ -228,7 +538,7 @@ const TurIltsChild = (props) => {
                             onRowClick={(rowData, rowMeta) => {
                                 const selectedRow =
                                     getTurtIltsChild[rowMeta.dataIndex];
-                                setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+                                setclickedRowData(selectedRow);
                             }}
                             costumToolbar={
                                 <CustomToolbar
@@ -257,19 +567,19 @@ const TurIltsChild = (props) => {
                             showArchive={false}
                         />
                         <TurIltsChildNew
-                            _parentID={props.changeDataRow.desk_id}
+                            _parentID={props.changeDataRow.id}
                             refreshTurIltsChild={refreshTurIltsChild}
                         />
                         <TurIltsChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshTurIltsChild={refreshTurIltsChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.desk_id}
+                            parentID={props.changeDataRow.id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };
