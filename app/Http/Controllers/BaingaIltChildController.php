@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 // use Redirect, Response, File;
 use Illuminate\Support\Facades\File;
-
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\BaingaIltChildImport;
 use App\Log\BaingaIltChildLog;
+use App\Models\User;
+
 
 
 
@@ -22,11 +23,19 @@ use App\Log\BaingaIltChildLog;
 class BaingaIltChildController extends Controller
 {
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
     public function ChildBaingIlt(Request $req)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
             $query = BaingaIltChild::where("hnID", $req->_parentID)
-                ->where("user_id", Auth::id());
+                // ->where("user_id", Auth::id());
+                ->whereIn("db_arhivbaingilt.user_id", $sharedUserIds);
 
             // 🔹 FILTER (шаардлагатай бол нэмнэ)
             if ($req->barimt_ner) {

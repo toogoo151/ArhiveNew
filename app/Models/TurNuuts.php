@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class TurNuuts extends Model
 {
@@ -35,6 +36,14 @@ class TurNuuts extends Model
         'hn_tailbar',
         'user_id',
     ];
+
+
+
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
 
     // protected static function booted()
     // {
@@ -69,6 +78,7 @@ class TurNuuts extends Model
     public function getArchiveTurNuuts()
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
 
             $ArchiveturNuuts = DB::table("db_arhivhnnuuts")
                 ->select(
@@ -102,7 +112,7 @@ class TurNuuts extends Model
                     )
                         ->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->where("db_arhivhnnuuts.user_id", Auth::id())
+                ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
                 ->where("hn_turul", "=", "2")
                 ->whereNotNull("db_arhivhnnuuts.ustgasan_temdeglel")
                 ->where("db_arhivhnnuuts.ustgasan_temdeglel", "!=", "")
@@ -235,8 +245,10 @@ class TurNuuts extends Model
     public function getTurNuuts(Request $request)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $query = DB::table("db_arhivhnnuuts")
-                ->where("db_arhivhnnuuts.user_id", Auth::id())
+                ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivhnnuuts.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
@@ -372,10 +384,12 @@ class TurNuuts extends Model
     public function getDansburtgelByTurNuutsHumrug($humrugID)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $dans = DB::table("db_arhivdans")
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
-                ->where("db_arhivdans.user_id", Auth::id())
+                ->whereIn("db_arhivdans.user_id", $sharedUserIds)
                 ->select(
                     "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",

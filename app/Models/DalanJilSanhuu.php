@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class DalanJilSanhuu extends Model
 {
@@ -45,11 +46,18 @@ class DalanJilSanhuu extends Model
     //     });
     // }
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
     public function getDalanJilSanhuu(Request $request)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
             $query = DB::table("db_arhivbaingahad")
-                ->where("db_arhivbaingahad.user_id", Auth::id())
+                ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
@@ -145,10 +153,12 @@ class DalanJilSanhuu extends Model
     public function DalanJilSanhuuByHumrug($humrugID)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $dans = DB::table("db_arhivdans")
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
-                ->where("db_arhivdans.user_id", Auth::id())
+                ->whereIn("db_arhivdans.user_id", $sharedUserIds)
                 ->select(
                     "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",
@@ -235,8 +245,10 @@ class DalanJilSanhuu extends Model
     public function getArchiveDalanJilSanhuu()
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $baingaIlt = DB::table("db_arhivbaingahad")
-                ->where("db_arhivbaingahad.user_id", Auth::id())
+                ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(

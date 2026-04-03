@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\User;
+
 
 class jagsaaltZuilDugaar extends Model
 {
@@ -26,21 +28,29 @@ class jagsaaltZuilDugaar extends Model
         'tobchlol',
     ];
 
-    protected static function booted()
+    // protected static function booted()
+    // {
+    //     static::created(function (jagsaaltZuilDugaar $jagsaalt) {
+    //         if (empty($jagsaalt->desk_id)) {
+    //             $jagsaalt->desk_id = $jagsaalt->id;
+    //             $jagsaalt->saveQuietly();
+    //         }
+    //     });
+    // }
+
+    public function scopeForCurrentOrg($query, $user)
     {
-        static::created(function (jagsaaltZuilDugaar $jagsaalt) {
-            if (empty($jagsaalt->desk_id)) {
-                $jagsaalt->desk_id = $jagsaalt->id;
-                $jagsaalt->saveQuietly();
-            }
-        });
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
     }
 
     public function getJagsaalt()
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $jagsaalt = DB::table("jagsaaltzuildugaar")
-                ->where("jagsaaltzuildugaar.userID", Auth::id())
+                ->whereIn("jagsaaltzuildugaar.userID", $sharedUserIds)
                 ->orderByDesc("jagsaaltzuildugaar.id")
                 ->leftjoin("jagsaalt_turul", "jagsaalt_turul.id", "=", "jagsaaltzuildugaar.jagsaalt_turul")
                 ->join("retention_period", "retention_period.id", "=", "jagsaaltzuildugaar.hugatsaa_turul")

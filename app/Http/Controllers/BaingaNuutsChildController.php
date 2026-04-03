@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Imports\BainganuutsChildImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Log\BaingaIltChildLog;
+use App\Models\User;
 
 
 
@@ -22,11 +23,20 @@ use App\Log\BaingaIltChildLog;
 class BaingaNuutsChildController extends Controller
 {
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
+
     public function ChildBaingaNuuts(Request $req)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $query = BaingaNuutsChild::where("hnID", $req->_parentID)
-                ->where("user_id", Auth::id());
+                ->whereIn("arhivbainga_nuuts.user_id", $sharedUserIds);
 
             // 🔹 FILTER (шаардлагатай бол нэмнэ)
             if ($req->barimt_ner) {

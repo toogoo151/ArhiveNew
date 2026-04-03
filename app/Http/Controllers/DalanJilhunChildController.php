@@ -14,16 +14,24 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\DalanJilHunChildImport;
 use App\Log\BaingaIltChildLog;
-
+use App\Models\User;
 
 class DalanJilhunChildController extends Controller
 {
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
     public function ChildDalanJilhunChild(Request $req)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $query = DalanJilHunChild::where("hnID", $req->_parentID)
-                ->where("user_id", Auth::id());
+                ->whereIn("db_arhivdalanjilhn.user_id", $sharedUserIds);
 
             // 🔹 FILTER (шаардлагатай бол нэмнэ)
             if ($req->barimt_ner) {

@@ -14,18 +14,26 @@ use Illuminate\Support\Facades\Crypt;
 use App\Imports\TurnuutsChildImport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Log\BaingaIltChildLog;
+use App\Models\User;
 
 
 
 
 class TurNuutsChildController extends Controller
 {
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
 
     public function ChildTurNuuts(Request $req)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $query = TurNuutsChild::where("hnID", $req->_parentID)
-                ->where("user_id", Auth::id());
+                ->whereIn("db_arhivturnuuts.user_id", $sharedUserIds);
 
             // 🔹 FILTER (шаардлагатай бол нэмнэ)
             if ($req->barimt_ner) {

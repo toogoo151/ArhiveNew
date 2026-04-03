@@ -45,6 +45,12 @@ class Dansburtgel extends Model
     //     });
     // }
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
 
     public function safeDecrypt($value)
     {
@@ -60,11 +66,11 @@ class Dansburtgel extends Model
     public function getDans()
     {
         try {
-            $userId = Auth::id();
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
 
             $dans = DB::table('db_arhivdans as d')
                 ->join('db_humrug as h', 'h.id', '=', 'd.humrugID')
-                ->where("d.user_id", $userId)
+                ->whereIn("d.user_id", $sharedUserIds)
                 ->select('d.*', 'h.humrug_ner')
                 ->orderByDesc("d.id")
                 ->get()
@@ -93,10 +99,10 @@ class Dansburtgel extends Model
     public function getHumrugs()
     {
         try {
-            $userId = Auth::id();
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
 
             $humrug = DB::table("db_humrug")
-                ->where("db_humrug.userID", "=", $userId)
+                ->whereIn("db_humrug.userID", $sharedUserIds)
                 ->get()
                 ->map(function ($item) {
                     // decrypt хийх

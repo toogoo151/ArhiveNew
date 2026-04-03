@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Http\Request;
+use App\Models\User;
+
 
 class BaingaNuuts extends Model
 {
@@ -35,6 +37,12 @@ class BaingaNuuts extends Model
         'hn_tailbar',
         'user_id',
     ];
+
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
 
     // protected static function booted()
     // {
@@ -68,81 +76,150 @@ class BaingaNuuts extends Model
 
     public function getArchiveBaingNuuts()
     {
+        // try {
+        //     $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
+        //     $baingaNuuts = DB::table("db_arhivhnnuuts")
+        //         ->select(
+        //             "db_arhivhnnuuts.*",
+
+        //             // humrug нэрийг 1 ширхэгээр авах
+        //             DB::raw("(SELECT humrug_ner
+        //       FROM db_humrug
+        //       WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
+        //       LIMIT 1) as humrug_ner"),
+
+        //             // dans нэрийг 1 ширхэгээр авах
+        //             DB::raw("(SELECT dans_ner
+        //       FROM db_arhivdans
+        //       WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
+        //       LIMIT 1) as dans_ner"),
+
+        //             // db_arhivdans доторх dans_baidal утгыг нэмэх
+        //             "db_arhivdans.dans_baidal",
+
+        //             // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
+        //             "db_arhivdans.hadgalah_hugatsaa",
+        //             "jagsaaltzuildugaar.hugatsaa as hugatsaa"
+        //         )
+        //         ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
+        //         ->leftJoin("jagsaaltzuildugaar", function ($join) {
+        //             $join->on(
+        //                 "jagsaaltzuildugaar.barimt_dd",
+        //                 "=",
+        //                 "db_arhivhnnuuts.jagsaalt_zuildugaar"
+        //             )
+        //                 ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds);
+        //         })
+        //         ->where("db_arhivhnnuuts.user_id", Auth::id())
+        //         ->where("hn_turul", "=", "0")
+        //         ->whereNotNull("db_arhivhnnuuts.ustgasan_temdeglel")
+        //         ->where("db_arhivhnnuuts.ustgasan_temdeglel", "!=", "")
+        //         ->orderByDesc("db_arhivhnnuuts.id")
+        //         ->get();
+
+        //     foreach ($baingaNuuts as $row) {
+        //         try {
+        //             if ($row->hn_zbn) {
+        //                 $row->hn_zbn = Crypt::decryptString($row->hn_zbn);
+        //             }
+
+        //             if ($row->hn_garchig) {
+        //                 $row->hn_garchig = Crypt::decryptString($row->hn_garchig);
+        //             }
+
+        //             if ($row->nuuts_zereglel) {
+        //                 $row->nuuts_zereglel = Crypt::decryptString($row->nuuts_zereglel);
+        //             }
+        //             if ($row->hn_tailbar) {
+        //                 $row->hn_tailbar = Crypt::decryptString($row->hn_tailbar);
+        //             }
+        //             if ($row->humrug_ner) {
+        //                 $row->humrug_ner = Crypt::decryptString($row->humrug_ner);
+        //             }
+
+        //             if ($row->dans_ner) {
+        //                 $row->dans_ner = Crypt::decryptString($row->dans_ner);
+        //             }
+
+        //             if ($row->dans_baidal) {
+        //                 $row->dans_baidal = Crypt::decryptString($row->dans_baidal);
+        //             }
+
+        //             if ($row->hadgalah_hugatsaa) {
+        //                 $row->hadgalah_hugatsaa = Crypt::decryptString($row->hadgalah_hugatsaa);
+        //             }
+        //         } catch (\Exception $e) {
+        //             // decrypt алдаа гарвал original утгыг үлдээнэ
+        //         }
+        //     }
+
+        //     return $baingaNuuts;
+        // } catch (\Throwable $th) {
+        //     return response([
+        //         "status" => "error",
+        //         "msg" => "татаж чадсангүй.",
+        //         "error" => $th->getMessage()
+        //     ], 500);
+        // }
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id')->toArray();
+
             $baingaNuuts = DB::table("db_arhivhnnuuts")
-                ->select(
-                    "db_arhivhnnuuts.*",
+                ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
 
-                    // humrug нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT humrug_ner
-              FROM db_humrug
-              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
-              LIMIT 1) as humrug_ner"),
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivhnnuuts.humrug_id")
 
-                    // dans нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT dans_ner
-              FROM db_arhivdans
-              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
-              LIMIT 1) as dans_ner"),
-
-                    // db_arhivdans доторх dans_baidal утгыг нэмэх
-                    "db_arhivdans.dans_baidal",
-
-                    // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
-                    "db_arhivdans.hadgalah_hugatsaa",
-                    "jagsaaltzuildugaar.hugatsaa as hugatsaa"
-                )
                 ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
-                ->leftJoin("jagsaaltzuildugaar", function ($join) {
+
+                ->leftJoin("jagsaaltzuildugaar", function ($join) use ($sharedUserIds) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
                         "=",
                         "db_arhivhnnuuts.jagsaalt_zuildugaar"
                     )
-                        ->where("jagsaaltzuildugaar.userID", Auth::id());
+                        ->whereIn("jagsaaltzuildugaar.userID", $sharedUserIds);
                 })
-                ->where("db_arhivhnnuuts.user_id", Auth::id())
-                ->where("hn_turul", "=", "0")
+
+                ->select(
+                    "db_arhivhnnuuts.*",
+                    "db_humrug.humrug_ner",
+                    "db_arhivdans.dans_ner",
+                    "db_arhivdans.dans_baidal",
+                    "db_arhivdans.hadgalah_hugatsaa",
+                    "jagsaaltzuildugaar.hugatsaa as hugatsaa"
+                )
+
+                ->where("hn_turul", "0")
+
                 ->whereNotNull("db_arhivhnnuuts.ustgasan_temdeglel")
                 ->where("db_arhivhnnuuts.ustgasan_temdeglel", "!=", "")
+
                 ->orderByDesc("db_arhivhnnuuts.id")
                 ->get();
 
-            foreach ($baingaNuuts as $row) {
-                try {
-                    if ($row->hn_zbn) {
-                        $row->hn_zbn = Crypt::decryptString($row->hn_zbn);
+            // 🔹 DECRYPT (clean version)
+            $baingaNuuts->transform(function ($row) {
+                $safeDecrypt = function ($val) {
+                    if (!$val) return $val;
+                    try {
+                        return Crypt::decryptString($val);
+                    } catch (\Exception $e) {
+                        return $val;
                     }
+                };
 
-                    if ($row->hn_garchig) {
-                        $row->hn_garchig = Crypt::decryptString($row->hn_garchig);
-                    }
+                $row->hn_zbn = $safeDecrypt($row->hn_zbn);
+                $row->hn_garchig = $safeDecrypt($row->hn_garchig);
+                $row->nuuts_zereglel = $safeDecrypt($row->nuuts_zereglel);
+                $row->hn_tailbar = $safeDecrypt($row->hn_tailbar);
+                $row->humrug_ner = $safeDecrypt($row->humrug_ner);
+                $row->dans_ner = $safeDecrypt($row->dans_ner);
+                $row->dans_baidal = $safeDecrypt($row->dans_baidal);
+                $row->hadgalah_hugatsaa = $safeDecrypt($row->hadgalah_hugatsaa);
 
-                    if ($row->nuuts_zereglel) {
-                        $row->nuuts_zereglel = Crypt::decryptString($row->nuuts_zereglel);
-                    }
-                    if ($row->hn_tailbar) {
-                        $row->hn_tailbar = Crypt::decryptString($row->hn_tailbar);
-                    }
-                    if ($row->humrug_ner) {
-                        $row->humrug_ner = Crypt::decryptString($row->humrug_ner);
-                    }
-
-                    if ($row->dans_ner) {
-                        $row->dans_ner = Crypt::decryptString($row->dans_ner);
-                    }
-
-                    if ($row->dans_baidal) {
-                        $row->dans_baidal = Crypt::decryptString($row->dans_baidal);
-                    }
-
-                    if ($row->hadgalah_hugatsaa) {
-                        $row->hadgalah_hugatsaa = Crypt::decryptString($row->hadgalah_hugatsaa);
-                    }
-                } catch (\Exception $e) {
-                    // decrypt алдаа гарвал original утгыг үлдээнэ
-                }
-            }
+                return $row;
+            });
 
             return $baingaNuuts;
         } catch (\Throwable $th) {
@@ -243,8 +320,10 @@ class BaingaNuuts extends Model
     public function getBaingaNuuts(Request $request)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $query = DB::table("db_arhivhnnuuts")
-                ->where("db_arhivhnnuuts.user_id", Auth::id())
+                ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivhnnuuts.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
@@ -438,10 +517,12 @@ class BaingaNuuts extends Model
     public function getDansburtgelByNuutsHumrug($humrugID)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
             $dans = DB::table("db_arhivdans")
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivdans.humrugID")
                 ->where("db_arhivdans.humrugID", $humrugID)
-                ->where("db_arhivdans.user_id", Auth::id())
+                ->whereIn("db_arhivdans.user_id", $sharedUserIds)
+                // ->where("db_arhivdans.user_id", Auth::id())
                 ->select(
                     "db_arhivdans.id as id",
                     "db_arhivdans.dans_dugaar",

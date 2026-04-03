@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\User;
+
 
 class SedevZuiModel extends Model
 {
@@ -21,11 +23,21 @@ class SedevZuiModel extends Model
         'zaagch_tailal'
     ];
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
     public function getSedevZui()
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $sedev = DB::table("arhivsedevzaagch")
-                ->where("arhivsedevzaagch.userID", Auth::id())
+                // ->where("arhivsedevzaagch.userID", Auth::id())
+                ->whereIn("arhivsedevzaagch.userID", $sharedUserIds)
+
                 ->orderByDesc("arhivsedevzaagch.id")
                 ->leftJoin("db_humrug", "db_humrug.id", "=", "arhivsedevzaagch.humrug_id")
                 ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "arhivsedevzaagch.dans_id")

@@ -15,18 +15,26 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\TurIltChildImport;
 use App\Log\BaingaIltChildLog;
-
+use App\Models\User;
 
 
 
 class TurIltChildController extends Controller
 {
 
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
     public function ChildTurIlt(Request $req)
     {
         try {
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
             $query = TurIltChild::where("hnID", $req->_parentID)
-                ->where("user_id", Auth::id());
+                ->whereIn("db_arhivturilt.user_id", $sharedUserIds);
 
             // 🔹 FILTER (шаардлагатай бол нэмнэ)
             if ($req->barimt_ner) {

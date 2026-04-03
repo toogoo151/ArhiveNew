@@ -88,6 +88,12 @@ class User extends Authenticatable
     {
         return $this->barimt_turul ?? 'Түвшин олдсонгүй';
     }
+    public function scopeWithSharedAccess($query, $user)
+    {
+        return $query->where('comand_id', $user->comand_id)
+            ->where('angi_id', $user->angi_id)
+            ->where('salbar_id', $user->salbar_id);
+    }
 
     public function getUser()
     {
