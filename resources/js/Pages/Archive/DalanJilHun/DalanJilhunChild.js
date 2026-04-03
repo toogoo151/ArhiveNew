@@ -9,8 +9,8 @@ import DalanJilhunChildEdit from "./DalanJilhunChildEdit";
 import DalanJilhunChildNew from "./DalanJilhunChildNew";
 import "./Index.css";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const DalanJilhunChild = (props) => {
     const [getdalanhunChild, setdalanhunChild] = useState([]);
@@ -20,6 +20,9 @@ const DalanJilhunChild = (props) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewData, setPreviewData] = useState([]);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     const [showModal] = useState("modal");
 
@@ -29,15 +32,34 @@ const DalanJilhunChild = (props) => {
     //     refreshdalanHunChild(props.changeDataRow.id);
     // }, []);
 
-    useEffect(() => {
-        // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshdalanHunChild(props.changeDataRow.id);
+    const refreshdalanHunChild = (id) => {
+        axios
+            .post("get/DalanJilhunChild", {
+                _parentID: id,
+                page: page + 1, // 🔥 нэмэх
+                perPage: rowsPerPage, // 🔥 нэмэх
+            })
+            .then((res) => {
+                // console.log(res.data);
+                setdalanhunChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                // setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setdalanhunChild([]); //
+                setTotalRows(0);
+            });
+    };
 
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
+    useEffect(() => {
+        refreshdalanHunChild(props.changeDataRow.id);
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+        0;
+    }, [props.changeDataRow]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -126,19 +148,6 @@ const DalanJilhunChild = (props) => {
             })
             .catch((err) => {
                 Swal.fire("Import алдаа");
-            });
-    };
-    const refreshdalanHunChild = (id) => {
-        axios
-            .post("get/DalanJilhunChild", {
-                _parentID: id,
-            })
-            .then((res) => {
-                // console.log(res.data);
-                setdalanhunChild(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
             });
     };
 
@@ -424,6 +433,12 @@ const DalanJilhunChild = (props) => {
                         data={getdalanhunChild}
                         setdata={setdalanhunChild}
                         columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
                         onRowClick={(rowData, rowMeta) => {
                             const selectedRow =
                                 getdalanhunChild[rowMeta.dataIndex];

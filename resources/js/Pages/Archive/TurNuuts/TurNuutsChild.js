@@ -9,8 +9,8 @@ import "./Index.css";
 import TurNuutsChildEdit from "./TurNuutsChildEdit";
 import TurNuutsChildNew from "./TurNuutsChildNew";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const TurNuutsChild = (props) => {
     const [getTurNuutsChild, setTurNuutsChild] = useState([]);
@@ -20,6 +20,9 @@ const TurNuutsChild = (props) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewData, setPreviewData] = useState([]);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     const [showModal] = useState("modal");
 
@@ -29,15 +32,31 @@ const TurNuutsChild = (props) => {
     //     refreshTurNuutsChild(props.changeDataRow.id);
     // }, []);
 
-    useEffect(() => {
-        // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurNuutsChild(props.changeDataRow.id);
+    const refreshTurNuutsChild = (id) => {
+        axios
+            .post("get/TurNuutsChild", {
+                _parentID: id,
+            })
+            .then((res) => {
+                setTurNuutsChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setTurNuutsChild([]); //
+                setTotalRows(0);
+            });
+    };
 
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
+    useEffect(() => {
+        refreshTurNuutsChild(props.changeDataRow.id);
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+        0;
+    }, [props.changeDataRow]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -161,20 +180,6 @@ const TurNuutsChild = (props) => {
         };
 
         reader.readAsArrayBuffer(file);
-    };
-
-    const refreshTurNuutsChild = (id) => {
-        axios
-            .post("get/TurNuutsChild", {
-                _parentID: id,
-            })
-            .then((res) => {
-                // console.log(res.data);
-                setTurNuutsChild(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
     };
 
     const config = {
@@ -398,10 +403,16 @@ const TurNuutsChild = (props) => {
                         data={getTurNuutsChild}
                         setdata={setTurNuutsChild}
                         columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
                         onRowClick={(rowData, rowMeta) => {
                             const selectedRow =
                                 getTurNuutsChild[rowMeta.dataIndex];
-                            setclickedRowData(selectedRow);
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
                         }}
                         costumToolbar={
                             <CustomToolbar
@@ -409,10 +420,10 @@ const TurNuutsChild = (props) => {
                                 modelType={"modal"}
                                 dataTargetID={"#TurNuutsChildNew"}
                                 spanIconClassName={"fas fa-solid fa-plus"}
-                                buttonName={"Нэмэх"}
+                                buttonName={"НЭМЭХ"}
                                 excelDownloadData={getTurNuutsChild}
                                 excelHeaders={excelHeaders}
-                                iisHideInsert={isRestricted}
+                                isHideInsert={isRestricted}
                                 isHideEdit={isRestricted}
                             />
                         }
@@ -422,7 +433,7 @@ const TurNuutsChild = (props) => {
                         btnDelete={btnDelete}
                         avgColumnIndex={-1}
                         avgColumnName={"email"}
-                        avgName={"Дундаж: "}
+                        avgName={"Дундаж:"}
                         getRowsSelected={getRowsSelected}
                         setRowsSelected={setRowsSelected}
                         isHideDelete={isRestricted}

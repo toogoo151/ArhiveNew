@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Imports\BaingaIltImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
+use App\Log\BaingaIltLog;
 
 
 class BaingaIltController extends Controller
@@ -16,23 +17,54 @@ class BaingaIltController extends Controller
     public function DeleteBaingIlt(Request $req)
     {
         try {
-            $delete = BaingaIlt::find($req->id);
-            $delete->delete();
-            return response(
-                array(
-                    "status" => "success",
-                    "msg" => "Амжилттай устгалаа."
-                ),
-                200
-            );
-        } catch (\Throwable $th) {
-            return response(
-                array(
+            $data = BaingaIlt::find($req->id);
+
+            // 🔴 байхгүй бол
+            if (!$data) {
+                return response([
                     "status" => "error",
-                    "msg" => "Алдаа гарлаа."
-                ),
-                500
-            );
+                    "msg" => "Өгөгдөл олдсонгүй"
+                ], 404);
+            }
+
+            // ✅ LOG хадгалах (DB-ээс авсан data ашиглана)
+            BaingaIltLog::create([
+                'humrug_id' => $data->humrug_id,
+                'dans_id' => $data->dans_id,
+                'hadgalamj_turul' => 0,
+                'hadgalamj_dugaar' => $data->hadgalamj_dugaar,
+                'hadgalamj_zbn' => $data->hadgalamj_zbn,
+                'hergiin_indeks' => $data->hergiin_indeks,
+                'hadgalamj_garchig' => $data->hadgalamj_garchig,
+                'harya_on' => $data->harya_on,
+                'on_ehen' => $data->on_ehen,
+                'on_suul' => $data->on_suul,
+                'huudas_too' => $data->huudas_too,
+                'habsralt_too' => $data->habsralt_too,
+                'jagsaalt_zuildugaar' => $data->jagsaalt_zuildugaar,
+                'hn_tailbar' => $data->hn_tailbar,
+
+                'h_type' => "1",
+                'successful' => "Устгасан",
+
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::id(),
+                'user_ip' => $req->ip(),
+            ]);
+
+            // ✅ дараа нь устгана
+            $data->delete();
+
+            return response([
+                "status" => "success",
+                "msg" => "Амжилттай устгалаа."
+            ], 200);
+        } catch (\Throwable $th) {
+            return response([
+                "status" => "error",
+                "msg" => $th->getMessage() // 🔥 debug-д хэрэгтэй
+            ], 500);
         }
     }
 
@@ -82,6 +114,28 @@ class BaingaIltController extends Controller
     public function NewBaingIlt(Request $req)
     {
         try {
+            BaingaIltLog::create([
+                'humrug_id' => $req->humrug_id,
+                'dans_id' => $req->dans_id,
+                'hadgalamj_turul' => 0,
+                'hadgalamj_dugaar' => $req->hadgalamj_dugaar,
+                'hadgalamj_zbn' => Crypt::encryptString($req->hadgalamj_zbn),
+                'hergiin_indeks' => $req->hergiin_indeks,
+                'hadgalamj_garchig' => Crypt::encryptString($req->hadgalamj_garchig),
+                'harya_on' => $req->harya_on,
+                'on_ehen' => $req->on_ehen,
+                'on_suul' => $req->on_suul,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'jagsaalt_zuildugaar' => $req->jagsaalt_zuildugaar,
+                'hn_tailbar' => Crypt::encryptString($req->hn_tailbar),
+                'h_type' => "1",
+                'successful' => "Нэмсэн",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
             $insertBainga = new BaingaIlt();
 
             $insertBainga->humrug_id = $req->humrug_id;
@@ -120,6 +174,30 @@ class BaingaIltController extends Controller
 
     public function EditBaingIlt(Request $req)
     {
+
+        BaingaIltLog::create([
+            'humrug_id' => $req->humrug_id,
+            'dans_id' => $req->dans_id,
+            'hadgalamj_turul' => 0,
+            'hadgalamj_dugaar' => $req->hadgalamj_dugaar,
+            'hadgalamj_zbn' => Crypt::encryptString($req->hadgalamj_zbn),
+            'hergiin_indeks' => $req->hergiin_indeks,
+            'hadgalamj_garchig' => Crypt::encryptString($req->hadgalamj_garchig),
+            'harya_on' => $req->harya_on,
+            'on_ehen' => $req->on_ehen,
+            'on_suul' => $req->on_suul,
+            'huudas_too' => $req->huudas_too,
+            'habsralt_too' => $req->habsralt_too,
+            'jagsaalt_zuildugaar' => $req->jagsaalt_zuildugaar,
+            'hn_tailbar' => Crypt::encryptString($req->hn_tailbar),
+            'h_type' => "1",
+            'successful' => "Зассан",
+            'user_angiID' => Auth::user()->angi_id,
+            'user_salbarID' => Auth::user()->salbar_id,
+            'user_id' => Auth::user()->id,
+            'user_ip' => $req->ip(),
+        ]);
+
         try {
             $edit = BaingaIlt::find($req->id);
 

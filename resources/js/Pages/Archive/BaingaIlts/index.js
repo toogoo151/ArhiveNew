@@ -12,8 +12,8 @@ import BaingaIltsEdit from "./BaingaIltsEdit";
 import BaingaIltShiljuuleh from "./BaingaIltShiljuuleh";
 import BaingaIltsNew from "./BaingaIltsNew";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 import "./Index.css";
 
@@ -68,6 +68,7 @@ const Index = () => {
         console.log("UPDATED DATA:", getBaingaIlt);
         console.log("UPDATED TOTAL:", totalRows);
     }, [getBaingaIlt, totalRows]);
+
     useEffect(() => {
         if (getBaingaIlt.length) {
             console.log("ROW SAMPLE:", getBaingaIlt[0]);

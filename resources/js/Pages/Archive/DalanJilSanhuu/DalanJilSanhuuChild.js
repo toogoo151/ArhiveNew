@@ -17,20 +17,45 @@ const DalanJilSanhuuChild = (props) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewData, setPreviewData] = useState([]);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
     const [showModal] = useState("modal");
 
     // useEffect(() => {
     //     refreshdalanSanhuuChild(props.changeDataRow.id);
     // }, []);
 
+    const refreshdalanSanhuuChild = (id) => {
+        axios
+            .post("get/DalanJilsanhuuChild", {
+                _parentID: id,
+                page: page + 1, // 🔥 нэмэх
+                perPage: rowsPerPage, // 🔥 нэмэх
+            })
+            .then((res) => {
+                setdalansanhuuChild(res.data.data || []); // ✅ FIX
+                setTotalRows(res.data.total || 0); // ✅ зөв
+            })
+            .catch((err) => {
+                console.log(err);
+                setdalansanhuuChild([]); //
+                setTotalRows(0);
+            });
+    };
+    useEffect(() => {
+        if (props.changeDataRow?.id) {
+            refreshdalanSanhuuChild(props.changeDataRow.id);
+        }
+    }, [props.changeDataRow.id, page, rowsPerPage]);
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshdalanSanhuuChild(props.changeDataRow.desk_id);
-
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
+        refreshdalanSanhuuChild(props.changeDataRow.id);
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
+        0;
     }, [props.changeDataRow.id]);
 
     const btnEdit = () => {
@@ -100,7 +125,7 @@ const DalanJilSanhuuChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshdalanSanhuuChild(props.changeDataRow.desk_id);
+                        refreshdalanSanhuuChild(props.changeDataRow.id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -142,19 +167,6 @@ const DalanJilSanhuuChild = (props) => {
         };
 
         reader.readAsArrayBuffer(file);
-    };
-    const refreshdalanSanhuuChild = (id) => {
-        axios
-            .post("get/DalanJilsanhuuChild", {
-                _parentID: id,
-            })
-            .then((res) => {
-                // console.log(res.data);
-                setdalansanhuuChild(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
     };
 
     const config = {
@@ -439,6 +451,12 @@ const DalanJilSanhuuChild = (props) => {
                         data={getdalansanhuuChild}
                         setdata={setdalansanhuuChild}
                         columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
                         onRowClick={(rowData, rowMeta) => {
                             const selectedRow =
                                 getdalansanhuuChild[rowMeta.dataIndex];
@@ -470,14 +488,14 @@ const DalanJilSanhuuChild = (props) => {
                         showArchive={false}
                     />
                     <DalanJilhunChildNew
-                        _parentID={props.changeDataRow.desk_id}
+                        _parentID={props.changeDataRow.id}
                         refreshdalanSanhuuChild={refreshdalanSanhuuChild}
                     />
                     <DalanJilhunChildEdit
                         setRowsSelected={setRowsSelected}
                         refreshdalanSanhuuChild={refreshdalanSanhuuChild}
                         changeDataRow={clickedRowData}
-                        parentID={props.changeDataRow.desk_id}
+                        parentID={props.changeDataRow.id}
                         isEditBtnClick={isEditBtnClick}
                     />
                 </div>
@@ -584,14 +602,14 @@ const DalanJilSanhuuChild = (props) => {
                             showArchive={false}
                         />
                         <DalanJilhunChildNew
-                            _parentID={props.changeDataRow.desk_id}
+                            _parentID={props.changeDataRow.id}
                             refreshdalanSanhuuChild={refreshdalanSanhuuChild}
                         />
                         <DalanJilhunChildEdit
                             setRowsSelected={setRowsSelected}
                             refreshdalanSanhuuChild={refreshdalanSanhuuChild}
                             changeDataRow={clickedRowData}
-                            parentID={props.changeDataRow.desk_id}
+                            parentID={props.changeDataRow.id}
                             isEditBtnClick={isEditBtnClick}
                         />
                     </div>

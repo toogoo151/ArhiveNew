@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
-
+use Illuminate\Http\Request;
 
 class TurNuuts extends Model
 {
@@ -232,92 +232,87 @@ class TurNuuts extends Model
     //     }
     // }
 
-    public function getTurNuuts()
+    public function getTurNuuts(Request $request)
     {
         try {
-
-            $turNuuts = DB::table("db_arhivhnnuuts")
-                ->select(
-                    "db_arhivhnnuuts.*",
-
-                    // humrug нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT humrug_ner
-              FROM db_humrug
-              WHERE db_humrug.id = db_arhivhnnuuts.humrug_id
-              LIMIT 1) as humrug_ner"),
-
-                    // dans нэрийг 1 ширхэгээр авах
-                    DB::raw("(SELECT dans_ner
-              FROM db_arhivdans
-              WHERE db_arhivdans.id = db_arhivhnnuuts.dans_id
-              LIMIT 1) as dans_ner"),
-
-                    // db_arhivdans доторх dans_baidal утгыг нэмэх
-                    "db_arhivdans.dans_baidal",
-
-                    // db_arhivdans доторх hadgalah_hugatsaa утгыг нэмэх
-                    "db_arhivdans.hadgalah_hugatsaa",
-                    "jagsaaltzuildugaar.hugatsaa as hugatsaa"
-                )
-                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
+            $query = DB::table("db_arhivhnnuuts")
+                ->where("db_arhivhnnuuts.user_id", Auth::id())
+                ->join("db_humrug", "db_humrug.id", "=", "db_arhivhnnuuts.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
                         "=",
                         "db_arhivhnnuuts.jagsaalt_zuildugaar"
-                    )
-                        ->where("jagsaaltzuildugaar.userID", Auth::id());
+                    )->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->where("db_arhivhnnuuts.user_id", Auth::id())
-                ->where("hn_turul", "=", "2")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivhnnuuts.dans_id")
+                ->where("hn_turul", "2")
                 ->where(function ($query) {
                     $query->whereNull("ustgasan_temdeglel")
                         ->orWhere("ustgasan_temdeglel", "");
-                })
-                ->orderByDesc("db_arhivhnnuuts.id")
-                ->get();
+                });
 
-            foreach ($turNuuts as $row) {
-                try {
-                    if ($row->hn_zbn) {
-                        $row->hn_zbn = Crypt::decryptString($row->hn_zbn);
-                    }
-
-                    if ($row->hn_garchig) {
-                        $row->hn_garchig = Crypt::decryptString($row->hn_garchig);
-                    }
-
-                    if ($row->nuuts_zereglel) {
-                        $row->nuuts_zereglel = Crypt::decryptString($row->nuuts_zereglel);
-                    }
-                    if ($row->hn_tailbar) {
-                        $row->hn_tailbar = Crypt::decryptString($row->hn_tailbar);
-                    }
-                    if ($row->humrug_ner) {
-                        $row->humrug_ner = Crypt::decryptString($row->humrug_ner);
-                    }
-
-                    if ($row->dans_ner) {
-                        $row->dans_ner = Crypt::decryptString($row->dans_ner);
-                    }
-
-                    if ($row->dans_baidal) {
-                        $row->dans_baidal = Crypt::decryptString($row->dans_baidal);
-                    }
-
-                    if ($row->hadgalah_hugatsaa) {
-                        $row->hadgalah_hugatsaa = Crypt::decryptString($row->hadgalah_hugatsaa);
-                    }
-                } catch (\Exception $e) {
-                    // decrypt алдаа гарвал original утгыг үлдээнэ
-                }
+            // 🔹 FILTER
+            if ($request->humrug_id) {
+                $query->where("db_arhivhnnuuts.humrug_id", $request->humrug_id);
             }
 
-            return $turNuuts;
+            if ($request->dans_id) {
+                $query->where("db_arhivhnnuuts.dans_id", $request->dans_id);
+            }
+
+            // 🔹 SORT
+            $sortField = $request->sortField ?? "db_arhivhnnuuts.id";
+            $sortOrder = $request->sortOrder ?? "desc";
+
+            $query->orderBy($sortField, $sortOrder);
+
+            // 🔹 PAGINATION
+            $perPage = $request->perPage ?? 10;
+
+            $data = $query->select(
+                "db_arhivhnnuuts.*",
+                "db_humrug.humrug_ner",
+                "db_arhivdans.dans_ner",
+                "db_arhivdans.dans_baidal",
+                "db_arhivdans.hadgalah_hugatsaa",
+                "jagsaaltzuildugaar.hugatsaa as hugatsaa"
+            )->paginate($perPage);
+
+
+            $data->getCollection()->transform(function ($row) {
+                $safeDecrypt = function ($value) {
+                    if (!$value) return $value;
+                    try {
+                        return Crypt::decryptString($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                };
+
+                $row->hn_zbn = $safeDecrypt($row->hn_zbn);
+                $row->hn_garchig = $safeDecrypt($row->hn_garchig);
+                $row->nuuts_zereglel = $safeDecrypt($row->nuuts_zereglel);
+                $row->hn_tailbar = $safeDecrypt($row->hn_tailbar);
+                $row->humrug_ner = $safeDecrypt($row->humrug_ner);
+                $row->dans_ner = $safeDecrypt($row->dans_ner);
+                $row->dans_baidal = $safeDecrypt($row->dans_baidal);
+                $row->hadgalah_hugatsaa = $safeDecrypt($row->hadgalah_hugatsaa);
+
+                return $row;
+            });
+
+
+            // return response()->json($data);
+            return response()->json([
+                "data" => $data->items(),
+                "total" => $data->total(),
+                "current_page" => $data->currentPage(),
+            ]);
         } catch (\Throwable $th) {
             return response([
                 "status" => "error",
-                "msg" => "татаж чадсангүй.",
+                "msg" => "Татаж чадсангүй.",
                 "error" => $th->getMessage()
             ], 500);
         }

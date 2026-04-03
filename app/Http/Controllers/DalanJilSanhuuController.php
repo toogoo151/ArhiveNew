@@ -11,7 +11,7 @@ use Redirect, Response, File;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\DalanJilSanhuuImport;
-
+use App\Log\BaingaIltLog;
 
 class DalanJilSanhuuController extends Controller
 {
@@ -42,6 +42,35 @@ class DalanJilSanhuuController extends Controller
     {
         try {
             $delete = DalanJilSanhuu::find($req->id);
+            if (!$delete) {
+                return response([
+                    "status" => "error",
+                    "msg" => "Өгөгдөл олдсонгүй"
+                ], 404);
+            }
+            BaingaIltLog::create([
+                'humrug_id' => $delete->humrug_id,
+                'dans_id' => $delete->dans_id,
+                'hadgalamj_turul' => 1,
+                'hadgalamj_dugaar' => $delete->hadgalamj_dugaar,
+                'hadgalamj_zbn' => $delete->hadgalamj_zbn,
+                'hergiin_indeks' => $delete->hergiin_indeks,
+                'hadgalamj_garchig' => $delete->hadgalamj_garchig,
+                'harya_on' => $delete->harya_on,
+                'on_ehen' => $delete->on_ehen,
+                'on_suul' => $delete->on_suul,
+                'huudas_too' => $delete->huudas_too,
+                'habsralt_too' => $delete->habsralt_too,
+                'jagsaalt_zuildugaar' => $delete->jagsaalt_zuildugaar,
+                'hn_tailbar' => $delete->hn_tailbar,
+
+                'h_type' => "4",
+                'successful' => "Устгасан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::id(),
+                'user_ip' => $req->ip(),
+            ]);
             $delete->delete();
             return response(
                 array(
@@ -75,6 +104,29 @@ class DalanJilSanhuuController extends Controller
         // ]);
 
         try {
+            BaingaIltLog::create([
+                'humrug_id' => $req->humrug_id,
+                'dans_id' => $req->dans_id,
+                'hadgalamj_turul' => 1,
+                'hadgalamj_dugaar' => $req->hadgalamj_dugaar,
+                'hadgalamj_zbn' => Crypt::encryptString($req->hadgalamj_zbn),
+                'hergiin_indeks' => $req->hergiin_indeks,
+                'hadgalamj_garchig' => Crypt::encryptString($req->hadgalamj_garchig),
+                'harya_on' => $req->harya_on,
+                'on_ehen' => $req->on_ehen,
+                'on_suul' => $req->on_suul,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'jagsaalt_zuildugaar' => $req->jagsaalt_zuildugaar,
+                'hn_tailbar' => Crypt::encryptString($req->hn_tailbar),
+                'h_type' => "4",
+                'successful' => "Нэмсэн",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
+
             $insertDalhun = new DalanJilSanhuu();
             $insertDalhun->humrug_id = $req->humrug_id;
             $insertDalhun->dans_id = $req->dans_id;
@@ -110,6 +162,29 @@ class DalanJilSanhuuController extends Controller
     public function EditDalanJilSanhuu(Request $req)
     {
         try {
+            BaingaIltLog::create([
+                'humrug_id' => $req->humrug_id,
+                'dans_id' => $req->dans_id,
+                'hadgalamj_turul' => 1,
+                'hadgalamj_dugaar' => $req->hadgalamj_dugaar,
+                'hadgalamj_zbn' => Crypt::encryptString($req->hadgalamj_zbn),
+                'hergiin_indeks' => $req->hergiin_indeks,
+                'hadgalamj_garchig' => Crypt::encryptString($req->hadgalamj_garchig),
+                'harya_on' => $req->harya_on,
+                'on_ehen' => $req->on_ehen,
+                'on_suul' => $req->on_suul,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'jagsaalt_zuildugaar' => $req->jagsaalt_zuildugaar,
+                'hn_tailbar' => Crypt::encryptString($req->hn_tailbar),
+                'h_type' => "4",
+                'successful' => "Зассан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
+
             $edit = DalanJilSanhuu::find($req->id);
             $edit->humrug_id = $req->humrug_id;
             $edit->dans_id = $req->dans_id;

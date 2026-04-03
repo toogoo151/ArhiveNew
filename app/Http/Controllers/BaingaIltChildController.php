@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\BaingaIltChildImport;
+use App\Log\BaingaIltChildLog;
+
 
 
 
@@ -23,23 +25,56 @@ class BaingaIltChildController extends Controller
     public function ChildBaingIlt(Request $req)
     {
         try {
-            $baingaIltChild = BaingaIltChild::where("hnID", "=", $req->_parentID)
-                ->where("db_arhivbaingilt.user_id", Auth::id())
-                ->orderBy('id', 'desc')
-                // $baingaIltChild = DB::table("db_arhivbaingilt")
-                // ->where("way_parent", "=", $req->_parentID)
-                ->get()
-                ->map(function ($item) {
-                    $item->barimt_ner = $item->barimt_ner ? Crypt::decryptString($item->barimt_ner) : null;
-                    $item->uild_gazar = $item->uild_gazar ? Crypt::decryptString($item->uild_gazar) : null;
-                    $item->aguulga = $item->aguulga ? Crypt::decryptString($item->aguulga) : null;
-                    $item->bichsen_ner = $item->bichsen_ner ? Crypt::decryptString($item->bichsen_ner) : null;
-                    $item->file_ner = $item->file_ner ? Crypt::decryptString($item->file_ner) : null;
-                    return $item;
-                });
-            return $baingaIltChild;
+            $query = BaingaIltChild::where("hnID", $req->_parentID)
+                ->where("user_id", Auth::id());
+
+            // 🔹 FILTER (шаардлагатай бол нэмнэ)
+            if ($req->barimt_ner) {
+                $query->where("barimt_ner", "like", "%" . $req->barimt_ner . "%");
+            }
+
+            // 🔹 SORT
+            $sortField = $req->sortField ?? "id";
+            $sortOrder = $req->sortOrder ?? "desc";
+
+            $query->orderBy($sortField, $sortOrder);
+
+            // 🔹 PAGINATION
+            $perPage = $req->perPage ?? 10;
+
+            $data = $query->paginate($perPage);
+
+            // 🔐 decrypt хийх
+            $data->getCollection()->transform(function ($item) {
+                $safeDecrypt = function ($value) {
+                    if (!$value) return $value;
+                    try {
+                        return Crypt::decryptString($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                };
+
+                $item->barimt_ner  = $safeDecrypt($item->barimt_ner);
+                $item->uild_gazar  = $safeDecrypt($item->uild_gazar);
+                $item->aguulga     = $safeDecrypt($item->aguulga);
+                $item->bichsen_ner = $safeDecrypt($item->bichsen_ner);
+                $item->file_ner    = $safeDecrypt($item->file_ner);
+
+                return $item;
+            });
+
+            return response()->json([
+                "data" => $data->items(),
+                "total" => $data->total(),
+                "current_page" => $data->currentPage(),
+            ]);
         } catch (\Throwable $th) {
-            // throw $th;
+            return response()->json([
+                "status" => "error",
+                "msg" => "Татаж чадсангүй.",
+                "error" => $th->getMessage()
+            ], 500);
         }
     }
 
@@ -118,30 +153,58 @@ class BaingaIltChildController extends Controller
                 ], 404);
             }
 
+            // 🔐 safe decrypt function
+            $safeEncrypt = function ($value) {
+                return $value ? Crypt::encryptString($value) : null;
+            };
+
+            // ✅ LOG (MODEL-ээс авна)
+            BaingaIltChildLog::create([
+                'hnID' => $delete->hnID,
+                'barimt_ner' => $safeEncrypt($delete->barimt_ner),
+                'uild_gazar' => $safeEncrypt($delete->uild_gazar),
+                'aguulga' => $safeEncrypt($delete->aguulga),
+                'bichsen_ner' => $safeEncrypt($delete->bichsen_ner),
+
+                'barimt_ognoo' => $delete->barimt_ognoo,
+                'barimt_dugaar' => $delete->barimt_dugaar,
+                'irsen_dugaar' => $delete->irsen_dugaar,
+                'yabsan_dugaar' => $delete->yabsan_dugaar,
+
+                'huudas_too' => $delete->huudas_too,
+                'habsralt_too' => $delete->habsralt_too,
+                'huudas_dugaar' => $delete->huudas_dugaar,
+                'bichsen_ognoo' => $delete->bichsen_ognoo,
+
+                'h_type' => "1",
+                'successful' => "Устгасан",
+
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::id(),
+                'user_ip' => $req->ip(),
+            ]);
+
+            // 📂 FILE DELETE
             if (!empty($delete->file_ner)) {
 
-                // 🔑 encrypted → decrypt
-                $decryptedFiles = Crypt::decryptString($delete->file_ner);
+                try {
+                    $decryptedFiles = Crypt::decryptString($delete->file_ner);
+                } catch (\Exception $e) {
+                    $decryptedFiles = $delete->file_ner; // fallback
+                }
 
                 $files = explode(';', $decryptedFiles);
 
                 foreach ($files as $fileUrl) {
 
-                    if (empty($fileUrl))
-                        continue;
+                    if (empty($fileUrl)) continue;
 
                     $parsedUrl = parse_url($fileUrl);
 
-                    if (!isset($parsedUrl['path']))
-                        continue;
+                    if (!isset($parsedUrl['path'])) continue;
 
-                    // /storage/doc/BaingaIlt/5/file.pdf
-                    $relativePath = $parsedUrl['path'];
-
-                    // storage → public
-                    $relativePath = str_replace('/storage/', '', $relativePath);
-
-                    // public/doc/BaingaIlt/5/file.pdf
+                    $relativePath = str_replace('/storage/', '', $parsedUrl['path']);
                     $storagePath = 'public/' . $relativePath;
 
                     if (Storage::exists($storagePath)) {
@@ -150,6 +213,7 @@ class BaingaIltChildController extends Controller
                 }
             }
 
+            // 🗑 DELETE
             $delete->delete();
 
             return response([
@@ -157,7 +221,6 @@ class BaingaIltChildController extends Controller
                 "msg" => "Амжилттай устгалаа."
             ], 200);
         } catch (\Throwable $th) {
-
             return response([
                 "status" => "error",
                 "msg" => $th->getMessage()
@@ -167,6 +230,7 @@ class BaingaIltChildController extends Controller
 
     public function NewChildBaingIlt(Request $req)
     {
+
         $userId = Auth::id();
         $userFolder = "public/doc/BaingaIlt/{$userId}";
         $fullURL = "";
@@ -196,6 +260,29 @@ class BaingaIltChildController extends Controller
                 $getPDFUrl = 'storage/doc/BaingaIlt/' . $userId . '/' . $setPDFPathID;
                 $fullURL .= asset($getPDFUrl) . ';';
             }
+
+            BaingaIltChildLog::create([
+                'hnID' => $req->hnID,
+                'barimt_ner' => Crypt::encryptString($req->barimt_ner),
+                'uild_gazar' => Crypt::encryptString($req->uild_gazar),
+                'aguulga' => Crypt::encryptString($req->aguulga),
+                'bichsen_ner' => Crypt::encryptString($req->bichsen_ner),
+                'file_ner' => Crypt::encryptString($fullURL),
+                'barimt_ognoo' => $req->barimt_ognoo,
+                'barimt_dugaar' => $req->barimt_dugaar,
+                'irsen_dugaar' => $req->irsen_dugaar,
+                'yabsan_dugaar' => $req->yabsan_dugaar,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'huudas_dugaar' => $req->huudas_dugaar,
+                'bichsen_ognoo' => $req->bichsen_ognoo,
+                'h_type' => "1",
+                'successful' => "Нэмсэн",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
 
 
             $insertBainga = new BaingaIltChild();
@@ -253,6 +340,7 @@ class BaingaIltChildController extends Controller
 
         try {
 
+
             $edit = BaingaIltChild::find($req->id);
 
             if (!$edit) {
@@ -304,6 +392,30 @@ class BaingaIltChildController extends Controller
             foreach ($oldFiles as $file) {
                 $fullURL .= $file . ';';
             }
+
+
+            BaingaIltChildLog::create([
+                'hnID' => $req->hnID,
+                'barimt_ner' => Crypt::encryptString($req->barimt_ner),
+                'uild_gazar' => Crypt::encryptString($req->uild_gazar),
+                'aguulga' => Crypt::encryptString($req->aguulga),
+                'bichsen_ner' => Crypt::encryptString($req->bichsen_ner),
+                'file_ner' => Crypt::encryptString($req->file_ner),
+                'barimt_ognoo' => $req->barimt_ognoo,
+                'barimt_dugaar' => $req->barimt_dugaar,
+                'irsen_dugaar' => $req->irsen_dugaar,
+                'yabsan_dugaar' => $req->yabsan_dugaar,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'huudas_dugaar' => $req->huudas_dugaar,
+                'bichsen_ognoo' => $req->bichsen_ognoo,
+                'h_type' => "1",
+                'successful' => "Зассан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
 
             /* 5️⃣ UPDATE DB */
 

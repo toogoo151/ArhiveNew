@@ -9,8 +9,8 @@ import BaingaIltsChildEdit from "./BaingaIltsChildEdit";
 import BaingaIltsChildNew from "./BaingaIltsChildNew";
 import "./Index.css";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const BaingaIltsChild = (props) => {
     const [getbaingaIltsChild, setbaingaIltsChild] = useState([]);
@@ -21,6 +21,10 @@ const BaingaIltsChild = (props) => {
     const [previewData, setPreviewData] = useState([]);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
+
     const [showModal] = useState("modal");
 
     const { tubshin, loading, error } = useAuthPermission();
@@ -28,6 +32,24 @@ const BaingaIltsChild = (props) => {
     // useEffect(() => {
     //     refreshbaingaIltsChild(props.changeDataRow.id);
     // }, []);
+
+    const refreshbaingaIltsChild = (id) => {
+        axios
+            .post("get/baingaIltsChild", {
+                _parentID: id,
+            })
+            .then((res) => {
+                // console.log(res.data);
+                setbaingaIltsChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setbaingaIltsChild([]); //
+                setTotalRows(0);
+            });
+    };
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
@@ -164,20 +186,6 @@ const BaingaIltsChild = (props) => {
         };
 
         reader.readAsArrayBuffer(file);
-    };
-
-    const refreshbaingaIltsChild = (id) => {
-        axios
-            .post("get/baingaIltsChild", {
-                _parentID: id,
-            })
-            .then((res) => {
-                // console.log(res.data);
-                setbaingaIltsChild(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
     };
 
     const config = {
@@ -499,6 +507,12 @@ const BaingaIltsChild = (props) => {
                         data={getbaingaIltsChild}
                         setdata={setbaingaIltsChild}
                         columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
                         onRowClick={(rowData, rowMeta) => {
                             const selectedRow =
                                 getbaingaIltsChild[rowMeta.dataIndex];

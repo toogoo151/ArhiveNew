@@ -9,8 +9,8 @@ import "./Index.css";
 import TurIltsChildEdit from "./TurIltsChildEdit";
 import TurIltsChildNew from "./TurIltsChildNew";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const TurIltsChild = (props) => {
     const [getTurtIltsChild, setTurIltsChild] = useState([]);
@@ -22,20 +22,42 @@ const TurIltsChild = (props) => {
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [showModal] = useState("modal");
     const { tubshin, loading, error } = useAuthPermission();
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     // useEffect(() => {
     //     refreshTurIltsChild(props.changeDataRow.id);
     // }, []);
 
-    useEffect(() => {
-        if (props.changeDataRow?.id) {
-            refreshTurIltsChild(props.changeDataRow.id);
-        }
+    const refreshTurIltsChild = (id) => {
+        axios
+            .post("get/TurIltsChild", {
+                _parentID: id,
+                page: page + 1, // 🔥 нэмэх
+                perPage: rowsPerPage, // 🔥 нэмэх
+            })
+            .then((res) => {
+                // console.log(res.data);
+                setTurIltsChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                // setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setTurIltsChild([]); //
+                setTotalRows(0);
+            });
+    };
 
-        setclickedRowData(null);
+    useEffect(() => {
+        refreshTurIltsChild(props.changeDataRow.id);
+        setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
-    }, [props.changeDataRow?.id]);
+        0;
+    }, [props.changeDataRow]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -125,19 +147,6 @@ const TurIltsChild = (props) => {
         };
 
         reader.readAsArrayBuffer(file);
-    };
-    const refreshTurIltsChild = (id) => {
-        axios
-            .post("get/TurIltsChild", {
-                _parentID: id,
-            })
-            .then((res) => {
-                // console.log(res.data);
-                setTurIltsChild(Array.isArray(res.data) ? res.data : []);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
     };
 
     const config = {
@@ -422,10 +431,16 @@ const TurIltsChild = (props) => {
                         data={getTurtIltsChild}
                         setdata={setTurIltsChild}
                         columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
                         onRowClick={(rowData, rowMeta) => {
                             const selectedRow =
                                 getTurtIltsChild[rowMeta.dataIndex];
-                            setclickedRowData(selectedRow);
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
                         }}
                         costumToolbar={
                             <CustomToolbar

@@ -30,9 +30,9 @@ import HomePage from "../../../../Pages/HomePage/HomePage";
 // Туслах санд нэмэх
 import AshigNom from "../../../../Pages/Archive/AshigNom/index";
 import JagsaaltZuil from "../../../../Pages/Archive/JagsaaltZuil/index";
+import Lavlagaa from "../../../../Pages/Archive/Lavlagaa/index";
 import SedevZui from "../../../../Pages/Archive/SedevZui/index";
 import Tovchlol from "../../../../Pages/Archive/TovchilsonUg/index";
-import Lavlagaa from "../../../../Pages/Archive/Lavlagaa/index";
 
 // erhzui
 import Erhzui from "../../../../Pages/Archive/ErhZui/index";
@@ -40,6 +40,11 @@ import Erhzui from "../../../../Pages/Archive/ErhZui/index";
 //Nuugdah
 import ProgrammType from "../../../../Pages/Archive/Tuslah/ProgrammType";
 import Retention from "../../../../Pages/Archive/Tuslah/Retention";
+
+//Search
+import LogBarimt from "../../../../Pages/Archive/Search/LogBarimt";
+import SearchBarimt from "../../../../Pages/Archive/Search/searchBarimt";
+import SearchNegj from "../../../../Pages/Archive/Search/searchNegj";
 
 const MyRoutes = (props) => {
     const { handleFirstMenuClick, getMissionType } = props;
@@ -92,6 +97,11 @@ const MyRoutes = (props) => {
             <Route path="/get/tovchilsonug" element={<Tovchlol />} />
             <Route path="/get/erhzui-info" element={<Erhzui />} />
             <Route path="/get/lavlagaa" element={<Lavlagaa />} />
+
+            {/* Лавлагаа */}
+            <Route path="/get/searchBarimts" element={<SearchBarimt />} />
+            <Route path="/get/searchNegjs" element={<SearchNegj />} />
+            <Route path="/get/logBarimts" element={<LogBarimt />} />
 
             {/* Туслах сан дуусах*/}
             {/* Нуугдмал санд нэмэх */}

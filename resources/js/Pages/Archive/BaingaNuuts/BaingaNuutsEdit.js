@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import axios from "../../../AxiosUser";
 
-
 const BaingaNuutsEdit = ({
     refreshBaingaNuuts,
     selectedHumrug,
@@ -256,7 +255,6 @@ const BaingaNuutsEdit = ({
                                             className="form-control"
                                             onChange={changeNuuts}
                                             value={nuuts_zereglel}
-                                            readOnly
                                         />
                                     </div>
                                 </div>

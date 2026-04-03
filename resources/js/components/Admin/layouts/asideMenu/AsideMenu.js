@@ -118,6 +118,29 @@ export default function AsideMenu() {
 
         {
             type: "menu",
+            title: "Лавлагаа",
+            icon: "fa fa-th-large",
+            level: [1, 2, 3],
+            subMenu: [
+                {
+                    name: "Баримт бичиг(Лавлагаа)",
+                    url: "/get/searchBarimts",
+                    icon: "fa fa-list",
+                },
+                {
+                    name: "Хадгаламжийн нэгж(Бүртгэл)",
+                    url: "/get/searchNegjs",
+                    icon: "fa fa-list",
+                },
+                {
+                    name: "Баримт бичиг(Бүртгэл)",
+                    url: "/get/logBarimts",
+                    icon: "fa fa-list",
+                },
+            ],
+        },
+        {
+            type: "menu",
             title: "Туслах сан",
             icon: "fa fa-th-large",
             level: [1, 2, 3],

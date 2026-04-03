@@ -5,11 +5,11 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 import BaingaNuutsChildEdit from "./BaingaNuutsChildEdit";
 import BaingaNuutsChildNew from "./BaingaNuutsChildNew";
 import "./Index.css";
-import useAuthPermission from "../../../useAuthPermission";
-import Spinner from "../../../Spinner";
 
 const BaingaNuutsChild = (props) => {
     const [getbaingaNuutsChild, setbaingaNuutsChild] = useState([]);
@@ -20,6 +20,10 @@ const BaingaNuutsChild = (props) => {
     const [previewData, setPreviewData] = useState([]);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
 
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
+
     const [showModal] = useState("modal");
     const { tubshin, loading, error } = useAuthPermission();
 
@@ -27,14 +31,30 @@ const BaingaNuutsChild = (props) => {
     //     refreshbaingaNuutsChild(props.changeDataRow.id);
     // }, []);
 
-    useEffect(() => {
-        // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshbaingaNuutsChild(props.changeDataRow.id);
+    const refreshbaingaNuutsChild = (id) => {
+        axios
+            .post("get/baingaNuutsChild", {
+                _parentID: id,
+            })
+            .then((res) => {
+                setbaingaNuutsChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setbaingaNuutsChild([]); //
+                setTotalRows(0);
+            });
+    };
 
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
+    useEffect(() => {
+        refreshbaingaNuutsChild(props.changeDataRow.id);
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
+        0;
     }, [props.changeDataRow]);
 
     const btnEdit = () => {
@@ -160,16 +180,6 @@ const BaingaNuutsChild = (props) => {
         };
 
         reader.readAsArrayBuffer(file);
-    };
-
-    const refreshbaingaNuutsChild = () => {
-        axios
-            .post("get/baingaNuutsChild", {
-                _parentID: props.changeDataRow.id,
-            })
-            .then((res) => {
-                setbaingaNuutsChild(res.data);
-            });
     };
 
     // const refreshbaingaNuutsChild = (id) => {
@@ -407,10 +417,16 @@ const BaingaNuutsChild = (props) => {
                         data={getbaingaNuutsChild}
                         setdata={setbaingaNuutsChild}
                         columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
                         onRowClick={(rowData, rowMeta) => {
                             const selectedRow =
                                 getbaingaNuutsChild[rowMeta.dataIndex];
-                            setclickedRowData(selectedRow);
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
                         }}
                         costumToolbar={
                             <CustomToolbar
@@ -445,7 +461,7 @@ const BaingaNuutsChild = (props) => {
                         setRowsSelected={setRowsSelected}
                         refreshbaingaNuutsChild={refreshbaingaNuutsChild}
                         changeDataRow={clickedRowData}
-                        _parentID={props.changeDataRow.id}
+                        parentID={props.changeDataRow.id}
                         isEditBtnClick={isEditBtnClick}
                     />
                 </div>

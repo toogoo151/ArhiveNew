@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\TurnuutsChildImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Log\BaingaIltChildLog;
 
 
 
@@ -23,23 +24,56 @@ class TurNuutsChildController extends Controller
     public function ChildTurNuuts(Request $req)
     {
         try {
-            $baingaNuutsChild = TurNuutsChild::where("hnID", "=", $req->_parentID)
-                ->where("db_arhivturnuuts.user_id", Auth::id())
-                ->orderBy('id', 'desc')
-                // $BaingaNuutsChild = DB::table("db_arhivbaingilt")
-                // ->where("way_parent", "=", $req->_parentID)
-                ->get()
-                ->map(function ($item) {
-                    $item->barimt_ner = $item->barimt_ner ? Crypt::decryptString($item->barimt_ner) : null;
-                    $item->uild_gazar = $item->uild_gazar ? Crypt::decryptString($item->uild_gazar) : null;
-                    $item->aguulga = $item->aguulga ? Crypt::decryptString($item->aguulga) : null;
-                    $item->bichsen_ner = $item->bichsen_ner ? Crypt::decryptString($item->bichsen_ner) : null;
-                    $item->file_ner = $item->file_ner ? Crypt::decryptString($item->file_ner) : null;
-                    return $item;
-                });
-            return $baingaNuutsChild;
+            $query = TurNuutsChild::where("hnID", $req->_parentID)
+                ->where("user_id", Auth::id());
+
+            // 🔹 FILTER (шаардлагатай бол нэмнэ)
+            if ($req->barimt_ner) {
+                $query->where("barimt_ner", "like", "%" . $req->barimt_ner . "%");
+            }
+
+            // 🔹 SORT
+            $sortField = $req->sortField ?? "id";
+            $sortOrder = $req->sortOrder ?? "desc";
+
+            $query->orderBy($sortField, $sortOrder);
+
+            // 🔹 PAGINATION
+            $perPage = $req->perPage ?? 10;
+
+            $data = $query->paginate($perPage);
+
+            // 🔐 decrypt хийх
+            $data->getCollection()->transform(function ($item) {
+                $safeDecrypt = function ($value) {
+                    if (!$value) return $value;
+                    try {
+                        return Crypt::decryptString($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                };
+
+                $item->barimt_ner  = $safeDecrypt($item->barimt_ner);
+                $item->uild_gazar  = $safeDecrypt($item->uild_gazar);
+                $item->aguulga     = $safeDecrypt($item->aguulga);
+                $item->bichsen_ner = $safeDecrypt($item->bichsen_ner);
+                $item->file_ner    = $safeDecrypt($item->file_ner);
+
+                return $item;
+            });
+
+            return response()->json([
+                "data" => $data->items(),
+                "total" => $data->total(),
+                "current_page" => $data->currentPage(),
+            ]);
         } catch (\Throwable $th) {
-            // throw $th;
+            return response()->json([
+                "status" => "error",
+                "msg" => "Татаж чадсангүй.",
+                "error" => $th->getMessage()
+            ], 500);
         }
     }
 
@@ -186,6 +220,35 @@ class TurNuutsChildController extends Controller
                     "msg" => "Мэдээлэл олдсонгүй."
                 ], 404);
             }
+            BaingaIltChildLog::create([
+                'hnID' => $req->hnID,
+                'barimt_ner' => $delete->barimt_ner
+                    ? Crypt::encryptString($delete->barimt_ner)
+                    : null,
+                'uild_gazar' => $delete->uild_gazar
+                    ? Crypt::encryptString($delete->uild_gazar)
+                    : null,
+                'aguulga' => $delete->aguulga
+                    ? Crypt::encryptString($delete->aguulga)
+                    : null,
+                'bichsen_ner' => $delete->bichsen_ner
+                    ? Crypt::encryptString($delete->bichsen_ner)
+                    : null,
+                'barimt_ognoo' => $delete->barimt_ognoo,
+                'barimt_dugaar' => $delete->barimt_dugaar,
+                'irsen_dugaar' => $delete->irsen_dugaar,
+                'yabsan_dugaar' => $delete->yabsan_dugaar,
+                'huudas_too' => $delete->huudas_too,
+                'habsralt_too' => $delete->habsralt_too,
+                'huudas_dugaar' => $delete->huudas_dugaar,
+                'bichsen_ognoo' => $delete->bichsen_ognoo,
+                'h_type' => "6",
+                'successful' => "Устгасан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
 
             if (!empty($delete->file_ner)) {
 
@@ -318,6 +381,30 @@ class TurNuutsChildController extends Controller
             }
 
             // 2b. DB-д хадгалах
+
+            BaingaIltChildLog::create([
+                'hnID' => $req->hnID,
+                'barimt_ner' => Crypt::encryptString($req->barimt_ner),
+                'uild_gazar' => Crypt::encryptString($req->uild_gazar),
+                'aguulga' => Crypt::encryptString($req->aguulga),
+                'bichsen_ner' => Crypt::encryptString($req->bichsen_ner),
+                'file_ner' => Crypt::encryptString($fullURL),
+                'barimt_ognoo' => $req->barimt_ognoo,
+                'barimt_dugaar' => $req->barimt_dugaar,
+                'irsen_dugaar' => $req->irsen_dugaar,
+                'yabsan_dugaar' => $req->yabsan_dugaar,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'huudas_dugaar' => $req->huudas_dugaar,
+                'bichsen_ognoo' => $req->bichsen_ognoo,
+                'h_type' => "6",
+                'successful' => "Нэмсэн",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
+
             $insertBainga = new TurNuutsChild();
             $insertBainga->hnID = $req->hnID;
 
@@ -511,6 +598,29 @@ class TurNuutsChildController extends Controller
                     "msg" => "ID: {$req->id} -тай бичлэг олдсонгүй!"
                 ], 404);
             }
+
+            BaingaIltChildLog::create([
+                'hnID' => $req->hnID,
+                'barimt_ner' => Crypt::encryptString($req->barimt_ner),
+                'uild_gazar' => Crypt::encryptString($req->uild_gazar),
+                'aguulga' => Crypt::encryptString($req->aguulga),
+                'bichsen_ner' => Crypt::encryptString($req->bichsen_ner),
+                'file_ner' => Crypt::encryptString($fullURL),
+                'barimt_ognoo' => $req->barimt_ognoo,
+                'barimt_dugaar' => $req->barimt_dugaar,
+                'irsen_dugaar' => $req->irsen_dugaar,
+                'yabsan_dugaar' => $req->yabsan_dugaar,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'huudas_dugaar' => $req->huudas_dugaar,
+                'bichsen_ognoo' => $req->bichsen_ognoo,
+                'h_type' => "6",
+                'successful' => "Зассан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
 
             $edit->barimt_ner = Crypt::encryptString($req->barimt_ner);
             $edit->uild_gazar = Crypt::encryptString($req->uild_gazar);

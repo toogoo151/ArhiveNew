@@ -11,6 +11,8 @@ use Redirect, Response, File;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Crypt;
 use App\Imports\TurNuutsImport;
+use App\Log\HnNuuts;
+
 
 
 class TurNuutsController extends Controller
@@ -43,6 +45,50 @@ class TurNuutsController extends Controller
     {
         try {
             $delete = TurNuuts::find($req->id);
+            if (!$delete) {
+                return response([
+                    "status" => "error",
+                    "msg" => "Мэдээлэл олдсонгүй."
+                ], 404);
+            }
+            HnNuuts::create([
+                'humrug_id' => $delete->humrug_id,
+                'dans_id' => $delete->dans_id,
+                'hn_turul' => 0,
+                'hn_dd' => $delete->hn_dd,
+
+                'hn_zbn' => $delete->hn_zbn
+                    ? Crypt::encryptString($delete->hn_zbn)
+                    : null,
+
+                'hereg_burgtel' => $delete->hereg_burgtel,
+
+                'nuuts_zereglel' => $delete->nuuts_zereglel
+                    ? Crypt::encryptString($delete->nuuts_zereglel)
+                    : null,
+
+                'hn_garchig' => $delete->hn_garchig
+                    ? Crypt::encryptString($delete->hn_garchig)
+                    : null,
+
+                'harya_on' => $delete->harya_on,
+                'on_ehen' => $delete->on_ehen,
+                'on_suul' => $delete->on_suul,
+                'huudas_too' => $delete->huudas_too,
+                'habsralt_too' => $delete->habsralt_too,
+                'jagsaalt_zuildugaar' => $delete->jagsaalt_zuildugaar,
+
+                'hn_tailbar' => $delete->hn_tailbar
+                    ? Crypt::encryptString($delete->hn_tailbar)
+                    : null,
+
+                'h_type' => "6",
+                'successful' => "Устгасан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => request()->ip(),
+            ]);
             $delete->delete();
             return response(
                 array(
@@ -76,6 +122,30 @@ class TurNuutsController extends Controller
         // ]);
 
         try {
+            HnNuuts::create([
+                'humrug_id' => $req->humrug_id,
+                'dans_id' => $req->dans_id,
+                'hn_turul' => 2,
+                'hn_dd' => $req->hn_dd,
+                'hn_zbn' => Crypt::encryptString($req->hn_zbn),
+                'hereg_burgtel' => $req->hereg_burgtel,
+                'nuuts_zereglel' => Crypt::encryptString($req->nuuts_zereglel),
+                'hn_garchig' => Crypt::encryptString($req->hn_garchig),
+                'harya_on' => $req->harya_on,
+                'on_ehen' => $req->on_ehen,
+                'on_suul' => $req->on_suul,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'jagsaalt_zuildugaar' => $req->jagsaalt_zuildugaar,
+                'hn_tailbar' => Crypt::encryptString($req->hn_tailbar),
+                'h_type' => "6",
+                'successful' => "Нэмсэн",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
+
             $insertTurNuuts = new TurNuuts();
             $insertTurNuuts->humrug_id = $req->humrug_id;
             $insertTurNuuts->dans_id = $req->dans_id;
@@ -110,6 +180,31 @@ class TurNuutsController extends Controller
     public function EditTurNuuts(Request $req)
     {
         try {
+
+            HnNuuts::create([
+                'humrug_id' => $req->humrug_id,
+                'dans_id' => $req->dans_id,
+                'hn_turul' => 2,
+                'hn_dd' => $req->hn_dd,
+                'hn_zbn' => Crypt::encryptString($req->hn_zbn),
+                'hereg_burgtel' => $req->hereg_burgtel,
+                'nuuts_zereglel' => Crypt::encryptString($req->nuuts_zereglel),
+                'hn_garchig' => Crypt::encryptString($req->hn_garchig),
+                'harya_on' => $req->harya_on,
+                'on_ehen' => $req->on_ehen,
+                'on_suul' => $req->on_suul,
+                'huudas_too' => $req->huudas_too,
+                'habsralt_too' => $req->habsralt_too,
+                'jagsaalt_zuildugaar' => $req->jagsaalt_zuildugaar,
+                'hn_tailbar' => Crypt::encryptString($req->hn_tailbar),
+                'h_type' => "6",
+                'successful' => "Зассан",
+                'user_angiID' => Auth::user()->angi_id,
+                'user_salbarID' => Auth::user()->salbar_id,
+                'user_id' => Auth::user()->id,
+                'user_ip' => $req->ip(),
+            ]);
+
             $edit = TurNuuts::find($req->id);
             $edit->humrug_id = $req->humrug_id;
             $edit->dans_id = $req->dans_id;

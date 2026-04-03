@@ -290,7 +290,7 @@ class StatisticController extends Controller
         $endYear = $request->endYear ? (int) $request->endYear : null;
 
         $q = DB::table('db_arhivbaingahad')
-            ->join('db_arhivdans', 'db_arhivdans.desk_id', '=', 'db_arhivbaingahad.dans_id')
+            ->join('db_arhivdans', 'db_arhivdans.id', '=', 'db_arhivbaingahad.dans_id')
             ->where('db_arhivbaingahad.user_id', $this->userId())
             ->where('db_arhivbaingahad.hadgalamj_turul', 1)
             ->select(
@@ -337,7 +337,6 @@ class StatisticController extends Controller
                         $sanhuuCount++;
                     }
                 }
-
             } catch (\Exception $e) {
                 \Log::error($e->getMessage());
             }

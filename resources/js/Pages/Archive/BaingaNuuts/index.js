@@ -6,14 +6,14 @@ import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
+import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 import BaingaHadgalahHugatsaa from "../BaingaIlts/BaingaHadgalahHugatsaa";
 import BaingaIltNuutsShiljuuleh from "./BaingaIltNuutsShiljuuleh";
 import BaingaNuutsChild from "./BaingaNuutsChild";
 import BaingaNuutsEdit from "./BaingaNuutsEdit";
 import BaingaNuutsNew from "./BaingaNuutsNew";
 import "./Index.css";
-import useAuthPermission from "../../../useAuthPermission";
-import Spinner from "../../../Spinner";
 
 const Index = () => {
     const today = new Date();
@@ -41,13 +41,22 @@ const Index = () => {
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const isDisabled = selectedHumrug === 0 || selectedDans === 0;
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     const [showModal] = useState("modal");
     const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
-        refreshBaingaNuuts();
-    }, [selectedHumrug, selectedDans]);
+        if (selectedHumrug && selectedDans) {
+            console.log("FETCH:", page, rowsPerPage);
+            console.log("TOTAL:", totalRows); // 18s
+            console.log("DATA LENGTH:", getBaingaNuuts.length); // 10
+            console.log("PAGE:", page); // 0 эсвэл 1
+            refreshBaingaNuuts();
+        }
+    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
 
     useEffect(() => {
         setSelectedFile(null);
@@ -56,11 +65,9 @@ const Index = () => {
     }, [selectedHumrug, selectedDans]);
 
     useEffect(() => {
-        if (getBaingaNuuts.length) {
-            console.log("ROW SAMPLE:", getBaingaNuuts[0]);
-            console.log("EXPIRED:", isExpiredRow(getBaingaNuuts[0]));
-        }
-    }, [getBaingaNuuts]);
+        console.log("UPDATED DATA:", getBaingaNuuts);
+        console.log("UPDATED TOTAL:", totalRows);
+    }, [getBaingaNuuts, totalRows]);
 
     const isExpiredRow = (row) => {
         if (!row?.on_suul || !row?.hugatsaa) return false;
@@ -88,6 +95,10 @@ const Index = () => {
     const selectedDansName = getDans.find(
         (d) => d.id === selectedDans
     )?.dans_ner;
+
+    useEffect(() => {
+        setPage(0); // 🔥 reset page
+    }, [selectedHumrug, selectedDans]);
 
     const importExcel = (file) => {
         const formData = new FormData();
@@ -127,42 +138,26 @@ const Index = () => {
         reader.readAsArrayBuffer(file);
     };
     const refreshBaingaNuuts = () => {
-        axios.get("/get/BaingaNuuts").then((res) => {
-            const reversed = [...res.data].reverse();
-            setAllDans(res.data);
-            if (selectedHumrug !== 0 && selectedDans !== 0) {
-                // 🔹 1. Фильтер хийх
-                let filteredData = res.data.filter(
-                    (item) =>
-                        Number(item.humrug_id) === Number(selectedHumrug) &&
-                        Number(item.dans_id) === Number(selectedDans)
-                );
+        if (!selectedHumrug || !selectedDans) {
+            setBaingaNuuts([]);
+            setTotalRows(0);
+            return;
+        }
 
-                // 🔹 2. Хугацаа хэтэрсэн мөрүүдийг дээд талд гаргах
-                filteredData.sort((a, b) => {
-                    const aExpired = isExpiredRow(a) ? 1 : 0;
-                    const bExpired = isExpiredRow(b) ? 1 : 0;
-
-                    // Хугацаа хэтэрсэн = 1 → дээд
-                    return bExpired - aExpired;
-                });
-
-                setBaingaNuuts(filteredData);
-            } else {
-                setBaingaNuuts([]);
-            }
-
-            // if (selectedHumrug !== 0 && selectedDans !== 0) {
-            //     const filteredData = res.data.filter(
-            //         (item) =>
-            //             Number(item.humrug_id) === Number(selectedHumrug) &&
-            //             Number(item.dans_id) === Number(selectedDans)
-            //     );
-            //     setBaingaNuuts(filteredData);
-            // } else {
-            //     setBaingaNuuts([]);
-            // }
-        });
+        axios
+            .get("/get/BaingaNuuts", {
+                params: {
+                    humrug_id: selectedHumrug,
+                    dans_id: selectedDans,
+                    page: page + 1,
+                    perPage: rowsPerPage,
+                },
+            })
+            .then((res) => {
+                console.log("API RESPONSE:", res.data);
+                setBaingaNuuts(res.data.data || []);
+                setTotalRows(res.data.totalRows || 0);
+            });
     };
 
     useEffect(() => {
@@ -564,9 +559,19 @@ const Index = () => {
                             бичиг/нууц/{" "}
                         </h4>
                         {/* DATE FILTER */}
-                        <div className="col-md-8 mb-3">
-                            <div className="input-group">
-                                <span className="input-group-text">
+                        <div
+                            className="col-md-8 mb-2"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                flexWrap: "wrap",
+                                fontWeight: 500,
+                                fontSize: "12px",
+                            }}
+                        >
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text py-1 px-2">
                                     Хөмрөг:
                                 </span>
 
@@ -1171,7 +1176,36 @@ const Index = () => {
                                             data={getBaingaNuuts}
                                             setdata={setBaingaNuuts}
                                             columns={columns}
+                                            isServerSide={true}
+                                            count={totalRows}
+                                            page={page}
+                                            rowsPerPage={rowsPerPage}
+                                            setPage={setPage}
+                                            setRowsPerPage={setRowsPerPage}
                                             options={{
+                                                // serverSide: true,
+                                                // count: totalRows,
+
+                                                // page: page,
+                                                // rowsPerPage: rowsPerPage,
+                                                onTableChange: (
+                                                    action,
+                                                    tableState
+                                                ) => {
+                                                    switch (action) {
+                                                        case "changePage":
+                                                            setPage(
+                                                                tableState.page
+                                                            );
+                                                            break;
+                                                        case "changeRowsPerPage":
+                                                            setRowsPerPage(
+                                                                tableState.rowsPerPage
+                                                            );
+                                                            break;
+                                                    }
+                                                },
+
                                                 setRowProps: (
                                                     row,
                                                     dataIndex
@@ -1188,6 +1222,7 @@ const Index = () => {
                                                             },
                                                         };
                                                     }
+                                                    return {};
                                                 },
                                             }}
                                             costumToolbar={
@@ -1204,7 +1239,7 @@ const Index = () => {
                                                     buttonName="Нэмэх"
                                                     excelDownloadData={
                                                         getBaingaNuuts
-                                                    }
+                                                    } // ⚠️ зөвхөн current page
                                                     excelHeaders={excelHeaders}
                                                     excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /нууц/"
                                                     isHideInsert={isRestricted}
@@ -1215,14 +1250,12 @@ const Index = () => {
                                                                 0 ||
                                                             selectedDans === 0
                                                         ) {
-                                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
                                                             Swal.fire({
                                                                 icon: "warning",
                                                                 title: "Анхааруулга",
                                                                 text: "Хөмрөг болон дансны дугаар сонгоно уу!",
                                                             });
                                                         }
-                                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
                                                     }}
                                                 />
                                             }

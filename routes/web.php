@@ -30,6 +30,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RetentionController;
 use App\Http\Controllers\SecretTypeController;
 use App\Http\Controllers\ErhzuiController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\LogController;
+
+
+
+
 
 
 
@@ -323,9 +329,9 @@ Route::post('/import/BaingaIltsChild', [BaingaIltChildController::class, 'import
 
 
 ///Байнга хадгалах Нууц start
-Route::get("/get/BaingaNuuts", function () {
+Route::get("/get/BaingaNuuts",  function (Request $request) {
     $baingaNuuts = new BaingaNuuts();
-    return $baingaNuuts->getBaingaNuuts();
+    return $baingaNuuts->getBaingaNuuts($request);
 });
 
 Route::get("/get/DansburtgelNuuts/{humrugID}", function ($humrugID) {
@@ -350,6 +356,7 @@ Route::get("/get/archiveBaingaNuuts", function () {
     return $ArchiveBaingNuuts->getArchiveBaingNuuts();
 });
 
+
 //nuuts archive shiljuuleh end
 
 
@@ -367,9 +374,9 @@ Route::post('/import/BaingaNuutsChild', [BaingaNuutsChildController::class, 'imp
 
 
 ///Түр хадгалах Нууц start
-Route::get("/get/TurNuuts", function () {
+Route::get("/get/TurNuuts", function (Request $request) {
     $turNuuts = new TurNuuts();
-    return $turNuuts->getTurNuuts();
+    return $turNuuts->getTurNuuts($request);
 });
 
 Route::get("/get/DansburtgelTurNuuts/{humrugID}", function ($humrugID) {
@@ -415,9 +422,9 @@ Route::post('/import/TurNuutsChild', [TurNuutsChildController::class, 'importTur
 // });
 
 // Түр хадгалах Илт start
-Route::get("/get/TurIlt", function () {
+Route::get("/get/TurIlt", function (Request $request) {
     $turIlt = new TurIlt();
-    return $turIlt->getTurIlt();
+    return $turIlt->getTurIlt($request);
 });
 
 Route::get("/get/DansburtgelTurIlt/{humrugID}", function ($humrugID) {
@@ -458,10 +465,14 @@ Route::post("/import/TurIltChild", [TurIltChildController::class, "importTurIltC
 
 
 //Dalan jil Hunii Nuuts start
-Route::get("/get/DalanJilHun", function () {
+Route::get("/get/DalanJilHun", function (Request $request) {
     $dalanjilHun = new DalanJilHun();
-    return $dalanjilHun->getDalanJilHun();
+    return $dalanjilHun->getDalanJilHun($request);
 });
+// Route::get("/get/BaingaIlt", function (Request $request) {
+//     $baingaIlt = new BaingaIlt();
+//     return $baingaIlt->getBaingaIlt($request);
+// });
 
 Route::get("/get/DansburtgelDalanjilHun/{humrugID}", function ($humrugID) {
     $dalanjilHun = new DalanJilHun();
@@ -502,9 +513,9 @@ Route::get("/get/ArchiveDHun", function () {
 
 
 //Dalan jil Sanhuu start
-Route::get("/get/DalanJilSanhuu", function () {
+Route::get("/get/DalanJilSanhuu",  function (Request $request) {
     $DalanJilSanhuu = new DalanJilSanhuu();
-    return $DalanJilSanhuu->getDalanJilSanhuu();
+    return $DalanJilSanhuu->getDalanJilSanhuu($request);
 });
 
 Route::get("/get/DansburtgelDalanjilSanhuu/{humrugID}", function ($humrugID) {
@@ -680,6 +691,14 @@ Route::get("/get/SecretTypeTuslah", function () {
 
 Route::post('/import/SecretTypeTuslah', [SecretTypeController::class, 'importSecretTypeTuslah']);
 //Туслах hide table end
+
+
+//Search heseg start
+
+//Search heseg end
+Route::get("/get/SearchBarimt", [SearchController::class, "getSearchBarimt"]);
+Route::get("/get/LogNegj", [LogController::class, "getLogNegj"]);
+
 
 
 

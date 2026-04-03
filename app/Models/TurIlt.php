@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Http\Request;
 
 class TurIlt extends Model
 {
@@ -44,21 +45,20 @@ class TurIlt extends Model
     //     });
     // }
 
-    public function getTurIlt()
+    public function getTurIlt(Request $request)
     {
         try {
-            $baingaIlt = DB::table("db_arhivbaingahad")
+            $query = DB::table("db_arhivbaingahad")
                 ->where("db_arhivbaingahad.user_id", Auth::id())
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
+                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
                     $join->on(
                         "jagsaaltzuildugaar.barimt_dd",
                         "=",
                         "db_arhivbaingahad.jagsaalt_zuildugaar"
-                    )
-                        ->where("jagsaaltzuildugaar.userID", Auth::id());
+                    )->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
-                ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
                 ->select(
                     "db_arhivbaingahad.*",
                     "db_humrug.humrug_ner",
@@ -67,58 +67,81 @@ class TurIlt extends Model
                     "db_arhivdans.hadgalah_hugatsaa",
                     "jagsaaltzuildugaar.hugatsaa as hugatsaa"
                 )
-                ->where("hadgalamj_turul", "=", "2")
+                ->where("hadgalamj_turul", "2")
                 ->where(function ($query) {
                     $query->whereNull("ustgasan_temdeglel")
                         ->orWhere("ustgasan_temdeglel", "");
-                })
-                ->orderByDesc("db_arhivbaingahad.id")
-                ->get();
+                });
 
 
-            foreach ($baingaIlt as $row) {
+            if ($request->humrug_id) {
+                $query->where("db_arhivbaingahad.humrug_id", $request->humrug_id);
+            }
+
+            if ($request->dans_id) {
+                $query->where("db_arhivbaingahad.dans_id", $request->dans_id);
+            }
+
+
+            $perPage = $request->perPage ?? 10;
+            $data = $query->orderByDesc("db_arhivbaingahad.id")
+                ->paginate($perPage);
+
+
+            foreach ($data->items() as $row) {
                 try {
-                    if ($row->hadgalamj_garchig) {
+                    if ($row->hadgalamj_garchig)
                         $row->hadgalamj_garchig = Crypt::decryptString($row->hadgalamj_garchig);
-                    }
 
-                    if ($row->hadgalamj_zbn) {
+                    if ($row->hadgalamj_zbn)
                         $row->hadgalamj_zbn = Crypt::decryptString($row->hadgalamj_zbn);
-                    }
 
-                    if ($row->hn_tailbar) {
+                    if ($row->hn_tailbar)
                         $row->hn_tailbar = Crypt::decryptString($row->hn_tailbar);
-                    }
 
-                    if ($row->humrug_ner) {
+                    if ($row->humrug_ner)
                         $row->humrug_ner = Crypt::decryptString($row->humrug_ner);
-                    }
 
-                    if ($row->dans_ner) {
+                    if ($row->dans_ner)
                         $row->dans_ner = Crypt::decryptString($row->dans_ner);
-                    }
 
-                    if ($row->dans_baidal) {
+                    if ($row->dans_baidal)
                         $row->dans_baidal = Crypt::decryptString($row->dans_baidal);
-                    }
 
-                    if ($row->hadgalah_hugatsaa) {
+                    if ($row->hadgalah_hugatsaa)
                         $row->hadgalah_hugatsaa = Crypt::decryptString($row->hadgalah_hugatsaa);
-                    }
                 } catch (\Exception $e) {
-                    // decrypt алдаа гарвал original утгыг үлдээнэ
                 }
             }
 
-            return $baingaIlt;
+            // 🔥 EXPIRED SORT (pagination дотор)
+            $sorted = collect($data->items())->sortByDesc(function ($row) {
+                if (!$row->on_suul || !$row->hugatsaa) return 0;
+
+                $years = intval($row->hugatsaa);
+                if ($years >= 70) return 0;
+
+                try {
+                    $end = \Carbon\Carbon::parse($row->on_suul)->addYears($years);
+                    return $end->isPast() ? 1 : 0;
+                } catch (\Exception $e) {
+                    return 0;
+                }
+            })->values();
+
+            return response()->json([
+                "data" => $sorted,
+                "total" => $data->total(),
+                "current_page" => $data->currentPage()
+            ]);
         } catch (\Throwable $th) {
             return response([
                 "status" => "error",
-                "msg" => "Татаж чадсангүй."
+                "msg" => "татаж чадсангүй.",
+                "error" => $th->getMessage()
             ], 500);
         }
     }
-
     public function getArchiveBaingIlt()
     {
         try {

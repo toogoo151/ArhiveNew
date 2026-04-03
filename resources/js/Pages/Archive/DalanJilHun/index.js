@@ -13,8 +13,8 @@ import DalanJilhunChild from "./DalanJilhunChild";
 import DalanJilhunShiljuuleh from "./DalanJilhunShiljuuleh";
 import "./Index.css";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const Index = () => {
     const today = new Date();
@@ -31,6 +31,10 @@ const Index = () => {
     const [allDans, setAllDans] = useState([]); // анхны бүх дата
     const [selectedHumrug, setSelectedHumrug] = useState(0);
     const [selectedDans, setselectedDans] = useState(0);
+
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [total, setTotal] = useState(0);
     //select
 
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -52,9 +56,14 @@ const Index = () => {
     const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
-        refreshDalHun();
-        console.log(getDans);
-    }, [selectedHumrug, selectedDans]);
+        if (selectedHumrug && selectedDans) {
+            console.log("FETCH:", page, rowsPerPage);
+            console.log("TOTAL:", total); // 18s
+            console.log("DATA LENGTH:", getDalHun.length); // 10
+            console.log("PAGE:", page); // 0 эсвэл 1
+            refreshDalHun();
+        }
+    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
 
     useEffect(() => {
         setSelectedFile(null);
@@ -63,11 +72,21 @@ const Index = () => {
     }, [selectedHumrug, selectedDans]);
 
     useEffect(() => {
+        console.log("UPDATED DATA:", getDalHun);
+        console.log("UPDATED TOTAL:", total);
+    }, [getDalHun, total]);
+
+    useEffect(() => {
         if (getDalHun.length) {
             console.log("ROW SAMPLE:", getDalHun[0]);
             console.log("EXPIRED:", isExpiredRow(getDalHun[0]));
         }
     }, [getDalHun]);
+
+    useEffect(() => {
+        setPage(0); // 🔥 reset page
+    }, [selectedHumrug, selectedDans]);
+
     const isExpiredRow = (row) => {
         if (!row?.on_suul || !row?.hugatsaa) return false;
 
@@ -133,33 +152,23 @@ const Index = () => {
         reader.readAsArrayBuffer(file);
     };
 
-    const refreshDalHun = () => {
-        axios.get("/get/DalanJilHun").then((res) => {
-            const reversed = [...res.data].reverse();
-            setAllDans(res.data);
+    const refreshDalHun = async () => {
+        try {
+            const res = await axios.get("/get/DalanJilHun", {
+                params: {
+                    humrug_id: selectedHumrug || null,
+                    dans_id: selectedDans || null,
+                    page: page + 1,
+                    perPage: rowsPerPage,
+                },
+            });
 
-            if (selectedHumrug !== 0 && selectedDans !== 0) {
-                // 🔹 1. Фильтер хийх
-                let filteredData = res.data.filter(
-                    (item) =>
-                        Number(item.humrug_id) === Number(selectedHumrug) &&
-                        Number(item.dans_id) === Number(selectedDans)
-                );
-
-                // 🔹 2. Хугацаа хэтэрсэн мөрүүдийг дээд талд гаргах
-                filteredData.sort((a, b) => {
-                    const aExpired = isExpiredRow(a) ? 1 : 0;
-                    const bExpired = isExpiredRow(b) ? 1 : 0;
-
-                    // Хугацаа хэтэрсэн = 1 → дээд
-                    return bExpired - aExpired;
-                });
-
-                setDalHun(filteredData);
-            } else {
-                setDalHun([]);
-            }
-        });
+            setAllDans(res.data.data); // бүх data
+            setDalHun(res.data.data); // filtered + expired sort
+            setTotal(res.data.total); // pagination-д хэрэгтэй нийт record
+        } catch (err) {
+            console.error("Failed to fetch DalanJilHun:", err);
+        }
     };
 
     const btnArchive = () => {
@@ -503,9 +512,20 @@ const Index = () => {
                             бичиг/Хүний нөөц/{" "}
                         </h4>
                         {/* DATE FILTER */}
-                        <div className="col-md-8 mb-3">
-                            <div className="input-group">
-                                <span className="input-group-text">
+                        <div
+                            className="col-md-8 mb-2"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                flexWrap: "wrap",
+                                fontWeight: 500,
+                                fontSize: "12px",
+                            }}
+                        >
+                            {" "}
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text py-1 px-2">
                                     Хөмрөг:
                                 </span>
 
@@ -886,6 +906,34 @@ const Index = () => {
                                             setdata={setDalHun}
                                             columns={columns}
                                             options={{
+                                                serverSide: true, // 🔥 ЧУХАЛ
+                                                count: total, // нийт row
+                                                page: page,
+                                                rowsPerPage: rowsPerPage,
+
+                                                onTableChange: (
+                                                    action,
+                                                    tableState
+                                                ) => {
+                                                    switch (action) {
+                                                        case "changePage":
+                                                            setPage(
+                                                                tableState.page
+                                                            );
+                                                            break;
+
+                                                        case "changeRowsPerPage":
+                                                            setRowsPerPage(
+                                                                tableState.rowsPerPage
+                                                            );
+                                                            setPage(0);
+                                                            break;
+
+                                                        default:
+                                                            break;
+                                                    }
+                                                },
+
                                                 setRowProps: (
                                                     row,
                                                     dataIndex
