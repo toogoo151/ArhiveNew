@@ -95,6 +95,8 @@ class User extends Authenticatable
             ->where('salbar_id', $user->salbar_id);
     }
 
+
+
     public function getUser()
     {
         try {
@@ -113,8 +115,12 @@ class User extends Authenticatable
                 // if (isset($u->hereglegch_ner)) {
                 //     $u->hereglegch_ner = self::decryptIfNeeded($u->hereglegch_ner);
                 // }
+
                 if (isset($u->salbar)) {
                     $u->salbar = self::decryptIfNeeded($u->salbar);
+                }
+                if (isset($u->ner)) {
+                    $u->ner = self::decryptIfNeeded($u->ner);
                 }
                 return $u;
             });

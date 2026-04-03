@@ -9,23 +9,34 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+
 
 
 
 
 class StatisticController extends Controller
 {
-    private function userId()
+    // private function userId()
+    // {
+    //     // All statistic endpoints should be user-scoped (auth middleware required)
+    //     return Auth::id();
+    // }
+    public function scopeForCurrentOrg($query, $user)
     {
-        // All statistic endpoints should be user-scoped (auth middleware required)
-        return Auth::id();
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
     }
 
 
 
     public function ClassCount(Request $req)
     {
-        $angiCount = DB::table("db_angi")->count();
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
+        $angiCount = DB::table("db_angi")
+            ->whereIn("db_angi.user_id", $sharedUserIds)
+            ->count();
         return $angiCount;
     }
     public function UserCount(Request $req)
@@ -35,24 +46,29 @@ class StatisticController extends Controller
     }
     public function HutheregCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $HutheregCount = DB::table("db_huthereg")
-            ->where("userID", $this->userId())
+            ->whereIn("db_huthereg.userID", $sharedUserIds)
             ->count();
         return $HutheregCount;
     }
     // GANBAT NEMSEN START
     public function BaingaILtCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
         $BaingIltCount = DB::table("db_arhivbaingahad")
-            ->where("user_id", $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where("hadgalamj_turul", 0)
             ->count();
         return $BaingIltCount;
     }
     public function BaingaNuutsCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $BaingaNuutsCount = DB::table("db_arhivhnnuuts")
-            ->where("user_id", $this->userId())
+            ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
             ->where("hn_turul", 0)
             ->count();
         return $BaingaNuutsCount;
@@ -60,8 +76,11 @@ class StatisticController extends Controller
 
     public function TurIltCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $TurIltCount = DB::table("db_arhivbaingahad")
-            ->where("user_id", $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
+
             ->where("hadgalamj_turul", 2)
             ->count();
         return $TurIltCount;
@@ -69,8 +88,10 @@ class StatisticController extends Controller
 
     public function TurNuutsCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $TurNuutsCount = DB::table("db_arhivhnnuuts")
-            ->where("user_id", $this->userId())
+            ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
             ->where("hn_turul", 2)
             ->count();
         return $TurNuutsCount;
@@ -78,38 +99,48 @@ class StatisticController extends Controller
 
     public function JagsaaltCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $JagsaaltCount = DB::table("jagsaaltzuildugaar")
-            ->where("userID", $this->userId())
+            ->whereIn("jagsaaltzuildugaar.userID", $sharedUserIds)
             ->count();
         return $JagsaaltCount;
     }
     public function SedevZuiCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $SedevZuiCount = DB::table("arhivsedevzaagch")
-            ->where("userID", $this->userId())
+            ->whereIn("arhivsedevzaagch.userID", $sharedUserIds)
             ->count();
         return $SedevZuiCount;
     }
     public function NomCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $NomCount = DB::table("arhivashignom")
-            ->where("userID", $this->userId())
+            ->whereIn("arhivashignom.userID", $sharedUserIds)
             ->count();
         return $NomCount;
     }
     public function TovchCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $TovchCount = DB::table("arhivtovchlol")
-            ->where("userID", $this->userId())
+            ->whereIn("arhivtovchlol.userID", $sharedUserIds)
             ->count();
         return $TovchCount;
     }
 
     public function DalanJilHRCount(Request $req)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $DalanJilHRCount = DB::table("db_arhivbaingahad")
-            ->where("user_id", $this->userId())
-            ->where("dans_id", "1")
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
+            // ->where("dans_id", "1")
             ->count();
         return $DalanJilHRCount;
     }
@@ -122,6 +153,8 @@ class StatisticController extends Controller
      */
     public function graphicYearCounts(Request $request)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $year = (int) $request->year;
         if ($year < 1900 || $year > 2100) {
             return response()->json([
@@ -138,25 +171,25 @@ class StatisticController extends Controller
         };
 
         $baingaIlt = DB::table('db_arhivbaingahad')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('hadgalamj_turul', 0)
             ->where($haryaCondition)
             ->count();
 
         $baingaNuuts = DB::table('db_arhivhnnuuts')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('hn_turul', 0)
             ->where($haryaCondition)
             ->count();
 
         $turIlt = DB::table('db_arhivbaingahad')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('hadgalamj_turul', 2)
             ->where($haryaCondition)
             ->count();
 
         $turNuuts = DB::table('db_arhivhnnuuts')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('hn_turul', 2)
             ->where($haryaCondition)
             ->count();
@@ -197,27 +230,28 @@ class StatisticController extends Controller
             $haryaOnValues[] = 'year/' . $y;
             $haryaOnValues[] = (string) $y;
         }
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
 
         $baingaIlt = DB::table('db_arhivbaingahad')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('hadgalamj_turul', 0)
             ->whereIn('harya_on', $haryaOnValues)
             ->count();
 
         $baingaNuuts = DB::table('db_arhivhnnuuts')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
             ->where('hn_turul', 0)
             ->whereIn('harya_on', $haryaOnValues)
             ->count();
 
         $turIlt = DB::table('db_arhivbaingahad')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('hadgalamj_turul', 2)
             ->whereIn('harya_on', $haryaOnValues)
             ->count();
 
         $turNuuts = DB::table('db_arhivhnnuuts')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
             ->where('hn_turul', 2)
             ->whereIn('harya_on', $haryaOnValues)
             ->count();
@@ -237,10 +271,12 @@ class StatisticController extends Controller
     public function graphicAvailableYears(Request $request)
     {
         $years = [];
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
 
         // Get distinct harya_on from db_arhivbaingahad
         $baingaYears = DB::table('db_arhivbaingahad')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->whereNotNull('harya_on')
             ->where('harya_on', '!=', '')
             ->distinct()
@@ -249,7 +285,7 @@ class StatisticController extends Controller
 
         // Get distinct harya_on from db_arhivhnnuuts
         $nuutsYears = DB::table('db_arhivhnnuuts')
-            ->where('user_id', $this->userId())
+            ->whereIn("db_arhivhnnuuts.user_id", $sharedUserIds)
             ->whereNotNull('harya_on')
             ->where('harya_on', '!=', '')
             ->distinct()
@@ -286,12 +322,14 @@ class StatisticController extends Controller
 
     public function graphic70YearCounts(Request $request)
     {
+        $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+
         $startYear = $request->startYear ? (int) $request->startYear : null;
         $endYear = $request->endYear ? (int) $request->endYear : null;
 
         $q = DB::table('db_arhivbaingahad')
             ->join('db_arhivdans', 'db_arhivdans.id', '=', 'db_arhivbaingahad.dans_id')
-            ->where('db_arhivbaingahad.user_id', $this->userId())
+            ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
             ->where('db_arhivbaingahad.hadgalamj_turul', 1)
             ->select(
                 'db_arhivdans.hadgalah_hugatsaa',

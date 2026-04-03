@@ -131,12 +131,13 @@ export default function AsideMenu() {
                     name: "Хадгаламжийн нэгж(Бүртгэл)",
                     url: "/get/searchNegjs",
                     icon: "fa fa-list",
+                    level: [2, 3],
                 },
-                {
-                    name: "Баримт бичиг(Бүртгэл)",
-                    url: "/get/logBarimts",
-                    icon: "fa fa-list",
-                },
+                // {
+                //     name: "Баримт бичиг(Бүртгэл)",
+                //     url: "/get/logBarimts",
+                //     icon: "fa fa-list",
+                // },
             ],
         },
         {
@@ -145,11 +146,17 @@ export default function AsideMenu() {
             icon: "fa fa-th-large",
             level: [1, 2, 3],
             subMenu: [
-                { name: "Хөмрөг", url: "/get/humrugs", icon: "fa fa-list" },
+                {
+                    name: "Хөмрөг",
+                    url: "/get/humrugs",
+                    icon: "fa fa-list",
+                    level: [2, 3],
+                },
                 {
                     name: "Данс бүртгэл",
                     url: "/get/DansBurtgels",
                     icon: "fa fa-list",
+                    level: [2, 3],
                 },
 
                 // GANBAT NEMSEN START
@@ -401,149 +408,161 @@ export default function AsideMenu() {
                                                     : "none",
                                             }}
                                         >
-                                            {item.subMenu.map((sub, i) => {
-                                                /** 🔹 Данс бүртгэл (children-тэй) */
-                                                if (sub.children) {
-                                                    const key = `${idx}-${i}`;
-                                                    const isSubOpen =
-                                                        openSubMenu[key] ||
-                                                        false;
+                                            {item.subMenu
+                                                .filter(
+                                                    (sub) =>
+                                                        !sub.level ||
+                                                        sub.level.includes(
+                                                            Number(getTuvshin)
+                                                        )
+                                                )
+                                                .map((sub, i) => {
+                                                    /** 🔹 Данс бүртгэл (children-тэй) */
+                                                    if (sub.children) {
+                                                        const key = `${idx}-${i}`;
+                                                        const isSubOpen =
+                                                            openSubMenu[key] ||
+                                                            false;
 
-                                                    return (
-                                                        <li
-                                                            key={key}
-                                                            className={`nav-item ${
-                                                                isSubOpen
-                                                                    ? "menu-open"
-                                                                    : ""
-                                                            }`}
-                                                        >
-                                                            <a
-                                                                className="nav-link"
-                                                                onClick={() =>
-                                                                    setOpenSubMenu(
-                                                                        (
-                                                                            p
-                                                                        ) => ({
-                                                                            ...p,
-                                                                            [key]: !p[
-                                                                                key
-                                                                            ],
-                                                                        })
-                                                                    )
-                                                                }
-                                                                style={{
-                                                                    cursor: "pointer",
-                                                                    paddingLeft: 30,
-                                                                }}
+                                                        return (
+                                                            <li
+                                                                key={key}
+                                                                className={`nav-item ${
+                                                                    isSubOpen
+                                                                        ? "menu-open"
+                                                                        : ""
+                                                                }`}
                                                             >
-                                                                <i
-                                                                    className={
-                                                                        sub.icon
+                                                                <a
+                                                                    className="nav-link"
+                                                                    onClick={() =>
+                                                                        setOpenSubMenu(
+                                                                            (
+                                                                                p
+                                                                            ) => ({
+                                                                                ...p,
+                                                                                [key]: !p[
+                                                                                    key
+                                                                                ],
+                                                                            })
+                                                                        )
                                                                     }
                                                                     style={{
-                                                                        marginRight: 12,
-                                                                        fontSize: 16,
-                                                                        width: 18,
-                                                                        textAlign:
-                                                                            "center",
+                                                                        cursor: "pointer",
+                                                                        paddingLeft: 30,
                                                                     }}
-                                                                />
-                                                                {/* <i
+                                                                >
+                                                                    <i
+                                                                        className={
+                                                                            sub.icon
+                                                                        }
+                                                                        style={{
+                                                                            marginRight: 12,
+                                                                            fontSize: 16,
+                                                                            width: 18,
+                                                                            textAlign:
+                                                                                "center",
+                                                                        }}
+                                                                    />
+                                                                    {/* <i
                                                                     className={
                                                                         sub.icon
                                                                     }
                                                                 /> */}
+                                                                    <p>
+                                                                        {
+                                                                            sub.name
+                                                                        }
+                                                                        <i
+                                                                            className="right fa fa-angle-left"
+                                                                            style={{
+                                                                                transition:
+                                                                                    "transform 0.25s ease",
+                                                                                transform:
+                                                                                    isSubOpen
+                                                                                        ? "rotate(-90deg)"
+                                                                                        : "rotate(0deg)",
+                                                                            }}
+                                                                        />
+                                                                    </p>
+                                                                </a>
+
+                                                                <ul className="nav nav-treeview">
+                                                                    {sub.children.map(
+                                                                        (
+                                                                            child,
+                                                                            c
+                                                                        ) => (
+                                                                            <li
+                                                                                key={
+                                                                                    c
+                                                                                }
+                                                                                className="nav-item"
+                                                                            >
+                                                                                <Link
+                                                                                    to={
+                                                                                        child.url
+                                                                                    }
+                                                                                    className="nav-link"
+                                                                                    style={{
+                                                                                        paddingLeft: 45,
+                                                                                        borderRadius: 8,
+                                                                                        color:
+                                                                                            currentUrl ===
+                                                                                            child.url
+                                                                                                ? "#fff"
+                                                                                                : "#cbd5e1",
+                                                                                        background:
+                                                                                            currentUrl ===
+                                                                                            child.url
+                                                                                                ? "linear-gradient(90deg,#667eea,#764ba2)"
+                                                                                                : "transparent",
+                                                                                        transition:
+                                                                                            "all 0.2s ease",
+                                                                                    }}
+                                                                                >
+                                                                                    <i
+                                                                                        className={`nav-icon ${child.icon}`}
+                                                                                    />
+                                                                                    <p>
+                                                                                        {
+                                                                                            child.name
+                                                                                        }
+                                                                                    </p>
+                                                                                </Link>
+                                                                            </li>
+                                                                        )
+                                                                    )}
+                                                                </ul>
+                                                            </li>
+                                                        );
+                                                    }
+
+                                                    /** 🔹 Энгийн submenu */
+                                                    return (
+                                                        <li
+                                                            key={i}
+                                                            className="nav-item"
+                                                        >
+                                                            <Link
+                                                                to={sub.url}
+                                                                className={`nav-link ${
+                                                                    currentUrl ===
+                                                                    sub.url
+                                                                        ? "active"
+                                                                        : ""
+                                                                }`}
+                                                            >
+                                                                <i
+                                                                    className={`nav-icon ${sub.icon}`}
+                                                                />
                                                                 <p>
                                                                     {sub.name}
-                                                                    <i
-                                                                        className="right fa fa-angle-left"
-                                                                        style={{
-                                                                            transition:
-                                                                                "transform 0.25s ease",
-                                                                            transform:
-                                                                                isSubOpen
-                                                                                    ? "rotate(-90deg)"
-                                                                                    : "rotate(0deg)",
-                                                                        }}
-                                                                    />
                                                                 </p>
-                                                            </a>
-
-                                                            <ul className="nav nav-treeview">
-                                                                {sub.children.map(
-                                                                    (
-                                                                        child,
-                                                                        c
-                                                                    ) => (
-                                                                        <li
-                                                                            key={
-                                                                                c
-                                                                            }
-                                                                            className="nav-item"
-                                                                        >
-                                                                            <Link
-                                                                                to={
-                                                                                    child.url
-                                                                                }
-                                                                                className="nav-link"
-                                                                                style={{
-                                                                                    paddingLeft: 45,
-                                                                                    borderRadius: 8,
-                                                                                    color:
-                                                                                        currentUrl ===
-                                                                                        child.url
-                                                                                            ? "#fff"
-                                                                                            : "#cbd5e1",
-                                                                                    background:
-                                                                                        currentUrl ===
-                                                                                        child.url
-                                                                                            ? "linear-gradient(90deg,#667eea,#764ba2)"
-                                                                                            : "transparent",
-                                                                                    transition:
-                                                                                        "all 0.2s ease",
-                                                                                }}
-                                                                            >
-                                                                                <i
-                                                                                    className={`nav-icon ${child.icon}`}
-                                                                                />
-                                                                                <p>
-                                                                                    {
-                                                                                        child.name
-                                                                                    }
-                                                                                </p>
-                                                                            </Link>
-                                                                        </li>
-                                                                    )
-                                                                )}
-                                                            </ul>
+                                                            </Link>
                                                         </li>
                                                     );
-                                                }
-
-                                                /** 🔹 Энгийн submenu */
-                                                return (
-                                                    <li
-                                                        key={i}
-                                                        className="nav-item"
-                                                    >
-                                                        <Link
-                                                            to={sub.url}
-                                                            className={`nav-link ${
-                                                                currentUrl ===
-                                                                sub.url
-                                                                    ? "active"
-                                                                    : ""
-                                                            }`}
-                                                        >
-                                                            <i
-                                                                className={`nav-icon ${sub.icon}`}
-                                                            />
-                                                            <p>{sub.name}</p>
-                                                        </Link>
-                                                    </li>
-                                                );
-                                            })}
+                                                })}
                                         </ul>
                                     </li>
                                 );
