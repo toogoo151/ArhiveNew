@@ -21,7 +21,7 @@ const AngiNew = (props) => {
 
     const formSchema = Yup.object().shape({
         comand_id: Yup.string().required("Командлалаа сонгоно уу."),
-        idangi: Yup.string().required("Ангийн дугаар оруулна уу."),
+        // idangi: Yup.string().required("Ангийн дугаар оруулна уу."),
         ner: Yup.string().required("Ангийн нэр оруулна уу."),
     });
     const {

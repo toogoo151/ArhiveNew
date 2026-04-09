@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\ErhzuiModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
 
 
 class ErhzuiController extends Controller
@@ -75,10 +78,21 @@ class ErhzuiController extends Controller
             ], 500);
         }
     }
+
+    public function scopeForCurrentOrg($query, $user)
+    {
+        $sharedUserIds = User::withSharedAccess($user)->pluck('id');
+        return $query->whereIn('user_id', $sharedUserIds);
+    }
+
     public function GetErhzui()
     {
         try {
-            $erhzui = ErhzuiModel::where("user_id", Auth::id())->orderByDesc("id")->get();
+            $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
+            $erhzui = DB::table("db_erhzui")
+                ->whereIn("db_erhzui.user_id", $sharedUserIds)
+                ->orderByDesc("id")
+                ->get();
             return response(
                 array(
                     "status" => "success",

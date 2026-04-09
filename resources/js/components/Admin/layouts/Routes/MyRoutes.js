@@ -30,9 +30,12 @@ import HomePage from "../../../../Pages/HomePage/HomePage";
 // Туслах санд нэмэх
 import AshigNom from "../../../../Pages/Archive/AshigNom/index";
 import JagsaaltZuil from "../../../../Pages/Archive/JagsaaltZuil/index";
-import Lavlagaa from "../../../../Pages/Archive/Lavlagaa/index";
 import SedevZui from "../../../../Pages/Archive/SedevZui/index";
 import Tovchlol from "../../../../Pages/Archive/TovchilsonUg/index";
+
+// Лавлагаа
+import Lavlagaa from "../../../../Pages/Archive/Lavlagaa/lavlagaa";
+import Huselt from "../../../../Pages/Archive/Lavlagaa/huselt";
 
 // erhzui
 import Erhzui from "../../../../Pages/Archive/ErhZui/index";
@@ -96,7 +99,10 @@ const MyRoutes = (props) => {
             <Route path="/get/dictonaries" element={<AshigNom />} />
             <Route path="/get/tovchilsonug" element={<Tovchlol />} />
             <Route path="/get/erhzui-info" element={<Erhzui />} />
-            <Route path="/get/lavlagaa" element={<Lavlagaa />} />
+
+            {/* Лавлагаа, хүсэлт */}
+            <Route path="/get/lavlagaa-info" element={<Lavlagaa />} />
+            <Route path="/get/huselt-info" element={<Huselt />} />
 
             {/* Лавлагаа */}
             <Route path="/get/searchBarimts" element={<SearchBarimt />} />

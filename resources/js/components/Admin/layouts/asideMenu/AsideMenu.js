@@ -123,7 +123,7 @@ export default function AsideMenu() {
             level: [1, 2, 3],
             subMenu: [
                 {
-                    name: "Баримт бичиг(Лавлагаа)",
+                    name: "Баримт бичиг(Хайлт)",
                     url: "/get/searchBarimts",
                     icon: "fa fa-list",
                 },
@@ -131,6 +131,12 @@ export default function AsideMenu() {
                     name: "Хадгаламжийн нэгж(Бүртгэл)",
                     url: "/get/searchNegjs",
                     icon: "fa fa-list",
+                    level: [2, 3],
+                },
+                {
+                    name: "Хүсэлт, лавлагааны бүртгэл",
+                    url: "/get/huselt-info",
+                    icon: "fa fa-download",
                     level: [2, 3],
                 },
                 // {
@@ -186,11 +192,7 @@ export default function AsideMenu() {
                     url: "/get/erhzui-info",
                     icon: "fa fa-gavel",
                 },
-                {
-                    name: "Лавлагаа",
-                    url: "/get/lavlagaa",
-                    icon: "fa fa-download",
-                },
+
                 // GANBAT NEMSEN END
             ],
         },

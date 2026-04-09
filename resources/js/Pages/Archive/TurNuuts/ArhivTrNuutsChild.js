@@ -1,34 +1,119 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import useAuthPermission from "../../../useAuthPermission";
+import "./Index.css";
+//
+
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const ArhivTrNuutsChild = (props) => {
     const [getTurNuutsChild, setTurNuutsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState([]);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     const [showModal] = useState("modal");
+
     const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshTurNuutsChild(props.changeDataRow.id);
     // }, []);
 
-    useEffect(() => {
-        // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshTurNuutsChild(props.changeDataRow.id);
+    const refreshTurNuutsChild = (id) => {
+        axios
+            .post("get/TurNuutsChild", {
+                _parentID: id,
+            })
+            .then((res) => {
+                setTurNuutsChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setTurNuutsChild([]); //
+                setTotalRows(0);
+            });
+    };
 
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
+    useEffect(() => {
+        refreshTurNuutsChild(props.changeDataRow.id);
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
+        0;
+    }, [props.changeDataRow]);
+
+    const btnEdit = () => {
+        if (!getRowsSelected.length) {
+            Swal.fire("Засах мөр сонгоно уу!");
+            return;
+        }
+
+        const rowIndex = getRowsSelected[0];
+        const rowData = getTurNuutsChild[rowIndex];
+
+        setclickedRowData(rowData); // 🔥 ЭНД өгөгдөл дамжуулна
+        setIsEditBtnClick(true);
+    };
+    const { changeDataRow } = props;
+
+    // const deleteOldFile = (file) => {
+    //     Swal.fire({
+    //         title: "Устгах уу?",
+    //         text: `"${file.filename}" файлыг устгах гэж байна`,
+    //         icon: "warning",
+    //         showCancelButton: true,
+    //         confirmButtonText: "Тийм, устга",
+    //         cancelButtonText: "Болих",
+    //     }).then((result) => {
+    //         if (result.isConfirmed) {
+    //             axios
+    //                 .post("/delete/TurNuutsChildFile", {
+    //                     id: props.changeDataRow.id,
+    //                     file_url: file.url,
+    //                 })
+    //                 .then((res) => {
+    //                     Swal.fire(res.data.msg);
+
+    //                     //  UI дээрээс устгасан файлыг хасна
+    //                     const filtered = oldFiles.filter(
+    //                         (f) => f.url !== file.url
+    //                     );
+    //                     setOldFiles(filtered);
+    //                 })
+    //                 .catch((err) => {
+    //                     Swal.fire(
+    //                         err.response?.data?.msg || "Устгах үед алдаа гарлаа"
+    //                     );
+    //                 });
+    //         }
+    //     });
+    // };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
@@ -47,10 +132,10 @@ const ArhivTrNuutsChild = (props) => {
                     .then((res) => {
                         Swal.fire(res.data.msg);
 
-                        // 🔥 selection цэвэрлэнэ
+                        //  selection цэвэрлэнэ
                         setRowsSelected([]);
 
-                        // 🔥 дахин татна
+                        //  дахин татна
                         refreshTurNuutsChild(props.changeDataRow.id);
                     })
                     .catch((err) => {
@@ -59,43 +144,41 @@ const ArhivTrNuutsChild = (props) => {
             }
         });
     };
-    // Get current authenticated user's tubshin on mount
-    if (loading)
-        return (
-            <div>
-                <Spinner />
-            </div>
-        );
-    if (error) return <p>Алдаа гарлаа</p>;
 
-    const isRestricted = tubshin === 2;
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
 
-    const btnEdit = () => {
-        if (!getRowsSelected.length) {
-            Swal.fire("Засах мөр сонгоно уу!");
-            return;
-        }
-
-        const rowIndex = getRowsSelected[0];
-        const rowData = getTurNuutsChild[rowIndex];
-
-        setclickedRowData(rowData); // 🔥 ЭНД өгөгдөл дамжуулна
-        setIsEditBtnClick(true);
-    };
-    const { changeDataRow } = props;
-
-    const refreshTurNuutsChild = (id) => {
         axios
-            .post("get/TurNuutsChild", {
-                _parentID: id,
-            })
+            .post("/import/TurNuutsChild", formData)
             .then((res) => {
-                // console.log(res.data);
-                setTurNuutsChild(res.data);
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshTurNuutsChild(props.changeDataRow.id);
             })
             .catch((err) => {
-                console.log(err);
+                Swal.fire("Import алдаа");
             });
+    };
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
     };
 
     const config = {
@@ -129,10 +212,152 @@ const ArhivTrNuutsChild = (props) => {
 
     return (
         <>
-            <div className="row clearfix">
+            <div
+                style={{
+                    background: "#ffffff",
+                    borderRadius: "12px",
+                    border: "1px solid #e2e8f0",
+                    overflow: "hidden", // 🔥 чухал (table тасрахгүй)
+                }}
+            >
+                {/* HEADER */}
+                <div
+                    style={{
+                        padding: "14px 18px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid #e2e8f0",
+                        background: "#f8fafc",
+                    }}
+                >
+                    {/* LEFT */}
+                    <div style={{ display: "flex", gap: "30px" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>📁 Дугаар:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hn_dd || "-"}
+                            </span>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>🏷 Гарчиг:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hn_garchig || "-"}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                </div>
+
+                <div style={{ padding: "10px" }}>
+                    <MUIDatatable
+                        data={getTurNuutsChild}
+                        setdata={setTurNuutsChild}
+                        columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
+                        onRowClick={(rowData, rowMeta) => {
+                            const selectedRow =
+                                getTurNuutsChild[rowMeta.dataIndex];
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+                        }}
+                        costumToolbar={
+                            <CustomToolbar
+                                btnClassName={"btn btn-success"}
+                                modelType={"modal"}
+                                dataTargetID={"#TurNuutsChildNew"}
+                                spanIconClassName={"fas fa-solid fa-plus"}
+                                buttonName={"НЭМЭХ"}
+                                excelDownloadData={getTurNuutsChild}
+                                excelHeaders={excelHeaders}
+                                isHideInsert={false}
+                                isHideEdit={false}
+                            />
+                        }
+                        btnEdit={btnEdit}
+                        modelType={showModal}
+                        editdataTargetID={"#TurNuutsChildEdit"}
+                        btnDelete={btnDelete}
+                        avgColumnIndex={-1}
+                        avgColumnName={"email"}
+                        avgName={"Дундаж:"}
+                        getRowsSelected={getRowsSelected}
+                        setRowsSelected={setRowsSelected}
+                        isHideDelete={false}
+                        isHideEdit={false}
+                    />
+                </div>
+            </div>
+            {/* <div className="row clearfix">
                 <div className="info-box">
                     <div className="col-md-12">
                         <h1 className="text-center">БАРИМТ БИЧИГ</h1>
+                        <div
+                            style={{
+                                background: "#f1f5f9",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                marginBottom: "16px",
+                                display: "flex",
+                                gap: "40px",
+                                fontWeight: 600,
+                            }}
+                        >
+                            <div>
+                                📁 Дугаар:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hn_dd || "-"}
+                                </span>
+                            </div>
+
+                            <div>
+                                🏷 Хадгаламжийн гарчиг:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hn_garchig || "-"}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="col-md-12 mb-3">
+                            <label
+                                htmlFor="turNuutsChildExcel"
+                                className="form-label"
+                            >
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+                                <input
+                                    type="file"
+                                    id="turNuutsChildExcel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile);
+                                            setSelectedFile(null);
+                                            document.getElementById(
+                                                "turNuutsChildExcel"
+                                            ).value = null;
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         <MUIDatatable
                             data={getTurNuutsChild}
                             setdata={setTurNuutsChild}
@@ -140,7 +365,7 @@ const ArhivTrNuutsChild = (props) => {
                             onRowClick={(rowData, rowMeta) => {
                                 const selectedRow =
                                     getTurNuutsChild[rowMeta.dataIndex];
-                                setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+                                setclickedRowData(selectedRow);
                             }}
                             costumToolbar={
                                 <CustomToolbar
@@ -167,9 +392,20 @@ const ArhivTrNuutsChild = (props) => {
                             isHideDelete={isRestricted}
                             isHideEdit={isRestricted}
                         />
+                        <TurNuutsChildNew
+                            _parentID={props.changeDataRow.id}
+                            refreshTurNuutsChild={refreshTurNuutsChild}
+                        />
+                        <TurNuutsChildEdit
+                            setRowsSelected={setRowsSelected}
+                            refreshTurNuutsChild={refreshTurNuutsChild}
+                            changeDataRow={clickedRowData}
+                            parentID={props.changeDataRow.id}
+                            isEditBtnClick={isEditBtnClick}
+                        />
                     </div>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };

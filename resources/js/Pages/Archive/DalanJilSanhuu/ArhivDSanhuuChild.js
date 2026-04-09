@@ -5,43 +5,56 @@ import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 
-import useAuthPermission from "../../../useAuthPermission";
-import Spinner from "../../../Spinner";
+import "./Index.css";
 
 const ArhivDSanhuuChild = (props) => {
-    const [getdalanSanhuuChild, setdalanSanhuuChild] = useState([]);
+    const [getdalansanhuuChild, setdalansanhuuChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState([]);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
-
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
     const [showModal] = useState("modal");
 
-    const { tubshin, loading, error } = useAuthPermission();
-
     // useEffect(() => {
-    //     refreshdalansanhuuChild(props.changeDataRow.id);
+    //     refreshdalanSanhuuChild(props.changeDataRow.id);
     // }, []);
 
+    const refreshdalanSanhuuChild = (id) => {
+        axios
+            .post("get/DalanJilsanhuuChild", {
+                _parentID: id,
+                page: page + 1, // 🔥 нэмэх
+                perPage: rowsPerPage, // 🔥 нэмэх
+            })
+            .then((res) => {
+                setdalansanhuuChild(res.data.data || []); // ✅ FIX
+                setTotalRows(res.data.total || 0); // ✅ зөв
+            })
+            .catch((err) => {
+                console.log(err);
+                setdalansanhuuChild([]); //
+                setTotalRows(0);
+            });
+    };
+    useEffect(() => {
+        if (props.changeDataRow?.id) {
+            refreshdalanSanhuuChild(props.changeDataRow.id);
+        }
+    }, [props.changeDataRow.id, page, rowsPerPage]);
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
-        refreshdalansanhuuChild(props.changeDataRow.desk_id);
-
-        // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
+        refreshdalanSanhuuChild(props.changeDataRow.id);
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
+        0;
     }, [props.changeDataRow.id]);
-
-    // Get current authenticated user's tubshin on mount
-    if (loading)
-        return (
-            <div>
-                <Spinner />
-            </div>
-        );
-    if (error) return <p>Алдаа гарлаа</p>;
-
-    const isRestricted = tubshin === 2;
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -50,7 +63,7 @@ const ArhivDSanhuuChild = (props) => {
         }
 
         const rowIndex = getRowsSelected[0];
-        const rowData = getdalanSanhuuChild[rowIndex];
+        const rowData = getdalansanhuuChild[rowIndex];
 
         setclickedRowData(rowData); // 🔥 ЭНД өгөгдөл дамжуулна
         setIsEditBtnClick(true);
@@ -100,8 +113,8 @@ const ArhivDSanhuuChild = (props) => {
         }).then((result) => {
             if (result.isConfirmed) {
                 axios
-                    .post("/delete/baingaIltChild", {
-                        id: getdalanSanhuuChild[getRowsSelected[0]].id,
+                    .post("/delete/DalanJilsanhuuChild", {
+                        id: getdalansanhuuChild[getRowsSelected[0]].id,
                     })
                     .then((res) => {
                         Swal.fire(res.data.msg);
@@ -110,26 +123,13 @@ const ArhivDSanhuuChild = (props) => {
                         setRowsSelected([]);
 
                         // 🔥 дахин татна
-                        refreshdalansanhuuChild(props.changeDataRow.id);
+                        refreshdalanSanhuuChild(props.changeDataRow.id);
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
                     });
             }
         });
-    };
-    const refreshdalansanhuuChild = (id) => {
-        axios
-            .post("get/DalanJilsanhuuChild", {
-                _parentID: id,
-            })
-            .then((res) => {
-                // console.log(res.data);
-                setdalanSanhuuChild(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
     };
 
     const config = {
@@ -161,50 +161,257 @@ const ArhivDSanhuuChild = (props) => {
         setGetDataRowLenght(rowIndex);
     };
 
+    //     {
+    //         text: "№",
+    //         key: "id",
+    //         cell: (row, index) => {
+    //             if (index === 0) {
+    //                 if (changeDataRow.id === row.id && getDataRowLenght > -1) {
+    //                     return (
+    //                         <div className="bg-success position-static mt-2 rounded text-center p-1 pointer-on-hover">
+    //                             <span hidden={true}>{parseInt(index) + 1}</span>
+    //                             <i className="fa fa-check text-white"></i>
+    //                         </div>
+    //                     );
+    //                 }
+    //                 return (
+    //                     <div className="text-center pointer-on-hover">
+    //                         {parseInt(index) + 1}
+    //                     </div>
+    //                 );
+    //             } else {
+    //                 if (changeDataRow.id === row.id && getDataRowLenght > -1) {
+    //                     return (
+    //                         <div className="bg-success position-static mt-2 rounded text-center p-1 pointer-on-hover">
+    //                             <span hidden={true}>{parseInt(index) + 1}</span>
+    //                             <i className="fa fa-check text-white"></i>
+    //                         </div>
+    //                     );
+    //                 }
+    //                 return (
+    //                     <div className="text-center pointer-on-hover">
+    //                         {parseInt(index) + 1}
+    //                     </div>
+    //                 );
+    //             }
+    //         },
+    //         align: "center",
+    //         sortable: true,
+    //         className: "small-column-id",
+    //     },
+
+    //     {
+    //         text: "Нэр",
+    //         key: "way_child",
+    //         align: "center",
+    //         sortable: true,
+    //     },
+    //     {
+    //         text: "Төлөв",
+    //         key: "status",
+    //         cell: (row) => {
+    //             if (row.status === 1) {
+    //                 return "Харуулсан";
+    //             } else {
+    //                 return "Нуусан";
+    //             }
+    //         },
+
+    //         align: "center",
+    //         sortable: true,
+    //     },
+    // ];
     return (
         <>
-            <div className="row clearfix">
+            <div
+                style={{
+                    background: "#ffffff",
+                    borderRadius: "12px",
+                    border: "1px solid #e2e8f0",
+                    overflow: "hidden", // 🔥 чухал (table тасрахгүй)
+                }}
+            >
+                {/* HEADER */}
+                <div
+                    style={{
+                        padding: "14px 18px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid #e2e8f0",
+                        background: "#f8fafc",
+                    }}
+                >
+                    {/* LEFT */}
+
+                    {/* RIGHT */}
+                    <div
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                        }}
+                    ></div>
+                </div>
+
+                <div style={{ padding: "10px" }}>
+                    <MUIDatatable
+                        data={getdalansanhuuChild}
+                        setdata={setdalansanhuuChild}
+                        columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
+                        onRowClick={(rowData, rowMeta) => {
+                            const selectedRow =
+                                getdalansanhuuChild[rowMeta.dataIndex];
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+                        }}
+                        costumToolbar={
+                            <CustomToolbar
+                                btnClassName={"btn btn-success"}
+                                modelType={"modal"}
+                                dataTargetID={"#dalanSanhuuNew"}
+                                spanIconClassName={"fas fa-solid fa-plus"}
+                                buttonName={"Нэмэх"}
+                                excelDownloadData={getdalansanhuuChild}
+                                excelHeaders={excelHeaders}
+                                isHideInsert={false}
+                            />
+                        }
+                        btnEdit={btnEdit}
+                        modelType={showModal}
+                        editdataTargetID={"#dalanSanhuuChildEdit"}
+                        btnDelete={btnDelete}
+                        avgColumnIndex={-1}
+                        avgColumnName={"email"}
+                        avgName={"Дундаж: "}
+                        getRowsSelected={getRowsSelected}
+                        setRowsSelected={setRowsSelected}
+                        isHideDelete={false}
+                        isHideEdit={false}
+                        showArchive={false}
+                    />
+                </div>
+            </div>
+            {/* <div className="row clearfix">
                 <div className="info-box">
                     <div className="col-md-12">
                         <h1 className="text-center">БАРИМТ БИЧИГ</h1>
+                        <div
+                            style={{
+                                background: "#f1f5f9",
+                                padding: "12px 16px",
+                                borderRadius: "8px",
+                                marginBottom: "16px",
+                                display: "flex",
+                                gap: "40px",
+                                fontWeight: 600,
+                            }}
+                        >
+                            <div>
+                                📁 Дугаар:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hadgalamj_dugaar || "-"}
+                                </span>
+                            </div>
+
+                            <div>
+                                🏷 Хадгаламжийн гарчиг:{" "}
+                                <span style={{ color: "#2563eb" }}>
+                                    {changeDataRow?.hadgalamj_garchig || "-"}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="col-md-12 mb-3">
+                            <label
+                                htmlFor="DalanjilSanhuuChildExcel"
+                                className="form-label"
+                            >
+                                Excel Import
+                            </label>
+                            <div className="d-flex align-items-center">
+                          
+                                <input
+                                    type="file"
+                                    id="DalanjilSanhuuChildExcel"
+                                    className="form-control form-control-sm me-2"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) => {
+                                        if (e.target.files.length)
+                                            setSelectedFile(e.target.files[0]);
+                                    }}
+                                />
+
+               
+                                {selectedFile && (
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={() => {
+                                            importExcel(selectedFile);
+                                            setSelectedFile(null);
+                                            document.getElementById(
+                                                "DalanjilSanhuuChildExcel"
+                                            ).value = null;
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         <MUIDatatable
-                            data={getdalanSanhuuChild}
-                            setdata={setdalanSanhuuChild}
+                            data={getdalansanhuuChild}
+                            setdata={setdalansanhuuChild}
                             columns={columns}
                             onRowClick={(rowData, rowMeta) => {
                                 const selectedRow =
-                                    getdalanSanhuuChild[rowMeta.dataIndex];
+                                    getdalansanhuuChild[rowMeta.dataIndex];
                                 setclickedRowData(selectedRow); // 🔥 ЭНД гол set
                             }}
                             costumToolbar={
                                 <CustomToolbar
                                     btnClassName={"btn btn-success"}
                                     modelType={"modal"}
-                                    dataTargetID={"#baingaIltsChildNew"}
+                                    dataTargetID={"#dalanSanhuuNew"}
                                     spanIconClassName={"fas fa-solid fa-plus"}
                                     buttonName={"Нэмэх"}
-                                    excelDownloadData={getdalanSanhuuChild}
+                                    excelDownloadData={getdalansanhuuChild}
                                     excelHeaders={excelHeaders}
-                                    isHideInsert={isRestricted}
-                                    isHideEdit={isRestricted}
+                                    isHideInsert={true}
                                 />
                             }
                             btnEdit={btnEdit}
                             modelType={showModal}
-                            editdataTargetID={"#baingaIltsChildEdit"}
+                            editdataTargetID={"#dalanSanhuuChildEdit"}
                             btnDelete={btnDelete}
                             avgColumnIndex={-1}
                             avgColumnName={"email"}
                             avgName={"Дундаж: "}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
-                            isHideDelete={isRestricted}
-                            isHideEdit={isRestricted}
+                            isHideDelete={true}
+                            isHideEdit={true}
                             showArchive={false}
+                        />
+                        <DalanJilhunChildNew
+                            _parentID={props.changeDataRow.id}
+                            refreshdalanSanhuuChild={refreshdalanSanhuuChild}
+                        />
+                        <DalanJilhunChildEdit
+                            setRowsSelected={setRowsSelected}
+                            refreshdalanSanhuuChild={refreshdalanSanhuuChild}
+                            changeDataRow={clickedRowData}
+                            parentID={props.changeDataRow.id}
+                            isEditBtnClick={isEditBtnClick}
                         />
                     </div>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };
@@ -445,7 +652,10 @@ const columns = [
                         }}
                     >
                         {files.map((fileUrl, index) => {
-                            const fileName = fileUrl.split("/").pop();
+                            const fileNameFull = fileUrl.split("/").pop();
+                            const fileName = fileNameFull.includes("_")
+                                ? fileNameFull.split("_").slice(1).join("_")
+                                : fileNameFull;
 
                             return (
                                 <a

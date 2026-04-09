@@ -1,5 +1,6 @@
 import { format, subDays } from "date-fns";
 import { useEffect, useState } from "react";
+import { FaFileExcel } from "react-icons/fa";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
@@ -21,7 +22,6 @@ const Index = () => {
     const today = new Date();
     const defaultStart = format(subDays(today, 30), "yyyy-MM-dd");
     const defaultEnd = format(today, "yyyy-MM-dd");
-
     const [getBaingaIlt, setBaingaIlt] = useState([]);
     const [getHumrug, setHumrug] = useState([]);
     const [getDans, setDans] = useState([]);
@@ -54,9 +54,7 @@ const Index = () => {
     const [showModal] = useState("modal");
     const { tubshin, loading, error } = useAuthPermission();
 
-    // useEffect(() => {
-    //     setRowsSelected([]);
-    // }, [activeTab]);
+
 
     useEffect(() => {
         setSelectedFile(null);
@@ -135,18 +133,15 @@ const Index = () => {
     const expiredCount = getBaingaIlt.filter(isExpiredRow).length;
     const handlePreview = (file) => {
         const reader = new FileReader();
-
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: "array" });
-
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
 
             const jsonData = XLSX.utils.sheet_to_json(worksheet, {
                 header: 1, // array хэлбэрээр авна
             });
-
             setPreviewData(jsonData);
             setShowPreviewModal(true);
         };
@@ -752,7 +747,8 @@ const Index = () => {
 
                                             <div className="excel-right">
                                                 <span className="excel-label">
-                                                    📊 Excel:
+                                                    <FaFileExcel className="text-success me-2" />
+                                                    Excel:
                                                 </span>
                                                 <input
                                                     type="file"
@@ -819,8 +815,8 @@ const Index = () => {
                                                 <div className="modal-content">
                                                     <div className="modal-header bg-primary text-white">
                                                         <h5 className="modal-title">
-                                                            📊 Excel урьдчилж
-                                                            харах
+                                                            <FaFileExcel className="text-success me-2" />
+                                                            Excel урьдчилж харах
                                                         </h5>
 
                                                         <button

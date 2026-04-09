@@ -7,6 +7,7 @@ import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 // import BaingaHadgalahHugatsaa from "../BaingaIlts/BaingaHadgalahHugatsaa";
+import { FaFileExcel } from "react-icons/fa";
 import "./Index.css";
 import TurNuutsChild from "./TurNuutsChild";
 import TurNuutsEdit from "./TurNuutsEdit";
@@ -767,7 +768,8 @@ const Index = () => {
 
                                             <div className="excel-right">
                                                 <span className="excel-label">
-                                                    📊 Excel:
+                                                    <FaFileExcel className="text-success me-2" />
+                                                    Excel:
                                                 </span>
                                                 <input
                                                     type="file"
@@ -834,8 +836,8 @@ const Index = () => {
                                                 <div className="modal-content">
                                                     <div className="modal-header bg-primary text-white">
                                                         <h5 className="modal-title">
-                                                            📊 Excel урьдчилж
-                                                            харах
+                                                            <FaFileExcel className="text-success me-2" />
+                                                            Excel урьдчилж харах
                                                         </h5>
 
                                                         <button

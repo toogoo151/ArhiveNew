@@ -12,6 +12,7 @@ import DalanJilHunNew from "./DalanJilHunNew";
 import DalanJilhunChild from "./DalanJilhunChild";
 import DalanJilhunShiljuuleh from "./DalanJilhunShiljuuleh";
 import "./Index.css";
+import { FaFileExcel } from "react-icons/fa";
 
 import Spinner from "../../../Spinner";
 import useAuthPermission from "../../../useAuthPermission";
@@ -707,7 +708,8 @@ const Index = () => {
 
                                             <div className="excel-right">
                                                 <span className="excel-label">
-                                                    📊 Excel:
+                                                    <FaFileExcel className="text-success me-2" />
+                                                    Excel:
                                                 </span>
                                                 <input
                                                     type="file"
@@ -774,8 +776,8 @@ const Index = () => {
                                                 <div className="modal-content">
                                                     <div className="modal-header bg-primary text-white">
                                                         <h5 className="modal-title">
-                                                            📊 Excel урьдчилж
-                                                            харах
+                                                            <FaFileExcel className="text-success me-2" />
+                                                            Excel урьдчилж харах
                                                         </h5>
 
                                                         <button

@@ -1,5 +1,6 @@
 import { format, subDays } from "date-fns";
 import { useEffect, useState } from "react";
+import { FaFileExcel } from "react-icons/fa";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
@@ -49,16 +50,6 @@ const Index = () => {
     const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
-        if (selectedHumrug && selectedDans) {
-            console.log("FETCH:", page, rowsPerPage);
-            console.log("TOTAL:", totalRows); // 18s
-            console.log("DATA LENGTH:", getBaingaNuuts.length); // 10
-            console.log("PAGE:", page); // 0 эсвэл 1
-            refreshBaingaNuuts();
-        }
-    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
-
-    useEffect(() => {
         setSelectedFile(null);
         const input = document.getElementById("BainNuutsExcel");
         if (input) input.value = null;
@@ -99,6 +90,16 @@ const Index = () => {
     useEffect(() => {
         setPage(0); // 🔥 reset page
     }, [selectedHumrug, selectedDans]);
+
+    useEffect(() => {
+        if (selectedHumrug && selectedDans) {
+            console.log("FETCH:", page, rowsPerPage);
+            console.log("TOTAL:", totalRows); // 18s
+            console.log("DATA LENGTH:", getBaingaNuuts.length); // 10
+            console.log("PAGE:", page); // 0 эсвэл 1
+            refreshBaingaNuuts();
+        }
+    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
 
     const importExcel = (file) => {
         const formData = new FormData();
@@ -211,55 +212,7 @@ const Index = () => {
             setclickedRowData(null);
         }
     }, [getRowsSelected, getBaingaNuuts]);
-    //  ROW SELECT
-    // useEffect(() => {
-    //     if (getRowsSelected[0] !== undefined) {
-    //         setIsEditBtnClick(false);
-    //         setclickedRowData(getBaingaNuuts[getRowsSelected[0]]);
-    //     }
-    // }, [getRowsSelected, getBaingaNuuts]);
 
-    // useEffect(() => {
-    //     if (selectedHumrug === 0 || selectedDans === 0) {
-    //         setBaingaNuuts([]);
-    //         return;
-    //     }
-
-    //     const filteredData = allDans.filter(
-    //         (item) =>
-    //             Number(item.humrugID) === Number(selectedHumrug) &&
-    //             Number(item.hadgalah_hugatsaa) === Number(selectedDans)
-    //     );
-
-    //     setBaingaNuuts(filteredData);
-    // }, [selectedHumrug, selectedDans, allDans]);
-
-    // useEffect(() => {
-    //     let filteredData = allDans;
-
-    //     if (selectedHumrug !== 0) {
-    //         filteredData = filteredData.filter(
-    //             (item) => Number(item.humrugID) === Number(selectedHumrug)
-    //         );
-    //     }
-
-    //     if (selectedDans !== 0) {
-    //         filteredData = filteredData.filter(
-    //             (item) =>
-    //                 Number(item.hadgalah_hugatsaa) === Number(selectedDans)
-    //         );
-    //     }
-
-    //     setBaingaNuuts(filteredData);
-    // }, [selectedHumrug, selectedDans, allDans]);
-    // useEffect(() => {
-    //     if (!isFilterActive) {
-    //         setBaingaNuuts(allHumrug);
-    //         return;
-    //     }
-    // }, [allHumrug]);
-
-    // Get current authenticated user's tubshin on mount
     if (loading)
         return (
             <div>
@@ -978,7 +931,8 @@ const Index = () => {
 
                                             <div className="excel-right">
                                                 <span className="excel-label">
-                                                    📊 Excel:
+                                                    <FaFileExcel className="text-success me-2" />
+                                                    Excel:
                                                 </span>
                                                 <input
                                                     type="file"
@@ -1045,8 +999,8 @@ const Index = () => {
                                                 <div className="modal-content">
                                                     <div className="modal-header bg-primary text-white">
                                                         <h5 className="modal-title">
-                                                            📊 Excel урьдчилж
-                                                            харах
+                                                            <FaFileExcel className="text-success me-2" />
+                                                            Excel урьдчилж харах
                                                         </h5>
 
                                                         <button
@@ -1185,9 +1139,13 @@ const Index = () => {
                                             options={{
                                                 // serverSide: true,
                                                 // count: totalRows,
-
                                                 // page: page,
                                                 // rowsPerPage: rowsPerPage,
+
+                                                // rowsPerPageOptions: [
+                                                //     10, 15, 25, 50,
+                                                // ],
+
                                                 onTableChange: (
                                                     action,
                                                     tableState
@@ -1204,25 +1162,6 @@ const Index = () => {
                                                             );
                                                             break;
                                                     }
-                                                },
-
-                                                setRowProps: (
-                                                    row,
-                                                    dataIndex
-                                                ) => {
-                                                    const r =
-                                                        getBaingaNuuts[
-                                                            dataIndex
-                                                        ];
-                                                    if (isExpiredRow(r)) {
-                                                        return {
-                                                            style: {
-                                                                backgroundColor:
-                                                                    "#fee2e2",
-                                                            },
-                                                        };
-                                                    }
-                                                    return {};
                                                 },
                                             }}
                                             costumToolbar={

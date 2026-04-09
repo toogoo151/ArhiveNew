@@ -1,13 +1,16 @@
 import { format, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import ArhivBNuutsChild from "./ArhivBNuutsChild";
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
+import ArhivBNuutsChild from "./ArhivBNuutsChild";
+
+import "./Index.css";
 
 const ArhivBNuuts = () => {
     const today = new Date();
@@ -16,7 +19,7 @@ const ArhivBNuuts = () => {
 
     // const [isFilterActive, setIsFilterActive] = useState(false);
 
-    const [getarchivebaingaNuuts, setarchiveBaingaNuuts] = useState([]);
+    const [getBaingaNuuts, setBaingaNuuts] = useState([]);
     const [getHumrug, setHumrug] = useState([]);
     const [getDans, setDans] = useState([]);
 
@@ -29,55 +32,129 @@ const ArhivBNuuts = () => {
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState(null); // анх null
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [activeTab, setActiveTab] = useState("ilt");
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const isDisabled = selectedHumrug === 0 || selectedDans === 0;
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     const [showModal] = useState("modal");
     const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
-        refreshBaingaNuuts();
+        if (selectedHumrug && selectedDans) {
+            console.log("FETCH:", page, rowsPerPage);
+            console.log("TOTAL:", totalRows); // 18s
+            console.log("DATA LENGTH:", getBaingaNuuts.length); // 10
+            console.log("PAGE:", page); // 0 эсвэл 1
+            refreshBaingaNuuts();
+        }
+    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
+
+    useEffect(() => {
+        setSelectedFile(null);
+        const input = document.getElementById("BainNuutsExcel");
+        if (input) input.value = null;
     }, [selectedHumrug, selectedDans]);
 
-    const refreshBaingaNuuts = () => {
-        axios.get("/get/archiveBaingaNuuts").then((res) => {
-            const reversed = [...res.data].reverse();
-            setAllDans(res.data);
+    useEffect(() => {
+        console.log("UPDATED DATA:", getBaingaNuuts);
+        console.log("UPDATED TOTAL:", totalRows);
+    }, [getBaingaNuuts, totalRows]);
 
-            if (selectedHumrug !== 0 && selectedDans !== 0) {
-                const filteredData = res.data.filter(
-                    (item) =>
-                        Number(item.humrug_id) === Number(selectedHumrug) &&
-                        Number(item.dans_id) === Number(selectedDans)
-                );
-                setarchiveBaingaNuuts(filteredData);
-            } else {
-                setarchiveBaingaNuuts([]);
-            }
-        });
+    const isExpiredRow = (row) => {
+        if (!row?.on_suul || !row?.hugatsaa) return false;
+
+        // "1", "1 жил", "70 жил" → 1 / 70
+        const years = parseInt(row.hugatsaa, 10);
+
+        if (isNaN(years)) return false;
+
+        // 70 жил = байнгын хадгалалт
+        if (years >= 70) return false;
+
+        const start = new Date(row.on_suul);
+        const end = new Date(start);
+        end.setFullYear(end.getFullYear() + years);
+
+        return end < new Date();
     };
-    const btnDelete = () => {
-        if (!getRowsSelected.length) return;
+    const expiredCount = getBaingaNuuts.filter(isExpiredRow).length;
 
-        Swal.fire({
-            title: "Та устгахдаа итгэлтэй байна уу?",
-            showCancelButton: true,
-            confirmButtonText: "Тийм",
-            cancelButtonText: "Үгүй",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                axios
-                    .post("/delete/BaingaIlt", {
-                        id: getArchiveBaingaIlt[getRowsSelected[0]].id,
-                    })
-                    .then((res) => {
-                        Swal.fire(res.data.msg);
-                        refreshArchiveBaingaIlt();
-                    })
-                    .catch((err) => {
-                        Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
-                    });
-            }
-        });
+    const selectedHumrugName = getHumrug.find(
+        (h) => h.id === selectedHumrug
+    )?.humrug_ner;
+
+    const selectedDansName = getDans.find(
+        (d) => d.id === selectedDans
+    )?.dans_ner;
+
+    useEffect(() => {
+        setPage(0); // 🔥 reset page
+    }, [selectedHumrug, selectedDans]);
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("humrug_id", selectedHumrug);
+        formData.append("dans_id", selectedDans);
+
+        axios
+            .post("/import/BaingaNuuts", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshBaingaNuuts(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+    const refreshBaingaNuuts = () => {
+        if (!selectedHumrug || !selectedDans) {
+            setBaingaNuuts([]);
+            setTotalRows(0);
+            return;
+        }
+
+        axios
+            .get("/get/archiveBaingaNuuts", {
+                params: {
+                    humrug_id: selectedHumrug,
+                    dans_id: selectedDans,
+                    page: page + 1,
+                    perPage: rowsPerPage,
+                },
+            })
+            .then((res) => {
+                console.log("API RESPONSE:", res.data);
+                setBaingaNuuts(res.data.data || []);
+                setTotalRows(res.data.totalRows || 0);
+            });
     };
 
     useEffect(() => {
@@ -108,6 +185,10 @@ const ArhivBNuuts = () => {
             })
             .catch((err) => {
                 console.log(err);
+                console.log(
+                    "Дансны алдаа:",
+                    err.response?.data?.msg || "Алдаа гарлаа"
+                );
             });
     }, [selectedHumrug]);
 
@@ -120,39 +201,24 @@ const ArhivBNuuts = () => {
     useEffect(() => {
         const rowIndex = getRowsSelected[0];
 
-        if (
-            rowIndex !== undefined &&
-            getarchivebaingaNuuts[rowIndex] !== undefined
-        ) {
+        if (rowIndex !== undefined && getBaingaNuuts[rowIndex] !== undefined) {
             setIsEditBtnClick(false);
-            setclickedRowData(getarchivebaingaNuuts[rowIndex]);
+            setclickedRowData(getBaingaNuuts[rowIndex]);
         } else {
             setclickedRowData(null);
         }
-    }, [getRowsSelected, getarchivebaingaNuuts]);
-
-    // Get current authenticated user's tubshin on mount
-    if (loading)
-        return (
-            <div>
-                <Spinner />
-            </div>
-        );
-    if (error) return <p>Алдаа гарлаа</p>;
-
-    const isRestricted = tubshin === 2;
-
+    }, [getRowsSelected, getBaingaNuuts]);
     //  ROW SELECT
     // useEffect(() => {
     //     if (getRowsSelected[0] !== undefined) {
     //         setIsEditBtnClick(false);
-    //         setclickedRowData(getarchivebaingaNuuts[getRowsSelected[0]]);
+    //         setclickedRowData(getBaingaNuuts[getRowsSelected[0]]);
     //     }
-    // }, [getRowsSelected, getarchivebaingaNuuts]);
+    // }, [getRowsSelected, getBaingaNuuts]);
 
     // useEffect(() => {
     //     if (selectedHumrug === 0 || selectedDans === 0) {
-    //         setarchiveBaingaNuuts([]);
+    //         setBaingaNuuts([]);
     //         return;
     //     }
 
@@ -162,7 +228,7 @@ const ArhivBNuuts = () => {
     //             Number(item.hadgalah_hugatsaa) === Number(selectedDans)
     //     );
 
-    //     setarchiveBaingaNuuts(filteredData);
+    //     setBaingaNuuts(filteredData);
     // }, [selectedHumrug, selectedDans, allDans]);
 
     // useEffect(() => {
@@ -181,14 +247,319 @@ const ArhivBNuuts = () => {
     //         );
     //     }
 
-    //     setarchiveBaingaNuuts(filteredData);
+    //     setBaingaNuuts(filteredData);
     // }, [selectedHumrug, selectedDans, allDans]);
     // useEffect(() => {
     //     if (!isFilterActive) {
-    //         setarchiveBaingaNuuts(allHumrug);
+    //         setBaingaNuuts(allHumrug);
     //         return;
     //     }
     // }, [allHumrug]);
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
+
+    const btnEdit = () => {
+        setIsEditBtnClick(true);
+    };
+
+    const btnDelete = () => {
+        if (!getRowsSelected.length) return;
+
+        Swal.fire({
+            title: "Та устгахдаа итгэлтэй байна уу?",
+            showCancelButton: true,
+            confirmButtonText: "Тийм",
+            cancelButtonText: "Үгүй",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios
+                    .post("/delete/BaingaNuuts", {
+                        id: getBaingaNuuts[getRowsSelected[0]].id,
+                    })
+                    .then((res) => {
+                        Swal.fire(res.data.msg);
+                        refreshBaingaNuuts();
+                    })
+                    .catch((err) => {
+                        Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
+                    });
+            }
+        });
+    };
+    const columns = [
+        {
+            name: "id",
+            label: "№",
+            options: {
+                filter: true,
+                sort: true,
+                filter: false,
+                align: "center",
+                customBodyRenderLite: (rowIndex) => {
+                    if (rowIndex == 0) {
+                        return rowIndex + 1;
+                    } else {
+                        return rowIndex + 1;
+                    }
+                },
+                setCellProps: () => {
+                    return { align: "center" };
+                },
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                            width: 50,
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "hn_dd",
+            label: "Дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "hn_zbn",
+            label: "Зохион байгуулалтын нэгжийн нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "hereg_burgtel",
+            label: "Хэрэг,данс бүртгэлийн №",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "harya_on",
+            label: "Хэрэг бүртгэлийн он",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "hn_garchig",
+            label: "Хэрэг данс бүртгэлийн нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "nuuts_zereglel",
+            label: "Нууцын зэрэглэл",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "on_ehen",
+            label: "Эхэлсэн он,сар,өдөр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "on_suul",
+            label: "Дууссан он,сар,өдөр",
+            options: {
+                customBodyRenderLite: (rowIndex) => {
+                    const row = getBaingaNuuts[rowIndex]; // ✅ OK
+                    const expired = isExpiredRow(row); // ✅ OK
+
+                    return (
+                        <span
+                            style={{
+                                color: expired ? "#dc2626" : "inherit",
+                                fontWeight: expired ? 600 : "normal",
+                            }}
+                        >
+                            {row?.on_suul}
+                            {expired && " (хугацаа хэтэрсэн)"}
+                        </span>
+                    );
+                },
+            },
+        },
+        {
+            name: "huudas_too",
+            label: "Хуудасны тоо",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "habsralt_too",
+            label: "Хавсралтын тоо",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "jagsaalt_zuildugaar",
+            label: "Хадгалах хугацааны жагсаалтын зүйлийн дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: () => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+                customBodyRender: (value) => {
+                    if (
+                        value === null ||
+                        value === "" ||
+                        value === 0 ||
+                        value === undefined
+                    ) {
+                        return "-";
+                    }
+                    return value;
+                },
+            },
+        },
+
+        {
+            name: "hn_tailbar",
+            label: "Тайлбар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "ustgasan_temdeglel",
+            label: "Архивт шилжүүлсэн тухай тэмдэглэл",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+    ];
 
     //RENDER
     return (
@@ -196,14 +567,24 @@ const ArhivBNuuts = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center">
-                            Архивт шилжсэн байнга хадгалагдах хадгаламжийн нэгж,
-                            баримт бичиг/нууц/{" "}
-                        </h1>
+                        <h4 className="text-center mb-4">
+                            Байнга хадгалагдах хадгаламжийн нэгж, баримт
+                            бичиг/нууц/{" "}
+                        </h4>
                         {/* DATE FILTER */}
-                        <div className="col-md-8 mb-3">
-                            <div className="input-group">
-                                <span className="input-group-text">
+                        <div
+                            className="col-md-8 mb-2"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                flexWrap: "wrap",
+                                fontWeight: 500,
+                                fontSize: "12px",
+                            }}
+                        >
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text py-1 px-2">
                                     Хөмрөг:
                                 </span>
 
@@ -260,6 +641,7 @@ const ArhivBNuuts = () => {
                                         </option>
                                     ))}
                                 </select>
+                                <span className="mx-2"></span>
 
                                 {/* <select
                                     className="form-control"
@@ -278,334 +660,387 @@ const ArhivBNuuts = () => {
                                 </select> */}
                             </div>
                         </div>
-                        {/* TABLE */}
-                        <MUIDatatable
-                            data={getarchivebaingaNuuts}
-                            setdata={setarchiveBaingaNuuts}
-                            columns={columns}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName="btn btn-success"
-                                    modelType="modal"
-                                    dataTargetID={
-                                        selectedHumrug !== 0 &&
-                                        selectedDans !== 0
-                                            ? "#BaingaNuutsNew"
-                                            : null
+
+                        <div className="labelWrapper">
+                            <div className={`tab-indicator ${activeTab}`} />
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "ilt" ? "active" : ""
+                                }`}
+                                onClick={() => setActiveTab("ilt")}
+                            >
+                                📊 Нууц
+                            </button>
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "barimt" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    if (!clickedRowData) {
+                                        Swal.fire("Илт мөр сонгоно уу!");
+                                        return;
                                     }
-                                    spanIconClassName="fas fa-plus"
-                                    buttonName="Нэмэх"
-                                    excelDownloadData={getarchivebaingaNuuts}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={isRestricted}
-                                    isHideEdit={isRestricted}
-                                    onClick={() => {
-                                        if (
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                        ) {
-                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхааруулга",
-                                                text: "Хөмрөг болон дансны дугаар сонгоно уу!",
-                                            });
-                                        }
-                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                                    setActiveTab("barimt");
+                                }}
+                            >
+                                📂Баримт бичиг
+                            </button>
+                        </div>
+
+                        {activeTab === "ilt" && (
+                            <>
+                                {/* <div className="col-md-12 mb-3">
+                                    <label
+                                        htmlFor="BainNuutsExcel"
+                                        className="form-label"
+                                    >
+                                        Excel Import
+                                    </label>
+                                    <div className="d-flex align-items-center">
+                                        <input
+                                            style={{
+                                                cursor: isDisabled
+                                                    ? "not-allowed"
+                                                    : "pointer",
+                                                opacity: isDisabled ? 0.6 : 1,
+                                            }}
+                                            type="file"
+                                            id="BainNuutsExcel"
+                                            className="form-control form-control-sm me-2"
+                                            accept=".xlsx,.xls,.csv"
+                                            disabled={isDisabled}
+                                            onChange={(e) => {
+                                                if (e.target.files.length) {
+                                                    const file =
+                                                        e.target.files[0];
+                                                    setSelectedFile(file);
+                                                }
+                                            }}
+                                        />
+
+                                        {!isDisabled && selectedFile && (
+                                            <>
+                                                <button
+                                                    className="btn btn-outline-secondary btn-sm me-2"
+                                                    onClick={() =>
+                                                        handlePreview(
+                                                            selectedFile
+                                                        )
+                                                    }
+                                                >
+                                                    👁
+                                                </button>
+
+                                                <button
+                                                    className="btn btn-primary btn-sm"
+                                                    onClick={() => {
+                                                        importExcel(
+                                                            selectedFile
+                                                        );
+                                                        setSelectedFile(null);
+                                                        document.getElementById(
+                                                            "BainNuutsExcel"
+                                                        ).value = null;
+                                                    }}
+                                                >
+                                                    Import
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {showPreviewModal && (
+                                    <div
+                                        className="modal fade show d-block"
+                                        style={{
+                                            backgroundColor: "rgba(0,0,0,0.5)",
+                                        }}
+                                    >
+                                        <div className="modal-dialog modal-xl">
+                                            <div className="modal-content">
+                                                <div className="modal-header bg-primary text-white">
+                                                    <h5 className="modal-title">
+                                                        📊 Excel урьдчилж харах
+                                                    </h5>
+
+                                                    <button
+                                                        className="btn btn-sm btn-light"
+                                                        onClick={() =>
+                                                            setShowPreviewModal(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                                <div className="px-3 py-2 border-bottom bg-light d-flex gap-3 flex-wrap">
+                                                    <span className="badge bg-primary fs-6">
+                                                        📁 Хөмрөг:{" "}
+                                                        {selectedHumrugName ||
+                                                            "-"}
+                                                    </span>
+
+                                                    <span className="badge bg-success fs-6">
+                                                        📂 Данс:{" "}
+                                                        {selectedDansName ||
+                                                            "-"}
+                                                    </span>
+                                                </div>
+
+                                                <div className="modal-body p-0">
+                                                    <div
+                                                        style={{
+                                                            maxHeight: "60vh",
+                                                            overflow: "auto",
+                                                        }}
+                                                    >
+                                                        <table className="table table-bordered table-hover mb-0">
+                                                            <thead
+                                                                className="table-dark"
+                                                                style={{
+                                                                    position:
+                                                                        "sticky",
+                                                                    top: 0,
+                                                                    zIndex: 1,
+                                                                }}
+                                                            >
+                                                                <tr>
+                                                                    {excelHeaders.map(
+                                                                        (
+                                                                            col,
+                                                                            i
+                                                                        ) => (
+                                                                            <th
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                                className="text-nowrap"
+                                                                            >
+                                                                                {
+                                                                                    col.label
+                                                                                }
+                                                                            </th>
+                                                                        )
+                                                                    )}
+                                                                </tr>
+                                                            </thead>
+
+                                                            <tbody>
+                                                                {previewData
+                                                                    .slice(1)
+                                                                    .map(
+                                                                        (
+                                                                            row,
+                                                                            i
+                                                                        ) => (
+                                                                            <tr
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                            >
+                                                                                {excelHeaders.map(
+                                                                                    (
+                                                                                        col,
+                                                                                        j
+                                                                                    ) => (
+                                                                                        <td
+                                                                                            key={
+                                                                                                j
+                                                                                            }
+                                                                                            className="text-nowrap"
+                                                                                        >
+                                                                                            {row[
+                                                                                                j
+                                                                                            ] ??
+                                                                                                ""}
+                                                                                        </td>
+                                                                                    )
+                                                                                )}
+                                                                            </tr>
+                                                                        )
+                                                                    )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                                <div className="modal-footer">
+                                                    <button
+                                                        className="btn btn-outline-secondary"
+                                                        onClick={() =>
+                                                            setShowPreviewModal(
+                                                                false
+                                                            )
+                                                        }
+                                                    >
+                                                        Хаах
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )} */}
+
+                                <div
+                                    style={{
+                                        background: "#ffffff",
+                                        borderRadius: "12px",
+                                        border: "1px solid #e2e8f0",
+                                        overflow: "hidden", // 🔥 чухал (table тасрахгүй)
                                     }}
-                                />
-                            }
-                            modelType={showModal}
-                            editdataTargetID="#baingaNuutsedit"
-                            btnDelete={btnDelete}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={isRestricted}
-                            isHideEdit={isRestricted}
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className="row clearfix">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div className="card2">
-                        {clickedRowData && (
-                            <ArhivBNuutsChild changeDataRow={clickedRowData} />
+                                >
+                                    <div
+                                        style={{
+                                            padding: "14px 18px",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            borderBottom: "1px solid #e2e8f0",
+                                            background: "#f8fafc",
+                                        }}
+                                    ></div>
+
+                                    <div style={{ padding: "10px" }}>
+                                        <MUIDatatable
+                                            data={getBaingaNuuts}
+                                            setdata={setBaingaNuuts}
+                                            columns={columns}
+                                            isServerSide={true}
+                                            count={totalRows}
+                                            page={page}
+                                            rowsPerPage={rowsPerPage}
+                                            setPage={setPage}
+                                            setRowsPerPage={setRowsPerPage}
+                                            options={{
+                                                // serverSide: true,
+                                                // count: totalRows,
+
+                                                // page: page,
+                                                // rowsPerPage: rowsPerPage,
+                                                onTableChange: (
+                                                    action,
+                                                    tableState
+                                                ) => {
+                                                    switch (action) {
+                                                        case "changePage":
+                                                            setPage(
+                                                                tableState.page
+                                                            );
+                                                            break;
+                                                        case "changeRowsPerPage":
+                                                            setRowsPerPage(
+                                                                tableState.rowsPerPage
+                                                            );
+                                                            break;
+                                                    }
+                                                },
+
+                                                setRowProps: (
+                                                    row,
+                                                    dataIndex
+                                                ) => {
+                                                    const r =
+                                                        getBaingaNuuts[
+                                                            dataIndex
+                                                        ];
+                                                    if (isExpiredRow(r)) {
+                                                        return {
+                                                            style: {
+                                                                backgroundColor:
+                                                                    "#fee2e2",
+                                                            },
+                                                        };
+                                                    }
+                                                    return {};
+                                                },
+                                            }}
+                                            costumToolbar={
+                                                <CustomToolbar
+                                                    btnClassName="btn btn-success"
+                                                    modelType="modal"
+                                                    dataTargetID={
+                                                        selectedHumrug !== 0 &&
+                                                        selectedDans !== 0
+                                                            ? "#BaingaNuutsNew"
+                                                            : null
+                                                    }
+                                                    spanIconClassName="fas fa-plus"
+                                                    buttonName="Нэмэх"
+                                                    excelDownloadData={
+                                                        getBaingaNuuts
+                                                    } // ⚠️ зөвхөн current page
+                                                    excelHeaders={excelHeaders}
+                                                    excelTitle="Байнга хадгалагдах хадгаламжийн нэгж /нууц/"
+                                                    isHideInsert={false}
+                                                    isHideEdit={false}
+                                                    onClick={() => {
+                                                        if (
+                                                            selectedHumrug ===
+                                                                0 ||
+                                                            selectedDans === 0
+                                                        ) {
+                                                            Swal.fire({
+                                                                icon: "warning",
+                                                                title: "Анхааруулга",
+                                                                text: "Хөмрөг болон дансны дугаар сонгоно уу!",
+                                                            });
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            btnEdit={btnEdit}
+                                            modelType={showModal}
+                                            editdataTargetID="#baingaNuutsedit"
+                                            btnDelete={btnDelete}
+                                            getRowsSelected={getRowsSelected}
+                                            setRowsSelected={setRowsSelected}
+                                            isHideDelete={false}
+                                            isHideEdit={false}
+                                        />
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
             </div>
+
+            {activeTab === "barimt" && (
+                <>
+                    {clickedRowData ? (
+                        <ArhivBNuutsChild changeDataRow={clickedRowData} />
+                    ) : (
+                        <div className="text-center p-5">
+                            Илт мөр сонгоно уу
+                        </div>
+                    )}
+                </>
+            )}
+            {/* <div className="row clearfix">
+                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div className="card2">
+                        {clickedRowData && (
+                            <BaingaNuutsChild changeDataRow={clickedRowData} />
+                        )}
+                    </div>
+                </div>
+            </div> */}
         </>
     );
 };
 
 export default ArhivBNuuts;
 
-const columns = [
-    {
-        name: "id",
-        label: "№",
-        options: {
-            filter: true,
-            sort: true,
-            filter: false,
-            align: "center",
-            customBodyRenderLite: (rowIndex) => {
-                if (rowIndex == 0) {
-                    return rowIndex + 1;
-                } else {
-                    return rowIndex + 1;
-                }
-            },
-            setCellProps: () => {
-                return { align: "center" };
-            },
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                        width: 50,
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "hn_dd",
-        label: "Дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "hn_zbn",
-        label: "Зохион байгуулалтын нэгжийн нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "hereg_burgtel",
-        label: "Хэрэг,данс бүртгэлийн №",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "harya_on",
-        label: "Хэрэг бүртгэлийн он",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "hn_garchig",
-        label: "Хэрэг данс бүртгэлийн нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "nuuts_zereglel",
-        label: "Нууцын зэрэглэл",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "on_ehen",
-        label: "Эхэлсэн он,сар,өдөр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "on_suul",
-        label: "Дууссан он,сар,өдөр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "huudas_too",
-        label: "Хуудасны тоо",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "habsralt_too",
-        label: "Хавсралтын тоо",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "jagsaalt_zuildugaar",
-        label: "Хадгалах хугацааны жагсаалтын зүйлийн дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
-            },
-        },
-    },
-
-    {
-        name: "hn_tailbar",
-        label: "Тайлбар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "ustgasan_temdeglel",
-        label: "Архивт шилжүүлсэн тухай тэмдэглэл",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-];
-
 const excelHeaders = [
     { label: "Дугаар", key: "hn_dd" },
     { label: "Зохион байгуулалтын нэгжийн нэр", key: "hn_zbn" },
-    { label: "Хэрэг,данс бүотгэлийн №", key: "hergiin_indeks" },
-    { label: "Хэрэг данс бүртгэлийн нэр", key: "harya_on" },
+    { label: "Хэрэг,данс бүотгэлийн №", key: "hereg_burgtel" },
+    { label: "Хэрэг бүртгэлийн он", key: "harya_on" },
+    { label: "Хэрэг данс бүртгэлийн нэр", key: "hn_garchig" },
     { label: "Нууцын зэрэглэл ", key: "nuuts_zereglel" },
     { label: "Эхэлсэн он,сар,өдөр", key: "on_ehen" },
     { label: "Дууссан он,сар,өдөр", key: "on_suul" },
@@ -616,4 +1051,5 @@ const excelHeaders = [
         key: "jagsaalt_zuildugaar",
     },
     { label: "Тайлбар", key: "hn_tailbar" },
+    { label: "Архивт шилжүүлсэн тухай тэмдэглэл", key: "ustgasan_temdeglel" },
 ];

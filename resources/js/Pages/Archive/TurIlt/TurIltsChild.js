@@ -11,6 +11,7 @@ import TurIltsChildNew from "./TurIltsChildNew";
 
 import Spinner from "../../../Spinner";
 import useAuthPermission from "../../../useAuthPermission";
+import { FaFileExcel } from "react-icons/fa";
 
 const TurIltsChild = (props) => {
     const [getTurtIltsChild, setTurIltsChild] = useState([]);
@@ -284,7 +285,10 @@ const TurIltsChild = (props) => {
                             gap: "10px",
                         }}
                     >
-                        <span style={{ color: "#64748b" }}>📊 Excel:</span>
+                        <span style={{ color: "#64748b" }}>
+                            <FaFileExcel className="text-success me-2" />
+                            Excel:
+                        </span>
 
                         <input
                             type="file"
@@ -333,7 +337,8 @@ const TurIltsChild = (props) => {
                             <div className="modal-content">
                                 <div className="modal-header bg-primary text-white">
                                     <h5 className="modal-title">
-                                        📊 Excel урьдчилж харах
+                                        <FaFileExcel className="text-success me-2" />
+                                        Excel урьдчилж харах
                                     </h5>
 
                                     <button

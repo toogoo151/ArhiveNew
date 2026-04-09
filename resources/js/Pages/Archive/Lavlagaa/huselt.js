@@ -1,62 +1,43 @@
-import { format, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import SedevEdit from "./SedevEdit";
-import SedevNew from "./SedevNew";
+import HuseltEdit from "./HuseltEdit";
+import HuseltNew from "./HuseltNew";
 import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import LavlagaaHuseltTabs from "./LavlagaaHuseltTabs";
 
-const Index = () => {
+const Huselt = () => {
     // ================= FILTER CONTROL =================
     const [isFilterActive, setIsFilterActive] = useState(false);
     // ================= DATA =================
-    const [allSedevzui, setallSedevzui] = useState([]);
-    const [getSedevzui, setSedevzui] = useState([]);
-    const [getHumrug, setHumrug] = useState([]);
-    const [getDans, setDans] = useState([]);
+    const [allHuselt, setAllHuselt] = useState([]);
+    const [getHuselt, setHuselt] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState(null);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
     const [editRequestId, setEditRequestId] = useState(0);
 
     // Don't let Bootstrap auto-open the edit modal before React fills the form.
-    // We'll open it programmatically inside `TovchlolEdit`.
+    // We'll open it programmatically inside `LavlagaaEdit`.
     const [showModal] = useState(null);
     const { tubshin, loading, error } = useAuthPermission();
 
     // FETCH
     useEffect(() => {
-        refreshSedevzui();
-        axios
-            .get("/get/Humrug")
-            .then((res) => {
-                setHumrug(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-
-        axios
-            .get("/get/Dans")
-            .then((res) => {
-                setDans(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        refreshHuselt();
     }, []);
 
-    const refreshSedevzui = () => {
+    const refreshHuselt = () => {
         axios
-            .get("/get/sedevzuils")
+            .get("/get/huselt")
             .then((res) => {
                 setRowsSelected([]);
-                setallSedevzui(res.data);
-                setSedevzui(res.data); // анх бүх өгөгдөл
+                setAllHuselt(res.data.data);
+                setHuselt(res.data.data); // анх бүх өгөгдөл
                 setIsFilterActive(false);
             })
             .catch((err) => {
@@ -68,17 +49,17 @@ const Index = () => {
     useEffect(() => {
         if (getRowsSelected[0] !== undefined) {
             setIsEditBtnClick(false);
-            setclickedRowData(getSedevzui[getRowsSelected[0]]);
+            setclickedRowData(getHuselt[getRowsSelected[0]]);
         }
-    }, [getRowsSelected, getSedevzui]);
+    }, [getRowsSelected, getHuselt]);
 
     //  DATE FILTER
     useEffect(() => {
         if (!isFilterActive) {
-            setSedevzui(allSedevzui);
+            setHuselt(allHuselt);
             return;
         }
-    }, [isFilterActive, allSedevzui]);
+    }, [isFilterActive, allHuselt]);
 
     // Get current authenticated user's tubshin on mount
     if (loading)
@@ -94,10 +75,10 @@ const Index = () => {
     const btnEdit = () => {
         // Ensure the edit modal gets the selected row immediately on first click
         if (getRowsSelected[0] !== undefined) {
-            setclickedRowData(getSedevzui[getRowsSelected[0]]);
+            setclickedRowData(getHuselt[getRowsSelected[0]]);
         }
         setIsEditBtnClick(true);
-        // Trigger edit modal open every click
+        // Trigger edit modal open every click (even if already edited once)
         setEditRequestId((prev) => prev + 1);
     };
 
@@ -111,12 +92,12 @@ const Index = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 axios
-                    .post("/delete/sedevzui", {
-                        id: getSedevzui[getRowsSelected[0]].id,
+                    .post("/delete/huselt", {
+                        id: getHuselt[getRowsSelected[0]].id,
                     })
                     .then((res) => {
                         Swal.fire(res.data.msg);
-                        refreshSedevzui();
+                        refreshHuselt();
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -128,7 +109,7 @@ const Index = () => {
     const columns = [
         {
             name: "id",
-            label: " ",
+            label: "#",
             options: {
                 filter: true,
                 sort: true,
@@ -156,8 +137,8 @@ const Index = () => {
             },
         },
         {
-            name: "humrug_id",
-            label: "Хөмрөгийн дугаар",
+            name: "burtgel_dugaar",
+            label: "Бүртгэлийн дугаар",
             options: {
                 filter: true,
                 sort: false,
@@ -169,87 +150,12 @@ const Index = () => {
                         },
                     };
                 },
-                customBodyRenderLite: (dataIndex) => {
-                    const rowData = getSedevzui[dataIndex];
-                    if (!rowData || !rowData.humrug_id) return "-";
-                    const humrug = getHumrug.find(
-                        (el) => el.id == rowData.humrug_id
-                    );
-                    return humrug?.humrug_dugaar || "-";
-                },
             },
         },
         {
-            name: "humrug_ner",
-            label: "Хөмрөгийн нэр",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-                customBodyRenderLite: (dataIndex) => {
-                    const rowData = getSedevzui[dataIndex];
-                    if (!rowData || !rowData.humrug_id) return "-";
-                    const humrug = getHumrug.find(
-                        (el) => el.id == rowData.humrug_id
-                    );
-                    return humrug?.humrug_ner || "-";
-                },
-            },
-        },
-        {
-            name: "dans_id",
-            label: "Дансны дугаар",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-                customBodyRenderLite: (dataIndex) => {
-                    const rowData = getSedevzui[dataIndex];
-                    if (!rowData || !rowData.dans_id) return "-";
-                    const dans = getDans.find((el) => el.id == rowData.dans_id);
-                    return dans?.dans_dugaar || "-";
-                },
-            },
-        },
-        {
-            name: "dans_ner",
-            label: "Дансны нэр",
-            options: {
-                filter: true,
-                sort: false,
-                setCellHeaderProps: (value) => {
-                    return {
-                        style: {
-                            backgroundColor: "#5DADE2",
-                            color: "white",
-                        },
-                    };
-                },
-                customBodyRenderLite: (dataIndex) => {
-                    const rowData = getSedevzui[dataIndex];
-                    if (!rowData || !rowData.dans_id) return "-";
-                    const dans = getDans.find((el) => el.id == rowData.dans_id);
-                    return dans?.dans_ner || "-";
-                },
-            },
-        },
-        {
-            name: "zaagch_tobchlol",
-            label: "Сэдэв зүй заагчийн - Товчлол",
+            name: "huselt_ognoo",
+            label: "Хүсэлт гаргасан огноо",
+            type: 'date',
             options: {
                 filter: true,
                 sort: false,
@@ -265,12 +171,12 @@ const Index = () => {
         },
 
         {
-            name: "zaagch_tailal",
-            label: "Сэдэв зүй заагчийн - Тайлал",
+            name: "user_burt_dugaar",
+            label: "Хүсэлт захиалагчийн бүртгэлийн дугаар",
             options: {
                 filter: true,
                 sort: false,
-                setCellHeaderProps: () => {
+                setCellHeaderProps: (value) => {
                     return {
                         style: {
                             backgroundColor: "#5DADE2",
@@ -278,16 +184,130 @@ const Index = () => {
                         },
                     };
                 },
-                customBodyRender: (value) => {
-                    if (
-                        value === null ||
-                        value === "" ||
-                        value === 0 ||
-                        value === undefined
-                    ) {
-                        return "-";
+            },
+        },
+        {
+            name: "user_register",
+            label: "Захиалагчийн регистер",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "user_name",
+            label: "Захиалагчийн нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "user_location",
+            label: "Захиалагчийн хаяг",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "user_phonenumber",
+            label: "Захиалагчийн утасны дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "huselt_turul_id",
+            label: "Хүсэлтийн төрөл ",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => ({
+                    style: {
+                        backgroundColor: "#5DADE2",
+                        color: "white",
+                    },
+                }),
+                customBodyRenderLite: (dataIndex) => {
+                    const row = getHuselt[dataIndex];
+                    const turul = row?.huselt_turul;
+                    if (turul) {
+                        return (
+                            turul.name ??
+                            turul.turul_name ??
+                            row.huselt_turul_id ??
+                            "—"
+                        );
                     }
-                    return value;
+                    return row?.huselt_turul_id ?? "—";
+                },
+            },
+        },
+
+        {
+            name: "huselt_aguulga",
+            label: "Хүсэлтийн агуулга, гарчиг",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "ajiltan_info",
+            label: "Ажилтны овог, нэр, албан тушаал ",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
                 },
             },
         },
@@ -299,34 +319,31 @@ const Index = () => {
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center mb-4">Сэдэв зүйн заагч </h1>
-
+                        <h1 className="text-center mb-4">Хүсэлтийн бүртгэл</h1>
+                        <LavlagaaHuseltTabs />
                         {/* TABLE */}
                         <MUIDatatable
-                            data={getSedevzui}
-                            setdata={setSedevzui}
-                            columns={columns}
+                            data={getHuselt}
+                            setdata={setHuselt}
                             sortOrder={{ name: "id", direction: "desc" }}
+                            columns={columns}
                             costumToolbar={
-                                // isRestricted && (
                                 <CustomToolbar
-                                    // title={"Хэрэглэгчид"}
-                                    btnClassName={"btn btn-success"}
-                                    modelType={"modal"}
-                                    dataTargetID="#SedevNew"
-                                    spanIconClassName={"fas fa-solid fa-plus"}
-                                    excelDownloadData={getSedevzui}
-                                    buttonName={"Нэмэх"}
+                                    btnClassName="btn btn-success"
+                                    modelType="modal"
+                                    dataTargetID="#HuseltNew"
+                                    spanIconClassName="fas fa-plus"
+                                    buttonName="Нэмэх"
+                                    excelTitle="Хүсэлтийн жагсаалт"
+                                    excelDownloadData={getHuselt}
                                     excelHeaders={excelHeaders}
-                                    excelTitle="Сэдэв зүйн заагчийн жагсаалт"
                                     isHideInsert={isRestricted}
                                     isHideEdit={isRestricted}
                                 />
-                                // )
                             }
                             btnEdit={btnEdit}
                             modelType={showModal}
-                            editdataTargetID="#SedevEdit"
+                            editdataTargetID="#HuseltEdit"
                             btnDelete={btnDelete}
                             getRowsSelected={getRowsSelected}
                             setRowsSelected={setRowsSelected}
@@ -334,17 +351,13 @@ const Index = () => {
                             isHideEdit={isRestricted}
                         />
 
-                        <SedevNew
-                            refreshSedevzui={refreshSedevzui}
-                            Disabled={isRestricted}
-                        />
-                        <SedevEdit
+                        <HuseltNew refreshHuselt={refreshHuselt} />
+                        <HuseltEdit
                             setRowsSelected={setRowsSelected}
-                            refreshSedevzui={refreshSedevzui}
+                            refreshHuselt={refreshHuselt}
                             changeDataRow={clickedRowData}
                             isEditBtnClick={isEditBtnClick}
                             editRequestId={editRequestId}
-                            Disabled={isRestricted}
                         />
                     </div>
                 </div>
@@ -353,13 +366,18 @@ const Index = () => {
     );
 };
 
-export default Index;
+export default Huselt;
 
 const excelHeaders = [
     { label: "id", key: "id" },
-    { label: "Хөмрөгийн дугаар", key: "humrug_id" },
-    { label: "Хөмрөгийн нэр", key: "humrug_ner" },
-    { label: "Дансны дугаар", key: "dans_id" },
-    { label: "Товчлол", key: "zaagch_tobchlol" },
-    { label: "Тайлал", key: "zaagch_tailal" },
+    { label: "Бүртгэлийн дугаар", key: "burtgel_dugaar" },
+    { label: "Хүсэлт гаргасан огноо", key: "huselt_ognoo" },
+    { label: "Хүсэлт захиалагчийн бүртгэлийн дугаар", key: "user_burt_dugaar" },
+    { label: "Захиалагчийн регистер", key: "user_register" },
+    { label: "Захиалагчийн нэр", key: "user_name" },
+    { label: "Захиалагчийн хаяг", key: "user_location" },
+    { label: "Захиалагчийн утасны дугаар", key: "user_phonenumber" },
+    { label: "Хүсэлтийн төрөл", key: "huselt_turul_id" },
+    { label: "Хүсэлтийн агуулга, гарчиг", key: "huselt_aguulga" },
+    { label: "Ажилтны овог, нэр, албан тушаал", key: "ajiltan_info" },
 ];

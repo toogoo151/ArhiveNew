@@ -53,6 +53,7 @@ const LogBarimt = () => {
             setclickedRowData(getNegj[getRowsSelected[0]]);
         }
     }, [getRowsSelected]);
+
     const refreshNegj = () => {
         axios
             .get("/get/LogNegj", {
@@ -65,6 +66,7 @@ const LogBarimt = () => {
                     h_type: selectedType,
                 },
             })
+
             .then((res) => {
                 setNegj(res.data.data || []);
                 setTotal(res.data.total || 0);

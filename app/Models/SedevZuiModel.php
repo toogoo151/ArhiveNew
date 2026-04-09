@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\User;
 
 
+
 class SedevZuiModel extends Model
 {
     use HasFactory;
@@ -22,6 +23,21 @@ class SedevZuiModel extends Model
         'zaagch_tobchlol',
         'zaagch_tailal'
     ];
+
+    public static function decryptIfNeeded($value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Throwable $th) {
+            return $value;
+        }
+    }
+
+
 
     public function scopeForCurrentOrg($query, $user)
     {
@@ -49,6 +65,17 @@ class SedevZuiModel extends Model
                     "db_arhivdans.dans_dugaar"
                 )
                 ->get();
+
+            $sedev->transform(function ($s) {
+
+                if (isset($s->humrug_ner)) {
+                    $s->humrug_ner = self::decryptIfNeeded($s->humrug_ner);
+                }
+                if (isset($s->dans_ner)) {
+                    $s->dans_ner = self::decryptIfNeeded($s->dans_ner);
+                }
+                return $s;
+            });
 
 
             $sedev->transform(function ($item) {

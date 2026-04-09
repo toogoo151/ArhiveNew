@@ -338,12 +338,12 @@ class BaingaIlt extends Model
     //     }
     // }
 
-    public function getArchiveBaingIlt()
+    public function getArchiveBaingIlt(Request $request)
     {
         try {
             $sharedUserIds = User::withSharedAccess(Auth::user())->pluck('id');
 
-            $baingaIlt = DB::table("db_arhivbaingahad")
+            $query = DB::table("db_arhivbaingahad")
                 ->whereIn("db_arhivbaingahad.user_id", $sharedUserIds)
                 ->join("db_humrug", "db_humrug.id", "=", "db_arhivbaingahad.humrug_id")
                 ->leftJoin("jagsaaltzuildugaar", function ($join) {
@@ -351,64 +351,75 @@ class BaingaIlt extends Model
                         "jagsaaltzuildugaar.barimt_dd",
                         "=",
                         "db_arhivbaingahad.jagsaalt_zuildugaar"
-                    )
-                        ->where("jagsaaltzuildugaar.userID", Auth::id());
+                    )->where("jagsaaltzuildugaar.userID", Auth::id());
                 })
                 ->leftJoin("db_arhivdans", "db_arhivdans.id", "=", "db_arhivbaingahad.dans_id")
-                ->select(
-                    "db_arhivbaingahad.*",
-                    "db_humrug.humrug_ner",
-                    "db_arhivdans.dans_ner",
-                    "db_arhivdans.dans_baidal",
-                    "db_arhivdans.hadgalah_hugatsaa",
-                    "jagsaaltzuildugaar.hugatsaa as hugatsaa"
-                )
-                ->where("hadgalamj_turul", "=", "0")
+                ->where("hadgalamj_turul", "0")
                 ->whereNotNull("db_arhivbaingahad.ustgasan_temdeglel")
-                ->where("db_arhivbaingahad.ustgasan_temdeglel", "!=", "")
-                ->orderByDesc("db_arhivbaingahad.id")
-                ->get();
+                ->where("db_arhivbaingahad.ustgasan_temdeglel", "!=", "");
 
-
-            foreach ($baingaIlt as $row) {
-                try {
-                    if ($row->hadgalamj_garchig) {
-                        $row->hadgalamj_garchig = Crypt::decryptString($row->hadgalamj_garchig);
-                    }
-
-                    if ($row->hadgalamj_zbn) {
-                        $row->hadgalamj_zbn = Crypt::decryptString($row->hadgalamj_zbn);
-                    }
-
-                    if ($row->hn_tailbar) {
-                        $row->hn_tailbar = Crypt::decryptString($row->hn_tailbar);
-                    }
-
-                    if ($row->ustgasan_temdeglel) {
-                        $row->ustgasan_temdeglel = Crypt::decryptString($row->ustgasan_temdeglel);
-                    }
-
-                    // if ($row->dans_ner) {
-                    //     $row->dans_ner = Crypt::decryptString($row->dans_ner);
-                    // }
-
-                    // if ($row->dans_baidal) {
-                    //     $row->dans_baidal = Crypt::decryptString($row->dans_baidal);
-                    // }
-
-                    // if ($row->hadgalah_hugatsaa) {
-                    //     $row->hadgalah_hugatsaa = Crypt::decryptString($row->hadgalah_hugatsaa);
-                    // }
-                } catch (\Exception $e) {
-                    // decrypt алдаа гарвал original утгыг үлдээнэ
-                }
+            // 🔹 FILTER
+            if ($request->humrug_id) {
+                $query->where("db_arhivbaingahad.humrug_id", $request->humrug_id);
             }
 
-            return $baingaIlt;
+            if ($request->dans_id) {
+                $query->where("db_arhivbaingahad.dans_id", $request->dans_id);
+            }
+
+            // 🔹 SORT
+            $sortField = $request->sortField ?? "db_arhivbaingahad.id";
+            $sortOrder = $request->sortOrder ?? "desc";
+
+            $query->orderBy($sortField, $sortOrder);
+
+            // 🔹 PAGINATION
+            $perPage = $request->perPage ?? 10;
+
+            $data = $query->select(
+                "db_arhivbaingahad.*",
+                "db_humrug.humrug_ner",
+                "db_arhivdans.dans_ner",
+                "db_arhivdans.dans_baidal",
+                "db_arhivdans.hadgalah_hugatsaa",
+                "jagsaaltzuildugaar.hugatsaa as hugatsaa"
+            )->paginate($perPage);
+
+
+            $data->getCollection()->transform(function ($row) {
+                $safeDecrypt = function ($value) {
+                    if (!$value) return $value;
+                    try {
+                        return Crypt::decryptString($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                };
+
+                $row->hadgalamj_garchig = $safeDecrypt($row->hadgalamj_garchig);
+                $row->hadgalamj_zbn     = $safeDecrypt($row->hadgalamj_zbn);
+                $row->hn_tailbar        = $safeDecrypt($row->hn_tailbar);
+                $row->humrug_ner        = $safeDecrypt($row->humrug_ner);
+                $row->dans_ner          = $safeDecrypt($row->dans_ner);
+                $row->dans_baidal       = $safeDecrypt($row->dans_baidal);
+                $row->hadgalah_hugatsaa = $safeDecrypt($row->hadgalah_hugatsaa);
+                $row->ustgasan_temdeglel = $safeDecrypt($row->ustgasan_temdeglel);
+
+                return $row;
+            });
+
+
+            // return response()->json($data);
+            return response()->json([
+                "data" => $data->items(),
+                "total" => $data->total(),
+                "current_page" => $data->currentPage(),
+            ]);
         } catch (\Throwable $th) {
             return response([
                 "status" => "error",
-                "msg" => "Татаж чадсангүй."
+                "msg" => "Татаж чадсангүй.",
+                "error" => $th->getMessage()
             ], 500);
         }
     }

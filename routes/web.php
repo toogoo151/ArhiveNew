@@ -32,14 +32,14 @@ use App\Http\Controllers\SecretTypeController;
 use App\Http\Controllers\ErhzuiController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\LogController;
-
-
-
+use App\Http\Controllers\LavlagaaController;
+use App\Http\Controllers\HuseltController;
 
 
 
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\all_users;
 use App\Models\User;
 use App\Models\Comandlal;
@@ -304,10 +304,11 @@ Route::post("/edit/BaingaIlt", [BaingaIltController::class, "EditBaingIlt"])
 //arvhive shiluuleh start
 Route::post("/archive/BaingaIlt", [BaingaIltController::class, "ArchiveBaingIlt"]);
 
-Route::get("/get/ArchiveBaingaIlt", function () {
+Route::get("/get/ArchiveBaingaIlt", function (Request $request) {
     $ArchiveBaingIlt = new BaingaIlt();
-    return $ArchiveBaingIlt->getArchiveBaingIlt();
+    return $ArchiveBaingIlt->getArchiveBaingIlt($request);
 });
+
 Route::post('/import/baingaIlts', [BaingaIltController::class, 'importBaingaIlts']);
 
 
@@ -329,7 +330,7 @@ Route::post('/import/BaingaIltsChild', [BaingaIltChildController::class, 'import
 
 
 ///Байнга хадгалах Нууц start
-Route::get("/get/BaingaNuuts",  function (Request $request) {
+Route::get("/get/BaingaNuuts", function (Request $request) {
     $baingaNuuts = new BaingaNuuts();
     return $baingaNuuts->getBaingaNuuts($request);
 });
@@ -351,9 +352,14 @@ Route::post('/import/BaingaNuuts', [BaingaNuutsController::class, 'importBaingaN
 //nuuts archive shiljuuleh start
 Route::post("/archive/BaingaNuuts", [BaingaNuutsController::class, "ArchiveBaingNuuts"]);
 
-Route::get("/get/archiveBaingaNuuts", function () {
+// Route::get("/get/archiveBaingaNuuts", function () {
+//     $ArchiveBaingNuuts = new BaingaNuuts();
+//     return $ArchiveBaingNuuts->getArchiveBaingNuuts();
+// });
+
+Route::get("/get/archiveBaingaNuuts", function (Request $request) {
     $ArchiveBaingNuuts = new BaingaNuuts();
-    return $ArchiveBaingNuuts->getArchiveBaingNuuts();
+    return $ArchiveBaingNuuts->getArchiveBaingNuuts($request);
 });
 
 
@@ -393,9 +399,21 @@ Route::post("/import/TurNuuts", [TurNuutsController::class, "importTurNuuts"]);
 
 Route::post("/archive/TurNuuts", [TurNuutsController::class, "ArchiveTurNuuts"]);
 
-Route::get("/get/archiveTurNuuts", function () {
+// Route::get("/get/archiveTurNuuts", function () {
+//     $ArchiveTurNuuts = new TurNuuts();
+//     return $ArchiveTurNuuts->getArchiveTurNuuts();
+// });
+
+
+Route::get("/get/archiveTurNuuts", function (Request $request) {
     $ArchiveTurNuuts = new TurNuuts();
-    return $ArchiveTurNuuts->getArchiveTurNuuts();
+    return $ArchiveTurNuuts->getArchiveTurNuuts($request);
+});
+
+
+Route::get("/get/ArchiveTurIlt", function (Request $request) {
+    $ArchiveTurIlt = new TurIlt();
+    return $ArchiveTurIlt->getArchiveTurIlt($request);
 });
 //Түр хадгалах Нууц end
 
@@ -440,9 +458,13 @@ Route::post("/edit/TurIlt", [TurIltController::class, "EditTurIlt"])
 // arvhive shiluuleh start
 Route::post("/archive/TurIlt", [TurIltController::class, "ArchiveTurIlt"]);
 
-Route::get("/get/ArchiveTurIlt", function () {
+// Route::get("/get/ArchiveTurIlt", function () {
+//     $ArchiveTurIlt = new TurIlt();
+//     return $ArchiveTurIlt->getArchiveTurIlt();
+// });
+Route::get("/get/ArchiveTurIlt", function (Request $request) {
     $ArchiveTurIlt = new TurIlt();
-    return $ArchiveTurIlt->getArchiveTurIlt();
+    return $ArchiveTurIlt->getArchiveTurIlt($request);
 });
 Route::post("/import/turIlt", [TurIltController::class, "importTurIlt"]);
 
@@ -505,15 +527,19 @@ Route::post("/import/DalanJilChild", [DalanJilhunChildController::class, "ChildD
 //Dalan jil hunii nuuuts archive start
 Route::post("/archive/DalanJilHun", [DalanJilHunController::class, "ArchiveDalanJilHun"]);
 
-Route::get("/get/ArchiveDHun", function () {
+// Route::get("/get/ArchiveDHun", function () {
+//     $ArchiveDaljilHun = new DalanJilHun();
+//     return $ArchiveDaljilHun->getArchiveDalanJilhun();
+// });
+Route::get("/get/ArchiveDHun", function (Request $request) {
     $ArchiveDaljilHun = new DalanJilHun();
-    return $ArchiveDaljilHun->getArchiveDalanJilhun();
+    return $ArchiveDaljilHun->getArchiveDalanJilhun($request);
 });
 //Dalan jil hunii nuuuts archive end
 
 
 //Dalan jil Sanhuu start
-Route::get("/get/DalanJilSanhuu",  function (Request $request) {
+Route::get("/get/DalanJilSanhuu", function (Request $request) {
     $DalanJilSanhuu = new DalanJilSanhuu();
     return $DalanJilSanhuu->getDalanJilSanhuu($request);
 });
@@ -548,9 +574,15 @@ Route::post("/import/DalanSanhuuChild", [DalanJilSanhuuChildController::class, "
 //Dalan jil Sanhuu archive start
 Route::post("/archive/DalanJilSanhuu", [DalanJilSanhuuController::class, "ArchiveDalanJilSanhuu"]);
 
-Route::get("/get/ArchiveDalanJilSanhuu", function () {
+// Route::get("/get/ArchiveDalanJilSanhuu", function () {
+//     $ArchiveDaljilSanhuu = new DalanJilSanhuu();
+//     return $ArchiveDaljilSanhuu->getArchiveDalanJilSanhuu();
+// });
+
+Route::get("/get/ArchiveDalanJilSanhuu", function (Request $request) {
+
     $ArchiveDaljilSanhuu = new DalanJilSanhuu();
-    return $ArchiveDaljilSanhuu->getArchiveDalanJilSanhuu();
+    return $ArchiveDaljilSanhuu->getArchiveDalanJilSanhuu($request);
 });
 //Dalan jil Sanhuu archive end
 
@@ -644,6 +676,26 @@ Route::get('/get/hugatsaaTurul', function () {
 // Jagsaalt TURUL END
 
 
+// Lavlagaa start
+Route::get("/get/lavlagaa", [LavlagaaController::class, "GetLavlagaa"]);
+Route::post("/new/lavlagaa", [LavlagaaController::class, "CreateLavlagaa"])
+    ->middleware('auth');
+Route::post("/edit/lavlagaa", [LavlagaaController::class, "UpdateLavlagaa"])
+    ->middleware('auth');
+Route::post("/delete/lavlagaa", [LavlagaaController::class, "DeleteLavlagaa"])
+    ->middleware('auth');
+// Lavlagaa end
+
+// Huselt start
+Route::get("/get/huselt-turul", [HuseltController::class, "GetHuseltTurul"]);
+Route::get("/get/huselt", [HuseltController::class, "GetHuselt"]);
+Route::post("/new/huselt", [HuseltController::class, "CreateHuselt"])
+    ->middleware('auth');
+Route::post("/edit/huselt", [HuseltController::class, "UpdateHuselt"])
+    ->middleware('auth');
+Route::post("/delete/huselt", [HuseltController::class, "DeleteHuselt"])
+    ->middleware('auth');
+// Huselt end
 
 // GANBAT NEMSEN END
 
@@ -699,12 +751,19 @@ Route::post('/import/SecretTypeTuslah', [SecretTypeController::class, 'importSec
 Route::get("/get/SearchBarimt", [SearchController::class, "getSearchBarimt"]);
 Route::get("/get/LogNegj", [LogController::class, "getLogNegj"]);
 
+// Serve public disk files without hitting the SPA catch-all (fixes /storage/* → React 404 when
+// the request reaches Laravel, e.g. missing symlink or front-controller-only hosting).
+Route::middleware('auth')->get('/storage/{path}', function (string $path) {
+    if (str_contains($path, '..')) {
+        abort(404);
+    }
+    if ($path === '' || !Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
 
-
-
-
-
-
-
+    return Storage::disk('public')->response($path, null, [
+        'Content-Disposition' => 'inline',
+    ]);
+})->where('path', '.*');
 
 Route::any('{catchall}', [FrontendController::class, "showBlade"])->where('catchall', '.*');

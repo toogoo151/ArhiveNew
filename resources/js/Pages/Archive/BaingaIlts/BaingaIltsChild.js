@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FaFileExcel } from "react-icons/fa";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
@@ -360,7 +361,10 @@ const BaingaIltsChild = (props) => {
                             gap: "10px",
                         }}
                     >
-                        <span style={{ color: "#64748b" }}>📊 Excel:</span>
+                        <span style={{ color: "#64748b" }}>
+                            <FaFileExcel className="text-success me-2" />
+                            Excel:
+                        </span>
 
                         <input
                             type="file"
@@ -409,7 +413,8 @@ const BaingaIltsChild = (props) => {
                             <div className="modal-content">
                                 <div className="modal-header bg-primary text-white">
                                     <h5 className="modal-title">
-                                        📊 Excel урьдчилж харах
+                                        <FaFileExcel className="text-success me-2" />
+                                        Excel урьдчилж харах
                                     </h5>
 
                                     <button

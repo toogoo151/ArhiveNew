@@ -1,24 +1,54 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
-import useAuthPermission from "../../../useAuthPermission";
+
+import "./Index.css";
+
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const ArhivBIltsChild = (props) => {
     const [getbaingaIltsChild, setbaingaIltsChild] = useState([]);
     const [getRowsSelected, setRowsSelected] = useState([]);
     const [clickedRowData, setclickedRowData] = useState([]);
     const [isEditBtnClick, setIsEditBtnClick] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [totalRows, setTotalRows] = useState(0);
 
     const [showModal] = useState("modal");
+
     const { tubshin, loading, error } = useAuthPermission();
 
     // useEffect(() => {
     //     refreshbaingaIltsChild(props.changeDataRow.id);
     // }, []);
+
+    const refreshbaingaIltsChild = (id) => {
+        axios
+            .post("get/baingaIltsChild", {
+                _parentID: id,
+            })
+            .then((res) => {
+                // console.log(res.data);
+                setbaingaIltsChild(res.data.data);
+                setTotalRows(res.data.total || 0);
+                setTotalRows(0);
+            })
+            .catch((err) => {
+                console.log(err);
+                setbaingaIltsChild([]); //
+                setTotalRows(0);
+            });
+    };
 
     useEffect(() => {
         // Parent мөр өөрчлөгдөх үед child table refresh хийнэ
@@ -27,18 +57,10 @@ const ArhivBIltsChild = (props) => {
         // 🔥 Edit mode болон сонгогдсон row-ийг reset хийнэ
         setclickedRowData([]);
         setRowsSelected([]);
+        0;
         setIsEditBtnClick(false);
-    }, [props.changeDataRow.id]);
-
-    if (loading)
-        return (
-            <div>
-                <Spinner />
-            </div>
-        );
-    if (error) return <p>Алдаа гарлаа</p>;
-
-    const isRestricted = tubshin === 2;
+        0;
+    }, [props.changeDataRow]);
 
     const btnEdit = () => {
         if (!getRowsSelected.length) {
@@ -53,6 +75,50 @@ const ArhivBIltsChild = (props) => {
         setIsEditBtnClick(true);
     };
     const { changeDataRow } = props;
+
+    // const deleteOldFile = (file) => {
+    //     Swal.fire({
+    //         title: "Устгах уу?",
+    //         text: `"${file.filename}" файлыг устгах гэж байна`,
+    //         icon: "warning",
+    //         showCancelButton: true,
+    //         confirmButtonText: "Тийм, устга",
+    //         cancelButtonText: "Болих",
+    //     }).then((result) => {
+    //         if (result.isConfirmed) {
+    //             axios
+    //                 .post("/delete/baingaIltChildFile", {
+    //                     id: props.changeDataRow.id,
+    //                     file_url: file.url,
+    //                 })
+    //                 .then((res) => {
+    //                     Swal.fire(res.data.msg);
+
+    //                     //  UI дээрээс устгасан файлыг хасна
+    //                     const filtered = oldFiles.filter(
+    //                         (f) => f.url !== file.url
+    //                     );
+    //                     setOldFiles(filtered);
+    //                 })
+    //                 .catch((err) => {
+    //                     Swal.fire(
+    //                         err.response?.data?.msg || "Устгах үед алдаа гарлаа"
+    //                     );
+    //                 });
+    //         }
+    //     });
+    // };
+
+    // Get current authenticated user's tubshin on mount
+    if (loading)
+        return (
+            <div>
+                <Spinner />
+            </div>
+        );
+    if (error) return <p>Алдаа гарлаа</p>;
+
+    const isRestricted = tubshin === 2;
 
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
@@ -83,18 +149,42 @@ const ArhivBIltsChild = (props) => {
             }
         });
     };
-    const refreshbaingaIltsChild = (id) => {
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("hnID", props.changeDataRow.id);
+
         axios
-            .post("get/baingaIltsChild", {
-                _parentID: id,
-            })
+            .post("/import/BaingaIltsChild", formData)
             .then((res) => {
-                // console.log(res.data);
-                setbaingaIltsChild(res.data);
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshbaingaIltsChild(props.changeDataRow.id);
             })
             .catch((err) => {
-                console.log(err);
+                Swal.fire("Import алдаа");
             });
+    };
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
     };
 
     const config = {
@@ -102,6 +192,9 @@ const ArhivBIltsChild = (props) => {
         length_menu: [10, 20, 50],
         show_filter: true,
         show_pagination: true,
+        responsive: "standard",
+        tableBodyHeight: "500px",
+        tableBodyMaxHeight: "700px",
 
         filename: "Чиглэл",
         button: {
@@ -188,46 +281,127 @@ const ArhivBIltsChild = (props) => {
     // ];
     return (
         <>
-            <div className="row clearfix">
-                <div className="info-box">
-                    <div className="col-md-12">
-                        <h1 className="text-center">БАРИМТ БИЧИГ</h1>
-                        <MUIDatatable
-                            data={getbaingaIltsChild}
-                            setdata={setbaingaIltsChild}
-                            columns={columns}
-                            onRowClick={(rowData, rowMeta) => {
-                                const selectedRow =
-                                    getbaingaIltsChild[rowMeta.dataIndex];
-                                setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+            {/* <div className="col-md-12 mb-3">
+                    <label htmlFor="bainagiltChildExcel" className="form-label">
+                        Excel Import
+                    </label>
+                    <div className="d-flex align-items-center">
+
+                        <input
+                            type="file"
+                            id="bainagiltChildExcel"
+                            className="form-control form-control-sm me-2"
+                            accept=".xlsx,.xls,.csv"
+                            onChange={(e) => {
+                                if (e.target.files.length)
+                                    setSelectedFile(e.target.files[0]);
                             }}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName={"btn btn-success"}
-                                    modelType={"modal"}
-                                    dataTargetID={"#baingaIltsChildNew"}
-                                    spanIconClassName={"fas fa-solid fa-plus"}
-                                    buttonName={"Нэмэх"}
-                                    excelDownloadData={getbaingaIltsChild}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={isRestricted}
-                                    isHideEdit={isRestricted}
-                                />
-                            }
-                            btnEdit={btnEdit}
-                            modelType={showModal}
-                            editdataTargetID={"#baingaIltsChildEdit"}
-                            btnDelete={btnDelete}
-                            avgColumnIndex={-1}
-                            avgColumnName={"email"}
-                            avgName={"Дундаж: "}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={isRestricted}
-                            isHideEdit={isRestricted}
-                            showArchive={false}
                         />
+
+
+                        {selectedFile && (
+                            <button
+                                className="btn btn-primary btn-sm"
+                                onClick={() => {
+                                    importExcel(selectedFile);
+                                    setSelectedFile(null);
+                                    document.getElementById(
+                                        "bainagiltChildExcel"
+                                    ).value = null;
+                                }}
+                            >
+                                Import
+                            </button>
+                        )}
                     </div>
+                </div> */}
+            <div
+                style={{
+                    background: "#ffffff",
+                    borderRadius: "12px",
+                    border: "1px solid #e2e8f0",
+                    overflow: "hidden", // 🔥 чухал (table тасрахгүй)
+                }}
+            >
+                {/* HEADER */}
+                <div
+                    style={{
+                        padding: "14px 18px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        borderBottom: "1px solid #e2e8f0",
+                        background: "#f8fafc",
+                    }}
+                >
+                    {/* LEFT */}
+                    <div style={{ display: "flex", gap: "30px" }}>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>📁 Дугаар:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hadgalamj_dugaar || "-"}
+                            </span>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "6px" }}>
+                            <span style={{ color: "#64748b" }}>🏷 Гарчиг:</span>
+                            <span style={{ fontWeight: 600 }}>
+                                {changeDataRow?.hadgalamj_garchig || "-"}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* RIGHT */}
+                </div>
+                {showPreviewModal && (
+                    <div
+                        className="modal fade show d-block"
+                        style={{
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                        }}
+                    ></div>
+                )}
+                <div style={{ padding: "10px" }}>
+                    <MUIDatatable
+                        data={getbaingaIltsChild}
+                        setdata={setbaingaIltsChild}
+                        columns={columns}
+                        isServerSide={true}
+                        count={totalRows}
+                        page={page}
+                        rowsPerPage={rowsPerPage}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
+                        onRowClick={(rowData, rowMeta) => {
+                            const selectedRow =
+                                getbaingaIltsChild[rowMeta.dataIndex];
+                            setclickedRowData(selectedRow); // 🔥 ЭНД гол set
+                        }}
+                        costumToolbar={
+                            <CustomToolbar
+                                btnClassName={"btn btn-success"}
+                                modelType={"modal"}
+                                dataTargetID={"#baingaIltsChildNew"}
+                                spanIconClassName={"fas fa-solid fa-plus"}
+                                buttonName={"Нэмэх"}
+                                excelDownloadData={getbaingaIltsChild}
+                                excelHeaders={excelHeaders}
+                                isHideInsert={false}
+                            />
+                        }
+                        btnEdit={btnEdit}
+                        modelType={showModal}
+                        editdataTargetID={"#baingaIltsChildEdit"}
+                        btnDelete={btnDelete}
+                        avgColumnIndex={-1}
+                        avgColumnName={"email"}
+                        avgName={"Дундаж: "}
+                        getRowsSelected={getRowsSelected}
+                        setRowsSelected={setRowsSelected}
+                        isHideDelete={false}
+                        isHideEdit={false}
+                        showArchive={false}
+                    />
                 </div>
             </div>
         </>
@@ -470,7 +644,10 @@ const columns = [
                         }}
                     >
                         {files.map((fileUrl, index) => {
-                            const fileName = fileUrl.split("/").pop();
+                            const fileNameFull = fileUrl.split("/").pop();
+                            const fileName = fileNameFull.includes("_")
+                                ? fileNameFull.split("_").slice(1).join("_")
+                                : fileNameFull;
 
                             return (
                                 <a

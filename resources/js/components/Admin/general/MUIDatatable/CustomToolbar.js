@@ -1,5 +1,5 @@
 import ExcelIcon from "@mui/icons-material/CloudDownload";
-import { Typography, Tooltip } from "@mui/material";
+import { Tooltip, Typography } from "@mui/material";
 import React from "react";
 import { withStyles } from "tss-react/mui";
 import * as XLSX from "xlsx-js-style";

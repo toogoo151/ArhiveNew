@@ -1,14 +1,16 @@
 import { format, subDays } from "date-fns";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 import "../../../../styles/muidatatable.css";
 import axios from "../../../AxiosUser";
 import CustomToolbar from "../../../components/Admin/general/MUIDatatable/CustomToolbar";
 import MUIDatatable from "../../../components/Admin/general/MUIDatatable/MUIDatatable";
 import ArhivDhunChild from "./ArhivDhunChild";
+import "./Index.css";
 
-import useAuthPermission from "../../../useAuthPermission";
 import Spinner from "../../../Spinner";
+import useAuthPermission from "../../../useAuthPermission";
 
 const ArhivDhun = () => {
     const today = new Date();
@@ -17,7 +19,7 @@ const ArhivDhun = () => {
 
     // const [isFilterActive, setIsFilterActive] = useState(false);
 
-    const [getArchiveDhun, setArchiveDhun] = useState([]);
+    const [getDalHun, setDalHun] = useState([]);
     const [getHumrug, setHumrug] = useState([]);
     const [getDans, setDans] = useState([]);
 
@@ -25,6 +27,10 @@ const ArhivDhun = () => {
     const [allDans, setAllDans] = useState([]); // анхны бүх дата
     const [selectedHumrug, setSelectedHumrug] = useState(0);
     const [selectedDans, setselectedDans] = useState(0);
+
+    const [page, setPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [total, setTotal] = useState(0);
     //select
 
     const [getRowsSelected, setRowsSelected] = useState([]);
@@ -34,33 +40,131 @@ const ArhivDhun = () => {
     // const [showShiljuuleh, setShowShiljuuleh] = useState(false);
     // const [comment, setComment] = useState("");
     // const [shiljuulehMode, setShiljuulehMode] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [activeTab, setActiveTab] = useState("ilt");
+    const [previewData, setPreviewData] = useState([]);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const isDisabled = selectedHumrug === 0 || selectedDans === 0;
 
     const [showShiljuulehModal, setShowShiljuulehModal] = useState(false);
 
     const [showModal] = useState("modal");
-
     const { tubshin, loading, error } = useAuthPermission();
 
     useEffect(() => {
-        refreshArchiveDhun();
-        console.log(getDans);
+        if (selectedHumrug && selectedDans) {
+            console.log("FETCH:", page, rowsPerPage);
+            console.log("TOTAL:", total); // 18s
+            console.log("DATA LENGTH:", getDalHun.length); // 10
+            console.log("PAGE:", page); // 0 эсвэл 1
+            refreshDalHun();
+        }
+    }, [selectedHumrug, selectedDans, page, rowsPerPage]);
+
+    useEffect(() => {
+        setSelectedFile(null);
+        const input = document.getElementById("DalanJilhun");
+        if (input) input.value = null;
     }, [selectedHumrug, selectedDans]);
 
-    const refreshArchiveDhun = () => {
-        axios.get("/get/ArchiveDHun").then((res) => {
-            setAllDans(res.data);
+    useEffect(() => {
+        console.log("UPDATED DATA:", getDalHun);
+        console.log("UPDATED TOTAL:", total);
+    }, [getDalHun, total]);
 
-            if (selectedHumrug !== 0 && selectedDans !== 0) {
-                const filteredData = res.data.filter(
-                    (item) =>
-                        Number(item.humrug_id) === Number(selectedHumrug) &&
-                        Number(item.dans_id) === Number(selectedDans)
-                );
-                setArchiveDhun(filteredData);
-            } else {
-                setArchiveDhun([]);
-            }
-        });
+    useEffect(() => {
+        if (getDalHun.length) {
+            console.log("ROW SAMPLE:", getDalHun[0]);
+            console.log("EXPIRED:", isExpiredRow(getDalHun[0]));
+        }
+    }, [getDalHun]);
+
+    useEffect(() => {
+        setPage(0); // 🔥 reset page
+    }, [selectedHumrug, selectedDans]);
+
+    const isExpiredRow = (row) => {
+        if (!row?.on_suul || !row?.hugatsaa) return false;
+
+        // "1", "1 жил", "70 жил" → 1 / 70
+        const years = parseInt(row.hugatsaa, 10);
+
+        if (isNaN(years)) return false;
+
+        // 70 жил = байнгын хадгалалт
+        if (years >= 70) return false;
+
+        const start = new Date(row.on_suul);
+        const end = new Date(start);
+        end.setFullYear(end.getFullYear() + years);
+
+        return end < new Date();
+    };
+    const expiredCount = getDalHun.filter(isExpiredRow).length;
+
+    const selectedHumrugName = getHumrug.find(
+        (h) => h.id === selectedHumrug
+    )?.humrug_ner;
+
+    const selectedDansName = getDans.find(
+        (d) => d.id === selectedDans
+    )?.dans_ner;
+
+    const importExcel = (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("humrug_id", selectedHumrug);
+        formData.append("dans_id", selectedDans);
+
+        axios
+            .post("/import/DalanjilHun", formData)
+            .then((res) => {
+                Swal.fire(res.data.msg); // Мэдэгдэл
+                refreshDalHun(); // <-- Table refresh хийж өгөгдөл шинэчлэгдэх
+            })
+            .catch((err) => {
+                Swal.fire("Import алдаа");
+            });
+    };
+
+    const handlePreview = (file) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1, // array хэлбэрээр авна
+            });
+
+            setPreviewData(jsonData);
+            setShowPreviewModal(true);
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+
+    const refreshDalHun = async () => {
+        try {
+            const res = await axios.get("/get/ArchiveDHun", {
+                params: {
+                    humrug_id: selectedHumrug || null,
+                    dans_id: selectedDans || null,
+                    page: page + 1,
+                    perPage: rowsPerPage,
+                },
+            });
+
+            setAllDans(res.data.data); // бүх data
+            setDalHun(res.data.data); // filtered + expired sort
+            setTotal(res.data.total); // pagination-д хэрэгтэй нийт record
+        } catch (err) {
+            console.error("Failed to fetch DalanJilHun:", err);
+        }
     };
 
     const btnArchive = () => {
@@ -111,14 +215,20 @@ const ArhivDhun = () => {
     useEffect(() => {
         const rowIndex = getRowsSelected[0];
 
-        if (rowIndex !== undefined && getArchiveDhun[rowIndex] !== undefined) {
+        if (rowIndex !== undefined && getDalHun[rowIndex] !== undefined) {
             setIsEditBtnClick(false);
-            setclickedRowData(getArchiveDhun[rowIndex]);
+            setclickedRowData(getDalHun[rowIndex]);
         } else {
             setclickedRowData(null);
         }
-    }, [getRowsSelected, getArchiveDhun]);
+    }, [getRowsSelected, getDalHun]);
+    // useEffect(() => {
+    //     if (showShiljuuleh) {
+    //         setComment("");
+    //     }
+    // }, [showShiljuuleh]);
 
+    // Get current authenticated user's tubshin on mount
     if (loading)
         return (
             <div>
@@ -128,6 +238,10 @@ const ArhivDhun = () => {
     if (error) return <p>Алдаа гарлаа</p>;
 
     const isRestricted = tubshin === 2;
+
+    const btnEdit = () => {
+        setIsEditBtnClick(true);
+    };
 
     const btnDelete = () => {
         if (!getRowsSelected.length) return;
@@ -140,12 +254,12 @@ const ArhivDhun = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 axios
-                    .post("/delete/BaingaIlt", {
-                        id: getArchiveDhun[getRowsSelected[0]].id,
+                    .post("/delete/DalanJilHun", {
+                        id: getDalHun[getRowsSelected[0]].id,
                     })
                     .then((res) => {
                         Swal.fire(res.data.msg);
-                        refreshArchiveDhun();
+                        refreshDalHun();
                     })
                     .catch((err) => {
                         Swal.fire(err.response?.data?.msg || "Алдаа гарлаа");
@@ -154,20 +268,276 @@ const ArhivDhun = () => {
         });
     };
 
+    const columns = [
+        {
+            name: "id",
+            label: "№",
+            options: {
+                filter: true,
+                sort: true,
+                filter: false,
+                align: "center",
+                customBodyRenderLite: (rowIndex) => {
+                    if (rowIndex == 0) {
+                        return rowIndex + 1;
+                    } else {
+                        return rowIndex + 1;
+                    }
+                },
+                setCellProps: () => {
+                    return { align: "center" };
+                },
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                            width: 50,
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "hadgalamj_dugaar",
+            label: "Дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "hadgalamj_garchig",
+            label: "Хадгаламжийн нэгжийн гарчиг",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "hadgalamj_zbn",
+            label: "Зохион байгуулалтын нэгжийн нэр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "hergiin_indeks",
+            label: "Хэргийн индекс",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "harya_on",
+            label: "Харьяа он",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "on_ehen",
+            label: "Эхэлсэн он,сар,өдөр",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "on_suul",
+            label: "Дууссан он,сар,өдөр",
+            options: {
+                customBodyRenderLite: (rowIndex) => {
+                    const row = getDalHun[rowIndex]; // ✅ OK
+                    const expired = isExpiredRow(row); // ✅ OK
+
+                    return (
+                        <span
+                            style={{
+                                color: expired ? "#dc2626" : "inherit",
+                                fontWeight: expired ? 600 : "normal",
+                            }}
+                        >
+                            {row?.on_suul}
+                            {expired && " (хугацаа хэтэрсэн)"}
+                        </span>
+                    );
+                },
+            },
+        },
+        {
+            name: "huudas_too",
+            label: "Хуудасны тоо",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "habsralt_too",
+            label: "Хавсралтын тоо",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+
+        {
+            name: "jagsaalt_zuildugaar",
+            label: "Хадгалах хугацааны жагсаалтын зүйлийн дугаар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: () => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+                customBodyRender: (value) => {
+                    if (
+                        value === null ||
+                        value === "" ||
+                        value === 0 ||
+                        value === undefined
+                    ) {
+                        return "-";
+                    }
+                    return value;
+                },
+            },
+        },
+
+        {
+            name: "hn_tailbar",
+            label: "Тайлбар",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+        {
+            name: "ustgasan_temdeglel",
+            label: "Архивт шилжүүлсэн тухай тэмдэглэл",
+            options: {
+                filter: true,
+                sort: false,
+                setCellHeaderProps: (value) => {
+                    return {
+                        style: {
+                            backgroundColor: "#5DADE2",
+                            color: "white",
+                        },
+                    };
+                },
+            },
+        },
+    ];
+
     //RENDER
     return (
         <>
             <div className="row">
                 <div className="info-box">
                     <div className="col-md-12">
-                        <h1 className="text-center">
-                            Архивт шилжсэн 70 жил хадгалагдах хадгаламжийн нэгж,
-                            баримт бичиг/Хүний нөөц/{" "}
-                        </h1>
+                        <h4 className="text-center">
+                            70 жил хадгалагдах хадгаламжийн нэгж, баримт
+                            бичиг/Хүний нөөц/{" "}
+                        </h4>
                         {/* DATE FILTER */}
-                        <div className="col-md-8 mb-3">
-                            <div className="input-group">
-                                <span className="input-group-text">
+                        <div
+                            className="col-md-8 mb-2"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                flexWrap: "wrap",
+                                fontWeight: 500,
+                                fontSize: "12px",
+                            }}
+                        >
+                            {" "}
+                            <div className="input-group input-group-sm">
+                                <span className="input-group-text py-1 px-2">
                                     Хөмрөг:
                                 </span>
 
@@ -224,310 +594,178 @@ const ArhivDhun = () => {
                                         </option>
                                     ))}
                                 </select>
-                                <span className="mx-2"></span>
                             </div>
                         </div>
 
-                        <MUIDatatable
-                            data={getArchiveDhun}
-                            setdata={setArchiveDhun}
-                            columns={columns}
-                            costumToolbar={
-                                <CustomToolbar
-                                    btnClassName="btn btn-success"
-                                    modelType="modal"
-                                    dataTargetID={
-                                        selectedHumrug !== 0 &&
-                                        selectedDans !== 0
-                                            ? "#BaingaNew"
-                                            : null
+                        <div className="labelWrapper">
+                            <div className={`tab-indicator ${activeTab}`} />
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "ilt" ? "active" : ""
+                                }`}
+                                onClick={() => setActiveTab("ilt")}
+                            >
+                                📊 Хүний нөөц
+                            </button>
+
+                            <button
+                                className={`labelBtn ${
+                                    activeTab === "barimt" ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                    if (!clickedRowData) {
+                                        Swal.fire("Илт мөр сонгоно уу!");
+                                        return;
                                     }
-                                    spanIconClassName="fas fa-plus"
-                                    buttonName="Нэмэх"
-                                    excelDownloadData={getArchiveDhun}
-                                    excelHeaders={excelHeaders}
-                                    isHideInsert={isRestricted}
-                                    isHideEdit={isRestricted}
-                                    onClick={() => {
-                                        if (
-                                            selectedHumrug === 0 ||
-                                            selectedDans === 0
-                                        ) {
-                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
-                                            Swal.fire({
-                                                icon: "warning",
-                                                title: "Анхааруулга",
-                                                text: "Хөмрөг болон Бүртгэлийн дугаар сонгоно уу!",
-                                            });
-                                        }
-                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                                    setActiveTab("barimt");
+                                }}
+                            >
+                                📂Баримт бичиг
+                            </button>
+                        </div>
+
+                        {activeTab === "ilt" && (
+                            <>
+                                <div
+                                    style={{
+                                        background: "#ffffff",
+                                        borderRadius: "12px",
+                                        border: "1px solid #e2e8f0",
+                                        overflow: "hidden", // 🔥 чухал (table тасрахгүй)
                                     }}
-                                />
-                            }
-                            modelType={showModal}
-                            editdataTargetID="#baingaIltedit"
-                            btnDelete={btnDelete}
-                            getRowsSelected={getRowsSelected}
-                            setRowsSelected={setRowsSelected}
-                            isHideDelete={isRestricted}
-                            isHideEdit={isRestricted}
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className="row clearfix">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div className="card2">
-                        {clickedRowData && (
-                            <ArhivDhunChild changeDataRow={clickedRowData} />
+                                >
+                                    <div
+                                        style={{
+                                            padding: "14px 18px",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            borderBottom: "1px solid #e2e8f0",
+                                            background: "#f8fafc",
+                                        }}
+                                    ></div>
+
+                                    <div style={{ padding: "10px" }}>
+                                        <MUIDatatable
+                                            data={getDalHun}
+                                            setdata={setDalHun}
+                                            columns={columns}
+                                            options={{
+                                                serverSide: true, // 🔥 ЧУХАЛ
+                                                count: total, // нийт row
+                                                page: page,
+                                                rowsPerPage: rowsPerPage,
+
+                                                onTableChange: (
+                                                    action,
+                                                    tableState
+                                                ) => {
+                                                    switch (action) {
+                                                        case "changePage":
+                                                            setPage(
+                                                                tableState.page
+                                                            );
+                                                            break;
+
+                                                        case "changeRowsPerPage":
+                                                            setRowsPerPage(
+                                                                tableState.rowsPerPage
+                                                            );
+                                                            setPage(0);
+                                                            break;
+
+                                                        default:
+                                                            break;
+                                                    }
+                                                },
+
+                                                setRowProps: (
+                                                    row,
+                                                    dataIndex
+                                                ) => {
+                                                    const r =
+                                                        getDalHun[dataIndex];
+                                                    if (isExpiredRow(r)) {
+                                                        return {
+                                                            style: {
+                                                                backgroundColor:
+                                                                    "#fee2e2",
+                                                            },
+                                                        };
+                                                    }
+                                                },
+                                            }}
+                                            costumToolbar={
+                                                <CustomToolbar
+                                                    btnClassName="btn btn-success"
+                                                    modelType="modal"
+                                                    dataTargetID={
+                                                        selectedHumrug !== 0 &&
+                                                        selectedDans !== 0
+                                                            ? "#DalanJilNew"
+                                                            : null
+                                                    }
+                                                    spanIconClassName="fas fa-plus"
+                                                    buttonName="Нэмэх"
+                                                    excelDownloadData={
+                                                        getDalHun
+                                                    }
+                                                    excelHeaders={excelHeaders}
+                                                    excelTitle="70 жил хадгалагдах хадгаламжийн нэгж /Хүний нөөц/"
+                                                    isHideInsert={false}
+                                                    isHideEdit={false}
+                                                    onClick={() => {
+                                                        if (
+                                                            selectedHumrug ===
+                                                                0 ||
+                                                            selectedDans === 0
+                                                        ) {
+                                                            // Сонголт хийгээгүй бол зөвхөн анхааруулах
+                                                            Swal.fire({
+                                                                icon: "warning",
+                                                                title: "Анхааруулга",
+                                                                text: "Хөмрөг болон бүртгэлийн дугаар сонгоно уу!",
+                                                            });
+                                                        }
+                                                        // else блокоор modal автоматаар нээгдэх учраас өөр юу ч хийх шаардлагагүй
+                                                    }}
+                                                />
+                                            }
+                                            btnEdit={btnEdit}
+                                            modelType={showModal}
+                                            editdataTargetID="#DalanJilhunEdit"
+                                            btnDelete={btnDelete}
+                                            btnArchiveClick={btnArchive}
+                                            getRowsSelected={getRowsSelected}
+                                            setRowsSelected={setRowsSelected}
+                                            isHideDelete={false}
+                                            isHideEdit={false}
+                                            showArchive={false}
+                                        />
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
             </div>
+            {activeTab === "barimt" && (
+                <>
+                    {clickedRowData ? (
+                        <ArhivDhunChild changeDataRow={clickedRowData} />
+                    ) : (
+                        <div className="text-center p-5">
+                            Илт мөр сонгоно уу
+                        </div>
+                    )}
+                </>
+            )}
         </>
     );
 };
 
 export default ArhivDhun;
-
-const columns = [
-    {
-        name: "id",
-        label: "№",
-        options: {
-            filter: true,
-            sort: true,
-            filter: false,
-            align: "center",
-            customBodyRenderLite: (rowIndex) => {
-                if (rowIndex == 0) {
-                    return rowIndex + 1;
-                } else {
-                    return rowIndex + 1;
-                }
-            },
-            setCellProps: () => {
-                return { align: "center" };
-            },
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                        width: 50,
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "hadgalamj_dugaar",
-        label: "Дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "hadgalamj_garchig",
-        label: "Хадгаламжийн нэгжийн гарчиг",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "hadgalamj_zbn",
-        label: "Зохион байгуулалтын нэгжийн нэр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "hergiin_indeks",
-        label: "Хэргийн индекс",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "harya_on",
-        label: "Харьяа он",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "on_ehen",
-        label: "Эхэлсэн он,сар,өдөр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "on_suul",
-        label: "Дууссан он,сар,өдөр",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "huudas_too",
-        label: "Хуудасны тоо",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "habsralt_too",
-        label: "Хавсралтын тоо",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-
-    {
-        name: "jagsaalt_zuildugaar",
-        label: "Хадгалах хугацааны жагсаалтын зүйлийн дугаар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: () => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-            customBodyRender: (value) => {
-                if (
-                    value === null ||
-                    value === "" ||
-                    value === 0 ||
-                    value === undefined
-                ) {
-                    return "-";
-                }
-                return value;
-            },
-        },
-    },
-
-    {
-        name: "hn_tailbar",
-        label: "Тайлбар",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-    {
-        name: "ustgasan_temdeglel",
-        label: "Архивт шилжүүлсэн тухай тэмдэглэл",
-        options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-                return {
-                    style: {
-                        backgroundColor: "#5DADE2",
-                        color: "white",
-                    },
-                };
-            },
-        },
-    },
-];
 
 const excelHeaders = [
     { label: "Дугаар", key: "hadgalamj_dugaar" },
@@ -544,4 +782,5 @@ const excelHeaders = [
         key: "jagsaalt_zuildugaar",
     },
     { label: "Тайлбар", key: "hn_tailbar" },
+    { label: "Архивт шилжүүлсэн тухай тэмдэглэл", key: "ustgasan_temdeglel" },
 ];
